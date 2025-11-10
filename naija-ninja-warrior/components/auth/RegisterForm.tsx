@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { Eye, EyeOff } from 'lucide-react'
+import { supabase } from '@/lib/supabase/client'
 
 const NIGERIAN_STATES = [
   'Abia', 'Adamawa', 'Akwa Ibom', 'Anambra', 'Bauchi', 'Bayelsa', 'Benue',
@@ -153,24 +154,45 @@ export default function RegisterForm() {
     setError('')
 
     try {
-      // TODO: Send to API endpoint
-      const response = await fetch('/api/auth/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+      // Sign up with Supabase Auth
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: formData.email,
+        password: formData.password,
       })
 
-      const data = await response.json()
+      if (authError) {
+        setError(authError.message)
+        setLoading(false)
+        return
+      }
 
-      if (!response.ok) {
-        setError(data.message || 'Registration failed')
+      if (!authData.user) {
+        setError('Registration failed')
+        setLoading(false)
+        return
+      }
+
+      // Create user profile in users table
+      const { error: profileError } = await supabase
+        .from('users')
+        .insert({
+          id: authData.user.id,
+          email: formData.email,
+          full_name: formData.fullName,
+          phone: formData.phone,
+          role: 'user',
+        })
+
+      if (profileError) {
+        setError('Failed to create user profile')
+        setLoading(false)
         return
       }
 
       setSuccess(true)
+      setLoading(false)
     } catch (err) {
       setError('Something went wrong. Please try again.')
-    } finally {
       setLoading(false)
     }
   }
@@ -182,7 +204,8 @@ export default function RegisterForm() {
           <span className="text-3xl">✓</span>
         </div>
         <h2 className="text-2xl font-bold text-naija-green-900 mb-2">Registration Successful!</h2>
-        <p className="text-gray-600 mb-6">Check your email to verify your account.</p>
+        <p className="text-gray-600 mb-4">Check your email to verify your account before logging in.</p>
+        <p className="text-sm text-gray-500 mb-6">You should receive a confirmation email shortly.</p>
         <Link href="/login" className="text-naija-green-600 font-semibold hover:text-naija-green-700">
           Go to Login
         </Link>

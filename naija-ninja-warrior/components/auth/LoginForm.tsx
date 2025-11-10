@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { Eye, EyeOff } from 'lucide-react'
+import { supabase } from '@/lib/supabase/client'
 
 export default function LoginForm() {
   const [formData, setFormData] = useState({
@@ -41,25 +42,42 @@ export default function LoginForm() {
     }
 
     try {
-      // TODO: Send to API endpoint
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+      // Sign in with Supabase Auth
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: formData.email,
+        password: formData.password,
       })
 
-      const data = await response.json()
-
-      if (!response.ok) {
-        setError(data.message || 'Login failed')
+      if (error) {
+        setError(error.message)
+        setLoading(false)
         return
       }
 
-      // Redirect to user dashboard
-      window.location.href = '/dashboard'
+      if (!data.user) {
+        setError('Login failed')
+        setLoading(false)
+        return
+      }
+
+      // Get user role from users table
+      const { data: userData, error: userError } = await supabase
+        .from('users')
+        .select('role')
+        .eq('id', data.user.id)
+        .single()
+
+      if (userError) {
+        setError('Failed to load user data')
+        setLoading(false)
+        return
+      }
+
+      // Redirect based on role
+      const redirectPath = userData.role === 'admin' ? '/admin/dashboard' : '/user/dashboard'
+      window.location.href = redirectPath
     } catch (err) {
       setError('Something went wrong. Please try again.')
-    } finally {
       setLoading(false)
     }
   }
