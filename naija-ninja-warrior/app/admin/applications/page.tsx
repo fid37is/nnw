@@ -29,6 +29,7 @@ export default function AdminApplicationsPage() {
   const [applications, setApplications] = useState<Application[]>([])
   const [filteredApplications, setFilteredApplications] = useState<Application[]>([])
   const [loading, setLoading] = useState(true)
+  const [activeSeason, setActiveSeason] = useState<{ id: string; name: string; year: number } | null>(null)
   const [filter, setFilter] = useState<'all' | 'pending' | 'under_review' | 'approved' | 'rejected'>('all')
   const [searchTerm, setSearchTerm] = useState('')
   const [stateFilter, setStateFilter] = useState('')

@@ -109,7 +109,7 @@ export default function ApplicationPage() {
           <ul className="space-y-2 text-xs text-gray-700">
             <li className="flex gap-2">
               <span>✓</span>
-              <span>Duration: 3-5 minutes</span>
+              <span>Duration: 2-3 minutes</span>
             </li>
             <li className="flex gap-2">
               <span>✓</span>

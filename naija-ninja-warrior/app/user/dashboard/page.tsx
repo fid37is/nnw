@@ -4,7 +4,8 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { toast } from 'sonner'
 import { supabase } from '@/lib/supabase/client'
-import { LogOut, FileText, Upload, Clock, CheckCircle, XCircle } from 'lucide-react'
+import { FileText, Upload, Clock, CheckCircle, XCircle } from 'lucide-react'
+import UserDropdown from '@/components/UserDropdown'
 
 interface Application {
   id: string
@@ -138,13 +139,7 @@ export default function UserDashboard() {
             </div>
             <span className="font-bold text-lg text-naija-green-900">Naija Ninja</span>
           </Link>
-          <button
-            onClick={handleLogout}
-            className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:text-naija-green-600 transition font-semibold"
-          >
-            <LogOut size={18} />
-            Logout
-          </button>
+          <UserDropdown handleLogout={handleLogout} />
         </div>
       </nav>
 
@@ -163,30 +158,7 @@ export default function UserDashboard() {
           </h1>
           <p className="text-sm md:text-base text-gray-600">Manage your application</p>
         </div>
-
-        {/* User Info Card */}
-        <div className="bg-white rounded-xl shadow-sm border border-naija-green-100 p-4 mb-6">
-          <h2 className="text-base font-bold text-naija-green-900 mb-3">Your Profile</h2>
-          <div className="space-y-2 text-sm mb-4">
-            <div className="flex items-center gap-2">
-              <span className="text-gray-600">Email:</span>
-              <span className="font-semibold">{user?.email}</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="text-gray-600">Phone:</span>
-              <span className="font-semibold">{user?.phone || '—'}</span>
-            </div>
-          </div>
-          <div className="flex justify-end">
-            <Link
-              href="/user/profile"
-              className="px-3 py-2 bg-naija-green-100 text-naija-green-700 rounded-lg text-sm font-semibold hover:bg-naija-green-200 transition"
-            >
-              Edit Profile
-            </Link>
-          </div>
-        </div>
-       
+        
         {/* Application Status */}
         {application ? (
           <div className="space-y-6">

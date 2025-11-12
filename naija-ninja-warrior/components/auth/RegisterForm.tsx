@@ -13,15 +13,6 @@ const NIGERIAN_STATES = [
   'Plateau', 'Rivers', 'Sokoto', 'Taraba', 'Yobe', 'Zamfara', 'FCT'
 ]
 
-const GEO_ZONES = [
-  'North Central',
-  'North East',
-  'North West',
-  'South East',
-  'South South',
-  'South West'
-]
-
 export default function RegisterForm() {
   const [formData, setFormData] = useState({
     fullName: '',
@@ -172,7 +163,7 @@ export default function RegisterForm() {
         return
       }
 
-      // Create user profile in users table
+      // Create user profile with ALL collected data
       const { error: profileError } = await supabase
         .from('users')
         .insert({
@@ -180,7 +171,15 @@ export default function RegisterForm() {
           email: formData.email,
           full_name: formData.fullName,
           phone: formData.phone,
+          birth_date: formData.birthDate,
+          age: parseInt(formData.age),
+          state: formData.state,
+          geo_zone: formData.geoZone,
+          physical_fitness: formData.physicalFitness,
+          emergency_contact: formData.emergencyContact,
+          emergency_phone: formData.emergencyPhone,
           role: 'user',
+          profile_completed: true,
         })
 
       if (profileError) {
@@ -200,7 +199,7 @@ export default function RegisterForm() {
   if (success) {
     return (
       <div className="text-center py-12">
-        <div className="inline-block w-16 h-16 bg-naija-green-100 rounded-full items-center justify-center mb-4">
+        <div className="inline-flex w-16 h-16 bg-naija-green-100 rounded-full items-center justify-center mb-4">
           <span className="text-3xl">✓</span>
         </div>
         <h2 className="text-2xl font-bold text-naija-green-900 mb-2">Registration Successful!</h2>
