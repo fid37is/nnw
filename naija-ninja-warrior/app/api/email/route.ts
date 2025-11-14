@@ -1,16 +1,13 @@
 import { Resend } from 'resend'
 
-const resend = new Resend(process.env.RESEND_API_KEY)
-
 export async function POST(request: Request) {
+  const resend = new Resend(process.env.RESEND_API_KEY!)
+
   try {
     const { to, subject, html } = await request.json()
 
     if (!to || !subject || !html) {
-      return Response.json(
-        { error: 'Missing required fields' },
-        { status: 400 }
-      )
+      return Response.json({ error: 'Missing required fields' }, { status: 400 })
     }
 
     const result = await resend.emails.send({
@@ -21,10 +18,7 @@ export async function POST(request: Request) {
     })
 
     if (result.error) {
-      return Response.json(
-        { error: result.error.message },
-        { status: 400 }
-      )
+      return Response.json({ error: result.error.message }, { status: 400 })
     }
 
     return Response.json({
@@ -33,9 +27,6 @@ export async function POST(request: Request) {
     })
   } catch (error) {
     console.error('Email send error:', error)
-    return Response.json(
-      { error: 'Failed to send email' },
-      { status: 500 }
-    )
+    return Response.json({ error: 'Failed to send email' }, { status: 500 })
   }
 }
