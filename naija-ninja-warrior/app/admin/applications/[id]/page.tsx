@@ -1,8 +1,7 @@
 'use client'
 
-/* eslint-disable @typescript-eslint/no-unused-vars */
-
 import { useEffect, useState } from 'react'
+import { use } from 'react'
 import Link from 'next/link'
 import { toast } from 'sonner'
 import { supabase } from '@/lib/supabase/client'
@@ -29,18 +28,29 @@ interface ApplicationDetail {
   }
 }
 
+interface Comment {
+  id: string
+  application_id: string
+  admin_id: string
+  comment: string
+  created_at: string
+}
+
 export default function AdminApplicationDetailPage({
   params,
 }: {
-  params: { id: string }
+  params: Promise<{ id: string }>
 }) {
+  const { id } = use(params)
   const [application, setApplication] = useState<ApplicationDetail | null>(null)
   const [loading, setLoading] = useState(true)
   const [updating, setUpdating] = useState(false)
   const [comment, setComment] = useState('')
-  const [comments, setComments] = useState<any[]>([])
+  const [comments, setComments] = useState<Comment[]>([])
 
   useEffect(() => {
+    if (!id) return
+
     const loadApplicationDetail = async () => {
       try {
         const { data: { session } } = await supabase.auth.getSession()
@@ -50,33 +60,55 @@ export default function AdminApplicationDetailPage({
           return
         }
 
-        // Load application detail
+        // Load application detail with user data
         const { data: appData, error: appError } = await supabase
           .from('applications')
-          .select(`
-            *,
-            users (
-              full_name,
-              email,
-              phone
-            )
-          `)
-          .eq('id', params.id)
+          .select('id, user_id, status, age, birth_date, physical_fitness, state, geo_zone, emergency_contact, emergency_phone, submission_date, video_url, photo_url')
+          .eq('id', id)
           .single()
 
-        if (appError) throw appError
-        setApplication(appData)
+        if (appError) {
+          console.error('Error fetching application:', appError)
+          throw appError
+        }
+
+        if (!appData) {
+          toast.error('Application not found')
+          setLoading(false)
+          return
+        }
+
+        // Fetch user data separately
+        const { data: userData, error: userError } = await supabase
+          .from('users')
+          .select('full_name, email, phone')
+          .eq('id', appData.user_id)
+          .single()
+
+        if (userError) {
+          console.error('Error fetching user:', userError)
+          throw userError
+        }
+
+        const completeApp: ApplicationDetail = {
+          ...appData,
+          users: userData || { full_name: 'N/A', email: 'N/A', phone: 'N/A' }
+        }
+
+        setApplication(completeApp)
 
         // Load comments
-        const { data: commentsData } = await supabase
+        const { data: commentsData, error: commentsError } = await supabase
           .from('application_comments')
           .select('*')
-          .eq('application_id', params.id)
+          .eq('application_id', id)
           .order('created_at', { ascending: false })
 
-        setComments(commentsData || [])
+        if (!commentsError) {
+          setComments(commentsData || [])
+        }
       } catch (err) {
-        console.error(err)
+        console.error('Error loading application:', err)
         toast.error('Failed to load application')
       } finally {
         setLoading(false)
@@ -84,7 +116,7 @@ export default function AdminApplicationDetailPage({
     }
 
     loadApplicationDetail()
-  }, [params.id])
+  }, [id])
 
   const handleStatusUpdate = async (newStatus: string) => {
     if (!application) return
@@ -107,6 +139,7 @@ export default function AdminApplicationDetailPage({
       setApplication({ ...application, status: newStatus as any })
       toast.success(`Application marked as ${newStatus.replace('_', ' ')}`)
     } catch (err) {
+      console.error('Error updating status:', err)
       toast.error('Failed to update status')
     } finally {
       setUpdating(false)
@@ -142,6 +175,7 @@ export default function AdminApplicationDetailPage({
 
       setComments(commentsData || [])
     } catch (err) {
+      console.error('Error adding comment:', err)
       toast.error('Failed to add comment')
     }
   }
@@ -159,8 +193,11 @@ export default function AdminApplicationDetailPage({
   if (!application) {
     return (
       <main className="min-h-screen bg-gradient-to-br from-white via-naija-green-50 to-white">
-        <div className="flex items-center justify-center min-h-screen">
+        <div className="flex flex-col items-center justify-center min-h-screen gap-4">
           <p className="text-gray-600">Application not found</p>
+          <Link href="/admin/applications" className="text-naija-green-600 hover:text-naija-green-700 font-semibold">
+            Back to Applications
+          </Link>
         </div>
       </main>
     )
@@ -171,9 +208,9 @@ export default function AdminApplicationDetailPage({
       {/* Navbar */}
       <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-naija-green-100">
         <div className="max-w-7xl mx-auto px-4 py-4">
-          <Link href="/admin/dashboard" className="flex items-center gap-2 text-naija-green-600 hover:text-naija-green-700 font-semibold transition">
+          <Link href="/admin/applications" className="flex items-center gap-2 text-naija-green-600 hover:text-naija-green-700 font-semibold transition">
             <ArrowLeft size={18} />
-            Back to Dashboard
+            Back to Applications
           </Link>
         </div>
       </nav>

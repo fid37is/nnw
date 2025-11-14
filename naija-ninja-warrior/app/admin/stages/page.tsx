@@ -16,6 +16,7 @@ interface Stage {
   start_date: string
   end_date: string
   status: 'upcoming' | 'ongoing' | 'completed'
+  max_winners: number | null
   season_name: string
 }
 
@@ -41,6 +42,7 @@ export default function StagesPage() {
     start_date: '',
     end_date: '',
     status: 'upcoming' as 'upcoming' | 'ongoing' | 'completed',
+    max_winners: '' as string | number,
   })
 
   useEffect(() => {
@@ -64,35 +66,41 @@ export default function StagesPage() {
       if (seasonsError) throw seasonsError
       setSeasons(seasonsData || [])
 
-      // Load stages
+      // Load stages with season info separately
       const { data: stagesData, error: stagesError } = await supabase
         .from('competition_stages')
-        .select(`
-          id,
-          season_id,
-          name,
-          stage_order,
-          start_date,
-          end_date,
-          status,
-          seasons (name)
-        `)
+        .select('id, season_id, name, stage_order, start_date, end_date, status, max_winners')
         .order('stage_order', { ascending: true })
 
       if (stagesError) throw stagesError
 
-      setStages(
-        (stagesData || []).map((s: any) => ({
-          id: s.id,
-          season_id: s.season_id,
-          name: s.name,
-          stage_order: s.stage_order,
-          start_date: s.start_date,
-          end_date: s.end_date,
-          status: s.status,
-          season_name: s.seasons?.[0]?.name || 'Unknown',
-        }))
-      )
+      // Get season names
+      if (stagesData && stagesData.length > 0) {
+        const seasonIds = [...new Set(stagesData.map((s: any) => s.season_id))]
+        const { data: seasonNames } = await supabase
+          .from('seasons')
+          .select('id, name')
+          .in('id', seasonIds)
+
+        const seasonMap = new Map()
+        seasonNames?.forEach((s: any) => seasonMap.set(s.id, s.name))
+
+        setStages(
+          stagesData.map((s: any) => ({
+            id: s.id,
+            season_id: s.season_id,
+            name: s.name,
+            stage_order: s.stage_order,
+            start_date: s.start_date,
+            end_date: s.end_date,
+            status: s.status,
+            max_winners: s.max_winners,
+            season_name: seasonMap.get(s.season_id) || 'Unknown',
+          }))
+        )
+      } else {
+        setStages([])
+      }
     } catch (err) {
       toast.error('Failed to load data')
       console.error(err)
@@ -110,10 +118,19 @@ export default function StagesPage() {
     }
 
     try {
+      const dataToSave = {
+        name: formData.name,
+        stage_order: formData.stage_order,
+        start_date: formData.start_date,
+        end_date: formData.end_date,
+        status: formData.status,
+        max_winners: formData.max_winners ? parseInt(formData.max_winners.toString()) : null,
+      }
+
       if (editingId) {
         const { error } = await supabase
           .from('competition_stages')
-          .update(formData)
+          .update(dataToSave)
           .eq('id', editingId)
 
         if (error) throw error
@@ -121,13 +138,20 @@ export default function StagesPage() {
       } else {
         const { error } = await supabase
           .from('competition_stages')
-          .insert([{ season_id: selectedSeasonId, ...formData }])
+          .insert([{ season_id: selectedSeasonId, ...dataToSave }])
 
         if (error) throw error
         toast.success('Stage created!')
       }
 
-      setFormData({ name: '', stage_order: 1, start_date: '', end_date: '', status: 'upcoming' })
+      setFormData({ 
+        name: '', 
+        stage_order: 1, 
+        start_date: '', 
+        end_date: '', 
+        status: 'upcoming',
+        max_winners: ''
+      })
       setEditingId(null)
       setShowForm(false)
       loadData()
@@ -190,7 +214,14 @@ export default function StagesPage() {
               onClick={() => {
                 setShowForm(true)
                 setEditingId(null)
-                setFormData({ name: '', stage_order: 1, start_date: '', end_date: '', status: 'upcoming' })
+                setFormData({ 
+                  name: '', 
+                  stage_order: 1, 
+                  start_date: '', 
+                  end_date: '', 
+                  status: 'upcoming',
+                  max_winners: ''
+                })
               }}
               className="px-4 py-2 bg-naija-green-600 text-white rounded-lg hover:bg-naija-green-700 transition font-semibold flex items-center gap-2"
             >
@@ -224,49 +255,67 @@ export default function StagesPage() {
               <form onSubmit={handleSave} className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">Stage Name</label>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">Stage Name *</label>
                     <input
                       type="text"
                       value={formData.name}
                       onChange={e => setFormData({ ...formData, name: e.target.value })}
                       placeholder="e.g., Stage 1, Quarter Final, Semi Final"
                       className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:border-naija-green-600"
+                      required
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">Stage Order</label>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">Stage Order *</label>
                     <input
                       type="number"
                       value={formData.stage_order}
                       onChange={e => setFormData({ ...formData, stage_order: parseInt(e.target.value) })}
                       min="1"
                       className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:border-naija-green-600"
+                      required
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">Start Date</label>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">Start Date *</label>
                     <input
                       type="date"
                       value={formData.start_date}
                       onChange={e => setFormData({ ...formData, start_date: e.target.value })}
                       className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:border-naija-green-600"
+                      required
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">End Date</label>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">End Date *</label>
                     <input
                       type="date"
                       value={formData.end_date}
                       onChange={e => setFormData({ ...formData, end_date: e.target.value })}
                       className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:border-naija-green-600"
+                      required
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">Status</label>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">Max Winners *</label>
+                    <input
+                      type="number"
+                      value={formData.max_winners}
+                      onChange={e => setFormData({ ...formData, max_winners: e.target.value })}
+                      min="1"
+                      placeholder="e.g., 10"
+                      className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:border-naija-green-600"
+                      required
+                    />
+                    <p className="text-xs text-gray-500 mt-1">Number of participants who advance to next stage</p>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">Status *</label>
                     <select
                       value={formData.status}
                       onChange={e => setFormData({ ...formData, status: e.target.value as any })}
@@ -314,10 +363,15 @@ export default function StagesPage() {
                   <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-2">
-                        <span className="inline-block w-8 h-8 bg-naija-green-600 text-white rounded-full items-center justify-center text-sm font-bold">
+                        <span className="inline-flex w-8 h-8 bg-naija-green-600 text-white rounded-full items-center justify-center text-sm font-bold">
                           {stage.stage_order}
                         </span>
                         <h3 className="text-lg font-bold text-naija-green-900">{stage.name}</h3>
+                        {stage.max_winners && (
+                          <span className="ml-2 px-2 py-1 bg-purple-100 text-purple-700 rounded text-xs font-semibold">
+                            Top {stage.max_winners} advance
+                          </span>
+                        )}
                       </div>
                       <p className="text-sm text-gray-600 mb-2">
                         {new Date(stage.start_date).toLocaleDateString()} - {new Date(stage.end_date).toLocaleDateString()}
@@ -339,6 +393,7 @@ export default function StagesPage() {
                             start_date: stage.start_date,
                             end_date: stage.end_date,
                             status: stage.status,
+                            max_winners: stage.max_winners || '',
                           })
                           setEditingId(stage.id)
                           setShowForm(true)

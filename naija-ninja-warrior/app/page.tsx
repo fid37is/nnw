@@ -4,7 +4,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase/client'
-import { ArrowRight, Trophy, Users, Zap } from 'lucide-react'
+import { ArrowRight, Trophy, Users, Menu, X, User } from 'lucide-react'
 
 interface Champion {
   id: string
@@ -12,6 +12,7 @@ interface Champion {
   season_id: string
   full_name: string
   position: number
+  photo_url: string | null
 }
 
 interface Runner {
@@ -19,6 +20,7 @@ interface Runner {
   user_id: string
   full_name: string
   position: number
+  photo_url: string | null
 }
 
 interface Season {
@@ -27,6 +29,23 @@ interface Season {
   year: number
   application_start_date: string
   application_end_date: string
+  status: string
+}
+
+interface YouTubeVideo {
+  id: string
+  title: string
+  youtube_url: string
+  description: string
+  category: string
+  order_position: number
+}
+
+interface Sponsor {
+  id: string
+  name: string
+  logo_url: string
+  website_url: string
 }
 
 export default function Home() {
@@ -35,10 +54,27 @@ export default function Home() {
   const [season, setSeason] = useState<Season | null>(null)
   const [loading, setLoading] = useState(true)
   const [stats, setStats] = useState({ total: 0, active: 0, eliminated: 0 })
+  const [videos, setVideos] = useState<YouTubeVideo[]>([])
+  const [sponsors, setSponsors] = useState<Sponsor[]>([])
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   useEffect(() => {
     loadData()
   }, [])
+
+  const extractYouTubeId = (url: string): string => {
+    const patterns = [
+      /(?:https?:\/\/)?(?:www\.)?youtube\.com\/watch\?v=([a-zA-Z0-9_-]{11})/,
+      /(?:https?:\/\/)?(?:www\.)?youtu\.be\/([a-zA-Z0-9_-]{11})/,
+    ]
+    
+    for (const pattern of patterns) {
+      const match = url.match(pattern)
+      if (match) return match[1]
+    }
+    
+    return ''
+  }
 
   const loadData = async () => {
     try {
@@ -56,45 +92,112 @@ export default function Home() {
 
       setSeason(seasonData)
 
-      // Get champion
-      const { data: championData } = await supabase
-        .from('champions')
-        .select('id, user_id, season_id, position, users (full_name)')
+      const { data: stagesData } = await supabase
+        .from('competition_stages')
+        .select('id')
         .eq('season_id', seasonData.id)
-        .eq('position', 1)
-        .single()
 
-      if (championData) {
+      if (!stagesData || stagesData.length === 0) {
+        setLoading(false)
+        return
+      }
+
+      const stageIds = stagesData.map(s => s.id)
+
+      const { data: perfData } = await supabase
+        .from('stage_performances')
+        .select('user_id, position, time_seconds, status')
+        .in('competition_stage_id', stageIds)
+        .eq('status', 'completed')
+
+      const userIds = [...new Set(perfData?.map(p => p.user_id) || [])]
+
+      if (userIds.length === 0) {
+        setLoading(false)
+        return
+      }
+
+      const { data: usersData } = await supabase
+        .from('users')
+        .select('id, full_name')
+        .in('id', userIds)
+
+      let usersMap = new Map()
+      usersData?.forEach((user: any) => {
+        usersMap.set(user.id, user)
+      })
+
+      const { data: appData } = await supabase
+        .from('applications')
+        .select('user_id, photo_url')
+        .eq('season_id', seasonData.id)
+        .in('user_id', userIds)
+
+      let appMap = new Map()
+      appData?.forEach((app: any) => {
+        appMap.set(app.user_id, app)
+      })
+
+      const userStats = new Map()
+      perfData?.forEach((perf: any) => {
+        if (!userStats.has(perf.user_id)) {
+          userStats.set(perf.user_id, {
+            user_id: perf.user_id,
+            total_position: 0,
+            final_time_seconds: 0,
+            stages_completed: 0,
+          })
+        }
+
+        const stats = userStats.get(perf.user_id)
+        stats.total_position += perf.position || 0
+        stats.final_time_seconds += perf.time_seconds || 0
+        stats.stages_completed += 1
+      })
+
+      const entries = Array.from(userStats.values())
+        .map((stats: any) => {
+          const user = usersMap.get(stats.user_id)
+          const app = appMap.get(stats.user_id)
+          return {
+            user_id: stats.user_id,
+            full_name: user?.full_name || 'Unknown',
+            photo_url: app?.photo_url || null,
+            total_position: stats.total_position,
+            final_time_seconds: stats.final_time_seconds,
+            stages_completed: stats.stages_completed,
+          }
+        })
+        .sort((a, b) => {
+          if (a.total_position !== b.total_position) {
+            return a.total_position - b.total_position
+          }
+          return a.final_time_seconds - b.final_time_seconds
+        })
+
+      if (entries.length > 0) {
         setChampion({
-          id: championData.id,
-          user_id: championData.user_id,
-          season_id: championData.season_id,
-          full_name: championData.users?.[0]?.full_name || 'Champion',
-          position: championData.position,
+          id: entries[0].user_id,
+          user_id: entries[0].user_id,
+          season_id: seasonData.id,
+          full_name: entries[0].full_name,
+          photo_url: entries[0].photo_url,
+          position: 1,
         })
       }
 
-      // Get runners-up
-      const { data: runnersData } = await supabase
-        .from('champions')
-        .select('id, user_id, season_id, position, users (full_name)')
-        .eq('season_id', seasonData.id)
-        .in('position', [2, 3, 4])
-        .order('position', { ascending: true })
-
-      if (runnersData) {
-        setRunners(
-          runnersData.map((r: any) => ({
-            id: r.id,
-            user_id: r.user_id,
-            full_name: r.users?.[0]?.full_name || 'Participant',
-            position: r.position,
-          }))
-        )
+      if (entries.length > 1) {
+        const runnersArray = entries.slice(1, 3).map((entry, idx) => ({
+          id: entry.user_id,
+          user_id: entry.user_id,
+          full_name: entry.full_name,
+          photo_url: entry.photo_url,
+          position: idx + 2,
+        }))
+        setRunners(runnersArray)
       }
 
-      // Get stats
-      const { count: activeCount } = await supabase
+      const { count: totalCount } = await supabase
         .from('applications')
         .select('id', { count: 'exact' })
         .eq('season_id', seasonData.id)
@@ -106,16 +209,27 @@ export default function Home() {
         .eq('season_id', seasonData.id)
         .eq('status', 'eliminated')
 
-      const { count: totalCount } = await supabase
-        .from('applications')
-        .select('id', { count: 'exact' })
-        .eq('season_id', seasonData.id)
-
       setStats({
         total: totalCount || 0,
-        active: activeCount || 0,
+        active: (totalCount || 0) - (eliminatedCount || 0),
         eliminated: eliminatedCount || 0,
       })
+
+      const { data: videoData } = await supabase
+        .from('youtube_videos')
+        .select('*')
+        .order('order_position', { ascending: true })
+        .limit(3)
+
+      setVideos(videoData || [])
+
+      const { data: sponsorData } = await supabase
+        .from('sponsors')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(4)
+
+      setSponsors(sponsorData || [])
     } catch (err) {
       console.error('Failed to load data:', err)
     } finally {
@@ -127,18 +241,6 @@ export default function Home() {
     if (!season) return false
     const today = new Date().toISOString().split('T')[0]
     return today >= season.application_start_date && today <= season.application_end_date
-  }
-
-  const getMedalColor = (position: number) => {
-    if (position === 2) return 'border-l-4 border-slate-400'
-    if (position === 3) return 'border-l-4 border-orange-500'
-    return 'border-l-4 border-blue-500'
-  }
-
-  const getMedalBg = (position: number) => {
-    if (position === 2) return 'bg-slate-50'
-    if (position === 3) return 'bg-orange-50'
-    return 'bg-blue-50'
   }
 
   if (loading) {
@@ -155,8 +257,7 @@ export default function Home() {
       <nav className="sticky top-0 z-50 bg-white border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
-            {/* Logo Image - Replace the src path with your logo file */}
-            <div className="w-16 h-16 bg-naija-green-600 rounded-lg flex items-center justify-center shadow-md overflow-hidden">
+            <div className="w-14 h-14 rounded-lg flex items-center justify-center overflow-hidden">
               <Image
                 src="/logo.png"
                 alt="Naija Ninja Logo"
@@ -168,6 +269,7 @@ export default function Home() {
             </div>
             <span className="font-bold text-gray-900 hidden sm:inline">Naija Ninja</span>
           </Link>
+          
           <div className="hidden md:flex items-center gap-8">
             <Link href="/leaderboard" className="text-sm font-medium text-gray-600 hover:text-gray-900 transition">
               Leaderboard
@@ -182,15 +284,61 @@ export default function Home() {
               About
             </Link>
           </div>
-          <div className="flex items-center gap-3">
+
+          <div className="hidden md:flex items-center gap-3">
             <Link href="/login" className="text-sm font-medium text-gray-600 hover:text-gray-900">
               Login
             </Link>
-            <Link href="/register" className="px-6 py-2 bg-naija-green-600 text-white text-sm font-semibold rounded-lg hover:bg-naija-green-700 transition">
-              Apply
-            </Link>
+            {isApplicationOpen() ? (
+              <Link href="/register" className="px-6 py-2 bg-naija-green-600 text-white text-sm font-semibold rounded-lg hover:bg-naija-green-700 transition">
+                Apply
+              </Link>
+            ) : (
+              <Link href="/register" className="px-6 py-2 bg-naija-green-600 text-white text-sm font-semibold rounded-lg hover:bg-naija-green-700 transition">
+                Register
+              </Link>
+            )}
           </div>
+
+          <button
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="md:hidden p-2 text-gray-600 hover:text-gray-900"
+          >
+            {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
         </div>
+
+        {mobileMenuOpen && (
+          <div className="md:hidden bg-white border-t border-gray-100">
+            <div className="px-4 py-4 space-y-3">
+              <Link href="/leaderboard" className="block py-2 text-gray-600 hover:text-gray-900 transition">
+                Leaderboard
+              </Link>
+              <Link href="/participants" className="block py-2 text-gray-600 hover:text-gray-900 transition">
+                Participants
+              </Link>
+              <Link href="/merch" className="block py-2 text-gray-600 hover:text-gray-900 transition">
+                Shop
+              </Link>
+              <Link href="/about" className="block py-2 text-gray-600 hover:text-gray-900 transition">
+                About
+              </Link>
+              <hr className="my-2" />
+              <Link href="/login" className="block py-2 text-gray-600 hover:text-gray-900 transition">
+                Login
+              </Link>
+              {isApplicationOpen() ? (
+                <Link href="/register" className="block w-full px-6 py-2 bg-naija-green-600 text-white font-semibold rounded-lg hover:bg-naija-green-700 transition text-center">
+                  Apply
+                </Link>
+              ) : (
+                <Link href="/register" className="block w-full px-6 py-2 bg-naija-green-600 text-white font-semibold rounded-lg hover:bg-naija-green-700 transition text-center">
+                  Register
+                </Link>
+              )}
+            </div>
+          </div>
+        )}
       </nav>
 
       {/* Application Status */}
@@ -207,78 +355,94 @@ export default function Home() {
       )}
 
       {/* Hero Section */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-32 relative overflow-hidden">
-        {/* NNW Watermark - Full Width */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-32 relative overflow-hidden">
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none overflow-hidden">
-          <div className="text-[400px] font-black text-naija-green-100 opacity-30">
+          <div className="text-[300px] md:text-[400px] font-black text-naija-green-100 opacity-20">
             NNW
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-center relative z-10">
-          {/* Left Content */}
+        <div className="flex flex-col items-center text-center md:grid md:grid-cols-2 md:text-left md:items-center gap-12 md:gap-16 relative z-10">
           <div>
             <div className="inline-block px-3 py-1 bg-naija-green-100 text-naija-green-700 text-xs font-bold rounded-full mb-6">
               SEASON {season?.year}
             </div>
-            <h1 className="text-5xl md:text-6xl font-bold text-gray-900 leading-tight mb-6">
+            <h1 className="text-4xl md:text-6xl font-bold text-gray-900 leading-tight mb-6">
               Test Your Limits
             </h1>
-            <p className="text-lg text-gray-600 mb-8 leading-relaxed">
+            <p className="text-base md:text-lg text-gray-600 mb-8 leading-relaxed">
               Nigeria's premier physical competition. Compete against the best, push your boundaries, and claim your place in history.
             </p>
-            <div className="flex gap-4">
-              <Link
-                href="/register"
-                className="px-8 py-3 bg-naija-green-600 text-white font-semibold rounded-lg hover:bg-naija-green-700 transition flex items-center gap-2"
-              >
-                Apply Now
-                <ArrowRight size={18} />
-              </Link>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
+              {isApplicationOpen() && (
+                <Link
+                  href="/register"
+                  className="px-8 py-3 bg-naija-green-600 text-white font-semibold rounded-lg hover:bg-naija-green-700 transition flex items-center justify-center gap-2 whitespace-nowrap"
+                >
+                  Apply Now
+                  <ArrowRight size={18} />
+                </Link>
+              )}
               <Link
                 href="/leaderboard"
-                className="px-8 py-3 border-2 border-gray-200 text-gray-900 font-semibold rounded-lg hover:border-gray-300 transition"
+                className="px-8 py-3 border-2 border-gray-200 text-gray-900 font-semibold rounded-lg hover:border-gray-300 transition text-center whitespace-nowrap"
               >
-                View Leaderboard
+                <span className="hidden sm:inline">View </span>Leaderboard
               </Link>
             </div>
           </div>
 
-          {/* Right: Champion Showcase */}
-          <div className="flex items-center justify-center">
-            {champion ? (
-              <div className="w-full max-w-sm">
-                <div className="bg-gray-900 rounded-2xl overflow-hidden">
-                  {/* Champion Photo Area */}
-                  <div className="aspect-square bg-gradient-to-br from-gray-800 to-gray-900 flex items-center justify-center relative overflow-hidden">
-                    {/* Silhouette */}
-                    <div className="absolute inset-0 flex items-center justify-center opacity-20">
-                      <div className="text-[200px]">👤</div>
+          <div className="flex items-center justify-center w-full">
+            {champion && season?.status === 'completed' ? (
+              <div className="w-full max-w-sm md:max-w-full">
+                <div className="group relative overflow-hidden rounded-2xl shadow-md hover:shadow-2xl transition-all duration-300 hover:scale-105">
+                  <div className="relative aspect-[3/4] overflow-hidden bg-gray-200">
+                    {champion.photo_url ? (
+                      <Image
+                        src={champion.photo_url}
+                        alt={champion.full_name}
+                        fill
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                      />
+                    ) : (
+                      <>
+                        <div className="absolute inset-0 flex items-center justify-center opacity-20">
+                          <div className="text-[200px]">👤</div>
+                        </div>
+                        <div className="relative z-10 text-[120px] text-gray-700 flex items-center justify-center h-full">?</div>
+                      </>
+                    )}
+                    <div className="absolute top-3 left-3 w-14 h-14 rounded-full bg-gradient-to-br from-yellow-400 to-yellow-500 flex items-center justify-center text-3xl font-bold shadow-lg border-2 border-white">
+                      🥇
                     </div>
-                    {/* Question Mark */}
-                    <div className="relative z-10 text-[120px] text-gray-700">?</div>
-                  </div>
-                  {/* Info */}
-                  <div className="p-8 bg-gray-900 text-white">
-                    <p className="text-sm font-semibold text-gray-400 mb-2">REIGNING CHAMPION</p>
-                    <h2 className="text-3xl font-bold mb-1">{champion.full_name}</h2>
-                    <p className="text-sm text-gray-400">Season {season?.year}</p>
+                    <div className="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-black via-black/50 to-transparent"></div>
+                    <div className="absolute bottom-0 left-0 right-0 p-5">
+                      <p className="text-xs font-semibold text-gray-200 mb-2">REIGNING CHAMPION</p>
+                      <p className="text-white font-black text-2xl leading-tight line-clamp-3">
+                        {champion.full_name}
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
             ) : (
-              <div className="w-full max-w-sm">
-                <div className="bg-gray-900 rounded-2xl overflow-hidden">
-                  <div className="aspect-square bg-gradient-to-br from-gray-800 to-gray-900 flex items-center justify-center relative overflow-hidden">
+              <div className="w-full max-w-sm md:max-w-full">
+                <div className="group relative overflow-hidden rounded-2xl shadow-md hover:shadow-2xl transition-all duration-300">
+                  <div className="relative aspect-[3/4] overflow-hidden bg-gray-200">
                     <div className="absolute inset-0 flex items-center justify-center opacity-20">
                       <div className="text-[200px]">👤</div>
                     </div>
-                    <div className="relative z-10 text-[120px] text-gray-600">?</div>
-                  </div>
-                  <div className="p-8 bg-gray-900 text-white">
-                    <p className="text-sm font-semibold text-gray-400 mb-2">NEXT CHAMPION</p>
-                    <h2 className="text-3xl font-bold mb-1">Could Be You</h2>
-                    <p className="text-sm text-gray-400">Apply now and make history</p>
+                    <div className="relative z-10 text-[120px] text-gray-600 flex items-center justify-center h-full">?</div>
+                    <div className="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-black via-black/50 to-transparent"></div>
+                    <div className="absolute bottom-0 left-0 right-0 p-5">
+                      <p className="text-xs font-semibold text-gray-200 mb-2">NEXT CHAMPION</p>
+                      <p className="text-white font-black text-2xl leading-tight">
+                        Could Be You
+                      </p>
+                      {isApplicationOpen() && (
+                        <p className="text-xs font-semibold text-gray-200 mt-2">Apply now and make history</p>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -288,153 +452,227 @@ export default function Home() {
       </section>
 
       {/* Stats Section */}
-      <section className="max-w-7xl mx-auto justify-center text-center px-4 sm:px-6 lg:px-8 py-16 border-t border-gray-100">
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 border-t border-gray-100">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          <div>
+          <div className="text-center">
             <div className="text-4xl font-bold text-naija-green-600 mb-2">{stats.total}</div>
             <p className="text-gray-600 font-medium">Total Warriors</p>
           </div>
-          <div>
+          <div className="text-center">
             <div className="text-4xl font-bold text-gray-900 mb-2">{stats.active}</div>
             <p className="text-gray-600 font-medium">Competing</p>
           </div>
-          <div>
+          <div className="text-center">
             <div className="text-4xl font-bold text-gray-400 mb-2">{stats.eliminated}</div>
             <p className="text-gray-600 font-medium">Eliminated</p>
           </div>
         </div>
       </section>
 
-      {/* Top Performers */}
-      {runners.length > 0 && (
-        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 border-t border-gray-100">
-          <div className="mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-2">Top Performers</h2>
-            <p className="text-gray-600">Rising stars and runners-up</p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {runners.map(runner => (
-              <div key={runner.id} className={`p-6 rounded-lg ${getMedalBg(runner.position)} ${getMedalColor(runner.position)}`}>
-                <div className="mb-3">
-                  <span className="inline-block px-3 py-1 bg-gray-900 text-white text-xs font-bold rounded-full">
-                    #{runner.position}
-                  </span>
-                </div>
-                <h3 className="text-xl font-bold text-gray-900">{runner.full_name}</h3>
-                <p className="text-sm text-gray-600 mt-2">
-                  {runner.position === 2 ? 'Runner Up' : runner.position === 3 ? 'Third Place' : 'Fourth Place'}
-                </p>
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* View All Participants */}
+      {/* Top Competitors */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 border-t border-gray-100">
-        <div className="mb-12">
-          <h2 className="text-3xl font-bold text-gray-900 mb-2">Top Competitors</h2>
+        <div className="mb-12 text-center">
+          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">Top Competitors</h2>
           <p className="text-gray-600">The leaders in this season's competition</p>
         </div>
 
-        {/* Top 3 Positions */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          {/* 1st Place */}
-          <div className="p-6 bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-lg border border-yellow-200">
-            <div className="text-3xl font-bold text-yellow-700 mb-1">1st</div>
-            <p className="text-sm text-yellow-600 font-medium">
-              {champion ? champion.full_name : 'Waiting for champion...'}
-            </p>
-            {!champion && <p className="text-xs text-yellow-500 mt-2">Champion to be determined</p>}
-          </div>
+        {champion || runners.length > 0 ? (
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+              {champion && (
+                <div className="group relative overflow-hidden rounded-2xl shadow-md hover:shadow-2xl transition-all duration-300 hover:scale-105 cursor-pointer">
+                  <div className="relative aspect-[3/4] overflow-hidden bg-gray-200">
+                    {champion.photo_url ? (
+                      <Image
+                        src={champion.photo_url}
+                        alt={champion.full_name}
+                        fill
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center bg-gray-300">
+                        <User size={64} className="text-gray-500" />
+                      </div>
+                    )}
+                    <div className="absolute top-3 left-3 w-14 h-14 rounded-full bg-gradient-to-br from-yellow-400 to-yellow-500 flex items-center justify-center text-3xl font-bold shadow-lg border-2 border-white">
+                      🥇
+                    </div>
+                    <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-black via-black/50 to-transparent"></div>
+                    <div className="absolute bottom-0 left-0 right-0 p-5">
+                      <p className="text-white font-black text-2xl leading-tight line-clamp-3">
+                        {champion.full_name}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
 
-          {/* 2nd Place */}
-          <div className="p-6 bg-gradient-to-br from-slate-50 to-slate-100 rounded-lg border border-slate-200">
-            <div className="text-3xl font-bold text-slate-700 mb-1">2nd</div>
-            <p className="text-sm text-slate-600 font-medium">
-              {runners.length > 0 && runners[0] ? runners[0].full_name : 'Waiting for runner-up...'}
-            </p>
-            {(!runners.length || !runners[0]) && <p className="text-xs text-slate-500 mt-2">Runner-up to be determined</p>}
-          </div>
+              {runners.length > 0 && runners[0] && (
+                <div className="group relative overflow-hidden rounded-2xl shadow-md hover:shadow-2xl transition-all duration-300 hover:scale-105 cursor-pointer">
+                  <div className="relative aspect-[3/4] overflow-hidden bg-gray-200">
+                    {runners[0].photo_url ? (
+                      <Image
+                        src={runners[0].photo_url}
+                        alt={runners[0].full_name}
+                        fill
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center bg-gray-300">
+                        <User size={64} className="text-gray-500" />
+                      </div>
+                    )}
+                    <div className="absolute top-3 left-3 w-14 h-14 rounded-full bg-gradient-to-br from-gray-300 to-gray-400 flex items-center justify-center text-3xl font-bold shadow-lg border-2 border-white">
+                      🥈
+                    </div>
+                    <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-black via-black/50 to-transparent"></div>
+                    <div className="absolute bottom-0 left-0 right-0 p-5">
+                      <p className="text-white font-black text-2xl leading-tight line-clamp-3">
+                        {runners[0].full_name}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
 
-          {/* 3rd Place */}
-          <div className="p-6 bg-gradient-to-br from-orange-50 to-orange-100 rounded-lg border border-orange-200">
-            <div className="text-3xl font-bold text-orange-700 mb-1">3rd</div>
-            <p className="text-sm text-orange-600 font-medium">
-              {runners.length > 1 && runners[1] ? runners[1].full_name : 'Waiting for top performer...'}
-            </p>
-            {(!runners.length || runners.length < 2 || !runners[1]) && <p className="text-xs text-orange-500 mt-2">Competitor to be determined</p>}
-          </div>
-        </div>
+              {runners.length > 1 && runners[1] && (
+                <div className="group relative overflow-hidden rounded-2xl shadow-md hover:shadow-2xl transition-all duration-300 hover:scale-105 cursor-pointer">
+                  <div className="relative aspect-[3/4] overflow-hidden bg-gray-200">
+                    {runners[1].photo_url ? (
+                      <Image
+                        src={runners[1].photo_url}
+                        alt={runners[1].full_name}
+                        fill
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center bg-gray-300">
+                        <User size={64} className="text-gray-500" />
+                      </div>
+                    )}
+                    <div className="absolute top-3 left-3 w-14 h-14 rounded-full bg-gradient-to-br from-orange-400 to-orange-500 flex items-center justify-center text-3xl font-bold shadow-lg border-2 border-white">
+                      🥉
+                    </div>
+                    <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-black via-black/50 to-transparent"></div>
+                    <div className="absolute bottom-0 left-0 right-0 p-5">
+                      <p className="text-white font-black text-2xl leading-tight line-clamp-3">
+                        {runners[1].full_name}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
 
-        <div className="text-center">
-          <Link
-            href="/participants"
-            className="inline-flex items-center gap-2 px-8 py-3 border-2 border-gray-200 text-gray-900 font-semibold rounded-lg hover:border-gray-300 transition"
-          >
-            <Users size={20} />
-            View All Participants
-          </Link>
-        </div>
+            <div className="text-center">
+              <Link
+                href="/leaderboard"
+                className="inline-flex items-center gap-2 px-8 py-3 border-2 border-gray-200 text-gray-900 font-semibold rounded-lg hover:border-gray-300 transition"
+              >
+                <Users size={20} />
+                View Full Leaderboard
+              </Link>
+            </div>
+          </>
+        ) : (
+          <div className="bg-gray-50 rounded-lg border border-gray-200 p-12 text-center">
+            <Trophy size={64} className="mx-auto mb-4 text-gray-300" />
+            <p className="text-xl text-gray-600 font-semibold">Competition in progress</p>
+            <p className="text-gray-500 mt-2">Top competitors will appear here as the season progresses</p>
+          </div>
+        )}
       </section>
 
       {/* Sponsors */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 border-t border-gray-100">
-        <h2 className="text-2xl font-bold text-gray-900 mb-12 text-center">Supported By</h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-          {[
-            { name: 'Nike' },
-            { name: 'Gatorade' },
-            { name: 'Red Bull' },
-            { name: 'MTN' },
-          ].map((sponsor, idx) => (
-            <div key={idx} className="p-6 bg-gray-50 rounded-lg border border-gray-100">
-              <p className="font-semibold text-gray-900">{sponsor.name}</p>
-            </div>
-          ))}
-        </div>
+        <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-12 text-center">Supported By</h2>
+        {sponsors.length > 0 ? (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
+            {sponsors.map((sponsor) => (
+              <a
+                key={sponsor.id}
+                href={sponsor.website_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="p-6 bg-gray-50 rounded-lg border border-gray-100 hover:border-naija-green-600 transition flex items-center justify-center"
+              >
+                {sponsor.logo_url ? (
+                  <img
+                    src={sponsor.logo_url}
+                    alt={sponsor.name}
+                    className="max-w-full max-h-16 object-contain"
+                  />
+                ) : (
+                  <p className="font-semibold text-gray-900 text-center text-sm">{sponsor.name}</p>
+                )}
+              </a>
+            ))}
+          </div>
+        ) : (
+          <div className="bg-gray-50 rounded-lg border border-gray-200 p-12 text-center">
+            <h3 className="text-xl font-bold text-gray-900 mb-2">Be Our Sponsor</h3>
+            <p className="text-gray-600 mb-6">Partner with Naija Ninja Warrior and reach thousands of passionate competitors</p>
+            <Link
+              href="/contact"
+              className="inline-block px-6 py-3 bg-naija-green-600 text-white font-semibold rounded-lg hover:bg-naija-green-700 transition"
+            >
+              Contact Us
+            </Link>
+          </div>
+        )}
       </section>
 
       {/* Video Highlights */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 border-t border-gray-100">
-        <div className="mb-12">
-          <h2 className="text-3xl font-bold text-gray-900 mb-2">Event Highlights</h2>
+        <div className="mb-12 text-center">
+          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">Event Highlights</h2>
           <p className="text-gray-600">Watch epic moments from past competitions</p>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {[
-            { title: 'Finals Showdown', video: 'dQw4w9WgXcQ' },
-            { title: 'Champion\'s Journey', video: 'dQw4w9WgXcQ' },
-            { title: 'Epic Moments', video: 'dQw4w9WgXcQ' },
-          ].map((video, idx) => (
-            <div key={idx} className="rounded-lg overflow-hidden border border-gray-100 hover:border-gray-200 transition">
-              <div className="aspect-video bg-gray-200">
-                <iframe
-                  width="100%"
-                  height="100%"
-                  src={`https://www.youtube.com/embed/${video.video}`}
-                  title={video.title}
-                  frameBorder="0"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                  className="rounded-lg"
-                ></iframe>
-              </div>
-              <div className="p-4">
-                <h3 className="font-semibold text-gray-900">{video.title}</h3>
-              </div>
-            </div>
-          ))}
-        </div>
+        {videos.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {videos.map((video) => {
+              const videoId = extractYouTubeId(video.youtube_url)
+              return (
+                <div key={video.id} className="rounded-lg overflow-hidden border border-gray-100 hover:border-gray-200 transition">
+                  <div className="aspect-video bg-gray-200">
+                    {videoId ? (
+                      <iframe
+                        width="100%"
+                        height="100%"
+                        src={`https://www.youtube.com/embed/${videoId}`}
+                        title={video.title}
+                        frameBorder="0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen
+                        className="rounded-lg"
+                      ></iframe>
+                    ) : (
+                      <div className="w-full h-full bg-gray-300 flex items-center justify-center text-gray-600">
+                        Invalid video URL
+                      </div>
+                    )}
+                  </div>
+                  <div className="p-4">
+                    <h3 className="font-semibold text-gray-900 text-sm md:text-base">{video.title}</h3>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        ) : (
+          <div className="bg-gray-50 rounded-lg border border-gray-200 p-12 text-center">
+            <p className="text-gray-600 text-lg">Stay tuned to watch our season highlights</p>
+          </div>
+        )}
       </section>
 
       {/* FAQ Section */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 border-t border-gray-100">
-        <div className="mb-12">
-          <h2 className="text-3xl font-bold text-gray-900 mb-2">Frequently Asked Questions</h2>
+        <div className="mb-12 text-center">
+          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">Frequently Asked Questions</h2>
           <p className="text-gray-600">Find answers to common questions</p>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 max-w-4xl mx-auto">
           {[
             {
               question: 'How do I apply?',
@@ -473,11 +711,11 @@ export default function Home() {
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 border-t border-gray-100">
         <div className="max-w-2xl mx-auto">
           <div className="mb-8 text-center">
-            <h2 className="text-3xl font-bold text-gray-900 mb-2">Got Questions?</h2>
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">Got Questions?</h2>
             <p className="text-gray-600">Send us your inquiry and we'll get back to you shortly</p>
           </div>
 
-          <form className="space-y-6 bg-gray-50 p-8 rounded-lg border border-gray-100">
+          <form className="space-y-6 bg-gray-50 p-6 md:p-8 rounded-lg border border-gray-100">
             <div>
               <label className="block text-sm font-semibold text-gray-900 mb-2">Name</label>
               <input
@@ -521,21 +759,38 @@ export default function Home() {
       </section>
 
       {/* CTA Section */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 border-t border-gray-100">
-        <div className="bg-naija-green-600 rounded-2xl p-12 md:p-16 text-center text-white">
-          <h2 className="text-4xl font-bold mb-4">Ready to Compete?</h2>
-          <p className="text-lg text-green-100 mb-8 max-w-2xl mx-auto">
-            {champion
-              ? `Can you dethrone ${champion.full_name}? Join hundreds of warriors and prove yourself.`
-              : 'Be the first to claim the champion title. Apply now and make history.'}
-          </p>
-          <Link
-            href="/register"
-            className="inline-flex items-center gap-2 px-8 py-3 bg-white text-naija-green-600 font-bold rounded-lg hover:bg-green-50 transition"
-          >
-            Apply Now
-            <ArrowRight size={20} />
-          </Link>
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 border-t border-gray-100">
+        <div className="bg-naija-green-600 rounded-2xl p-8 md:p-16 text-center text-white">
+          <h2 className="text-3xl md:text-4xl font-bold mb-4">Ready to Compete?</h2>
+          {isApplicationOpen() ? (
+            <>
+              <p className="text-base md:text-lg text-green-100 mb-8 max-w-2xl mx-auto">
+                {champion
+                  ? `Can you dethrone ${champion.full_name}? Join hundreds of warriors and prove yourself.`
+                  : 'Be the first to claim the champion title. Apply now and make history.'}
+              </p>
+              <Link
+                href="/register"
+                className="inline-flex items-center justify-center gap-2 px-8 py-3 bg-white text-naija-green-600 font-bold rounded-lg hover:bg-green-50 transition"
+              >
+                Apply Now
+                <ArrowRight size={20} />
+              </Link>
+            </>
+          ) : (
+            <>
+              <p className="text-base md:text-lg text-green-100 mb-8 max-w-2xl mx-auto">
+                Applications are currently closed. Stay tuned for the next season or register to get updates about future competitions.
+              </p>
+              <Link
+                href="/register"
+                className="inline-flex items-center justify-center gap-2 px-8 py-3 bg-white text-naija-green-600 font-bold rounded-lg hover:bg-green-50 transition"
+              >
+                Register for Updates
+                <ArrowRight size={20} />
+              </Link>
+            </>
+          )}
         </div>
       </section>
 

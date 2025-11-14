@@ -13,6 +13,7 @@ export default function ApplicationPage() {
   const [userId, setUserId] = useState<string>('')
   const [applicationId, setApplicationId] = useState<string>('')
   const [activeSeason, setActiveSeason] = useState<string | null>(null)
+  const [applicationOpen, setApplicationOpen] = useState<boolean>(false)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -27,15 +28,28 @@ export default function ApplicationPage() {
 
         setUserId(session.user.id)
 
-        // Fetch active season
+        // Fetch active season and check application window
         const { data: seasonData } = await supabase
           .from('seasons')
-          .select('id')
+          .select('id, application_start_date, application_end_date')
           .eq('status', 'active')
           .single()
 
         if (seasonData) {
           setActiveSeason(seasonData.id)
+          
+          // Check if application window is open
+          const today = new Date()
+          today.setHours(0, 0, 0, 0)
+          
+          const startDate = new Date(seasonData.application_start_date)
+          startDate.setHours(0, 0, 0, 0)
+          
+          const endDate = new Date(seasonData.application_end_date)
+          endDate.setHours(23, 59, 59, 999)
+          
+          const isOpen = today >= startDate && today <= endDate
+          setApplicationOpen(isOpen)
         }
 
         // Check if user has existing application
@@ -138,6 +152,15 @@ export default function ApplicationPage() {
             </p>
             <p className="text-sm text-yellow-700 mt-2">
               Please check back later when a new season opens.
+            </p>
+          </div>
+        ) : !applicationOpen ? (
+          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6 text-center">
+            <p className="text-yellow-800 font-semibold">
+              Application window is currently closed.
+            </p>
+            <p className="text-sm text-yellow-700 mt-2">
+              Applications are not being accepted at this time. Please check back during the application period.
             </p>
           </div>
         ) : (

@@ -61,13 +61,18 @@ const navItems = [
     ],
   },
   {
-    label: 'Analytics',
-    href: '/admin/analytics',
-    icon: BarChart3,
+    label: 'Messages',
+    href: '/admin/messages',
+    icon: FileText,
   },
   {
     label: 'Audit Logs',
     href: '/admin/audit-logs',
+    icon: FileText,
+  },
+  {
+    label: 'Add Items',
+    href: '/admin/merch-sponsor',
     icon: FileText,
   },
 ]
@@ -125,8 +130,8 @@ export default function AdminSidebar() {
           <Image
             src="/logo.png"
             alt="Logo"
-            width={80}
-            height={80}
+            width={60}
+            height={60}
             className="rounded-lg"
           />
           <span className="font-bold text-lg truncate">Admin</span>

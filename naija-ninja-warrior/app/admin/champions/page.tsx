@@ -1,22 +1,19 @@
 'use client'
 
-/* eslint-disable @typescript-eslint/no-unused-vars */
-
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { supabase } from '@/lib/supabase/client'
 import AdminSidebar from '@/components/admin/AdminSidebar'
-import { Trophy, Edit2, Save, X } from 'lucide-react'
+import { Trophy, ArrowRight } from 'lucide-react'
 
-interface Champion {
-  id: string
-  season_id: string
+interface LeaderboardEntry {
+  rank: number
   user_id: string
-  title: string
-  description: string
-  user_name: string
-  season_name: string
-  season_year: number
+  full_name: string
+  total_position: number | null
+  final_time_seconds: number | null
+  stages_completed: number
+  last_stage_reached: string | null
 }
 
 interface Season {
@@ -26,153 +23,92 @@ interface Season {
   status: string
 }
 
-interface ApprovedUser {
-  id: string
-  full_name: string
-}
-
-export default function ChampionsPage() {
-  const [champions, setChampions] = useState<Champion[]>([])
+export default function AdminChampionsPage() {
+  const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([])
   const [seasons, setSeasons] = useState<Season[]>([])
-  const [approvedUsers, setApprovedUsers] = useState<ApprovedUser[]>([])
+  const [selectedSeasonId, setSelectedSeasonId] = useState<string>('')
   const [loading, setLoading] = useState(true)
-  const [editingId, setEditingId] = useState<string | null>(null)
-  const [showForm, setShowForm] = useState(false)
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
-  const [championToDelete, setChampionToDelete] = useState<string | null>(null)
-  const [formData, setFormData] = useState({
-    season_id: '',
-    user_id: '',
-    title: '',
-    description: '',
-  })
 
   useEffect(() => {
-    loadData()
+    loadSeasons()
   }, [])
 
-  const loadData = async () => {
+  useEffect(() => {
+    if (selectedSeasonId) {
+      loadLeaderboard()
+    }
+  }, [selectedSeasonId])
+
+  const loadSeasons = async () => {
     try {
-      // Load champions
-      const { data: championsData, error: championsError } = await supabase
-        .from('season_champions')
-        .select(`
-          id,
-          season_id,
-          user_id,
-          title,
-          description,
-          users (full_name),
-          seasons (name, year)
-        `)
-        .order('seasons(year)', { ascending: false })
-
-      if (championsError && championsError.code !== 'PGRST116') throw championsError
-
-      if (championsData) {
-        setChampions(
-          championsData.map((c: any) => ({
-            id: c.id,
-            season_id: c.season_id,
-            user_id: c.user_id,
-            title: c.title,
-            description: c.description,
-            user_name: c.users?.[0]?.full_name || 'Unknown',
-            season_name: c.seasons?.[0]?.name || 'Unknown',
-            season_year: c.seasons?.[0]?.year || 0,
-          }))
-        )
-      }
-
-      // Load seasons
-      const { data: seasonsData, error: seasonsError } = await supabase
+      const { data, error } = await supabase
         .from('seasons')
         .select('id, name, year, status')
         .order('year', { ascending: false })
 
-      if (seasonsError) throw seasonsError
-      setSeasons(seasonsData || [])
-
-      // Load approved users
-      const { data: usersData, error: usersError } = await supabase
-        .from('applications')
-        .select(`user_id, users (id, full_name)`)
-        .eq('status', 'approved')
-
-      if (usersError) throw usersError
-
-      const uniqueUsers = Array.from(
-        new Map(
-          (usersData || []).map((item: any) => [
-            item.users[0]?.id,
-            { id: item.users[0]?.id, full_name: item.users[0]?.full_name },
-          ])
-        ).values()
-      )
-
-      setApprovedUsers(uniqueUsers as ApprovedUser[])
+      if (error) throw error
+      setSeasons(data || [])
+      if (data && data.length > 0) {
+        setSelectedSeasonId(data[0].id)
+      }
     } catch (err) {
-      toast.error('Failed to load data')
+      toast.error('Failed to load seasons')
       console.error(err)
     } finally {
       setLoading(false)
     }
   }
 
-  const handleSave = async (e: React.FormEvent) => {
-    e.preventDefault()
-
-    if (!formData.season_id || !formData.user_id || !formData.title) {
-      toast.error('Please fill in all required fields')
-      return
-    }
-
+  const loadLeaderboard = async () => {
     try {
-      if (editingId) {
-        const { error } = await supabase
-          .from('season_champions')
-          .update(formData)
-          .eq('id', editingId)
+      const { data, error } = await supabase
+        .from('season_leaderboard')
+        .select(`
+          user_id,
+          total_position,
+          final_time_seconds,
+          stages_completed,
+          last_stage_reached,
+          users (full_name)
+        `)
+        .eq('season_id', selectedSeasonId)
+        .order('total_position', { ascending: true, nullsFirst: false })
+        .order('final_time_seconds', { ascending: true, nullsFirst: false })
 
-        if (error) throw error
-        toast.success('Champion updated!')
-      } else {
-        const { error } = await supabase
-          .from('season_champions')
-          .insert([formData])
+      if (error) throw error
 
-        if (error) throw error
-        toast.success('Champion added!')
-      }
+      const entries = (data || []).map((entry: any, index: number) => ({
+        rank: index + 1,
+        user_id: entry.user_id,
+        full_name: entry.users?.[0]?.full_name || 'Unknown',
+        total_position: entry.total_position,
+        final_time_seconds: entry.final_time_seconds,
+        stages_completed: entry.stages_completed || 0,
+        last_stage_reached: entry.last_stage_reached || 'Not started',
+      }))
 
-      setFormData({ season_id: '', user_id: '', title: '', description: '' })
-      setEditingId(null)
-      setShowForm(false)
-      loadData()
+      setLeaderboard(entries)
     } catch (err) {
-      toast.error('Failed to save champion')
+      toast.error('Failed to load leaderboard')
       console.error(err)
     }
   }
 
-  const handleDelete = async () => {
-    if (!championToDelete) return
-
-    try {
-      const { error } = await supabase
-        .from('season_champions')
-        .delete()
-        .eq('id', championToDelete)
-
-      if (error) throw error
-      toast.success('Champion deleted!')
-      setShowDeleteConfirm(false)
-      setChampionToDelete(null)
-      loadData()
-    } catch (err) {
-      toast.error('Failed to delete champion')
-    }
+  const formatTime = (seconds: number | null) => {
+    if (!seconds) return '-'
+    const mins = Math.floor(seconds / 60)
+    const secs = seconds % 60
+    return `${mins}:${secs.toString().padStart(2, '0')}`
   }
+
+  const getMedalIcon = (rank: number) => {
+    if (rank === 1) return '🥇'
+    if (rank === 2) return '🥈'
+    if (rank === 3) return '🥉'
+    return null
+  }
+
+  const currentSeason = seasons.find(s => s.id === selectedSeasonId)
 
   if (loading) {
     return (
@@ -192,192 +128,144 @@ export default function ChampionsPage() {
       <main className="flex-1 lg:ml-64 min-h-screen bg-gradient-to-br from-white via-naija-green-50 to-white">
         <div className="max-w-7xl mx-auto px-4 py-8 lg:p-8">
           {/* Header */}
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
-            <div>
-              <h1 className="text-3xl font-bold text-naija-green-900 flex items-center gap-2">
-                <Trophy size={32} />
-                Season Champions
-              </h1>
-              <p className="text-gray-600">Manage champions for each season</p>
-            </div>
-            <button
-              onClick={() => {
-                setShowForm(true)
-                setEditingId(null)
-                setFormData({ season_id: '', user_id: '', title: '', description: '' })
-              }}
-              className="px-4 py-2 bg-naija-green-600 text-white rounded-lg hover:bg-naija-green-700 transition font-semibold"
-            >
-              Add Champion
-            </button>
+          <div className="mb-8">
+            <h1 className="text-3xl font-bold text-naija-green-900 flex items-center gap-2">
+              <Trophy size={32} />
+              Season Champions
+            </h1>
+            <p className="text-gray-600">Auto-generated rankings from performance data</p>
           </div>
 
-          {/* Form */}
-          {showForm && (
+          {/* Season Selector - Only if multiple seasons */}
+          {seasons.length > 1 && (
+            <div className="bg-white rounded-lg shadow-sm border border-naija-green-100 p-4 mb-6 max-w-xs">
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Select Season</label>
+              <select
+                value={selectedSeasonId}
+                onChange={e => setSelectedSeasonId(e.target.value)}
+                className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:border-naija-green-600"
+              >
+                {seasons.map(s => (
+                  <option key={s.id} value={s.id}>
+                    {s.name} {s.year}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+
+          {/* Current Season Info */}
+          {currentSeason && (
             <div className="bg-white rounded-lg shadow-sm border border-naija-green-100 p-6 mb-8">
-              <h2 className="text-xl font-bold text-naija-green-900 mb-4">
-                {editingId ? 'Edit Champion' : 'Add New Champion'}
-              </h2>
-              <form onSubmit={handleSave} className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">Season</label>
-                    <select
-                      value={formData.season_id}
-                      onChange={e => setFormData({ ...formData, season_id: e.target.value })}
-                      className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:border-naija-green-600"
-                    >
-                      <option value="">Select Season</option>
-                      {seasons.map(season => (
-                        <option key={season.id} value={season.id}>
-                          {season.name} {season.year}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">Champion</label>
-                    <select
-                      value={formData.user_id}
-                      onChange={e => setFormData({ ...formData, user_id: e.target.value })}
-                      className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:border-naija-green-600"
-                    >
-                      <option value="">Select Approved Participant</option>
-                      {approvedUsers.map(user => (
-                        <option key={user.id} value={user.id}>
-                          {user.full_name}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">Title</label>
-                    <input
-                      type="text"
-                      value={formData.title}
-                      onChange={e => setFormData({ ...formData, title: e.target.value })}
-                      placeholder="e.g., National Champion"
-                      className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:border-naija-green-600"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">Description</label>
-                    <textarea
-                      value={formData.description}
-                      onChange={e => setFormData({ ...formData, description: e.target.value })}
-                      placeholder="Optional: Achievement details"
-                      rows={2}
-                      className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:border-naija-green-600"
-                    />
-                  </div>
-                </div>
-
-                <div className="flex gap-3">
-                  <button
-                    type="submit"
-                    className="px-4 py-2 bg-naija-green-600 text-white rounded-lg hover:bg-naija-green-700 transition font-semibold"
-                  >
-                    {editingId ? 'Update' : 'Add'} Champion
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setShowForm(false)
-                      setEditingId(null)
-                    }}
-                    className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </form>
+              <h2 className="text-xl font-bold text-naija-green-900 mb-2">{currentSeason.name} {currentSeason.year}</h2>
+              <p className="text-sm text-gray-600">
+                Status: <span className="font-semibold capitalize">{currentSeason.status}</span>
+              </p>
             </div>
           )}
 
           {/* Champions List */}
-          {champions.length === 0 ? (
+          {leaderboard.length === 0 ? (
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8 text-center">
               <Trophy size={32} className="mx-auto mb-3 text-gray-400" />
-              <p className="text-gray-600 font-semibold">No champions recorded yet</p>
+              <p className="text-gray-600 font-semibold">No performance data yet</p>
             </div>
           ) : (
-            <div className="grid gap-4">
-              {champions.map(champion => (
-                <div key={champion.id} className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                  <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-2">
-                        <Trophy size={20} className="text-yellow-500" />
-                        <h3 className="text-lg font-bold text-naija-green-900">{champion.user_name}</h3>
+            <div className="space-y-4">
+              {/* Top 3 Featured */}
+              {leaderboard.slice(0, 3).length > 0 && (
+                <div className="mb-8">
+                  <h3 className="text-lg font-bold text-naija-green-900 mb-4">Top 3</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    {leaderboard.slice(0, 3).map(entry => (
+                      <div
+                        key={entry.user_id}
+                        className={`rounded-lg shadow-md border-2 p-6 text-center ${
+                          entry.rank === 1
+                            ? 'bg-gradient-to-br from-yellow-50 to-amber-50 border-yellow-300'
+                            : entry.rank === 2
+                            ? 'bg-gradient-to-br from-gray-50 to-slate-50 border-gray-300'
+                            : 'bg-gradient-to-br from-orange-50 to-amber-50 border-orange-300'
+                        }`}
+                      >
+                        <div className="text-5xl mb-3">{getMedalIcon(entry.rank)}</div>
+                        <h3 className="text-xl font-bold text-gray-900 mb-2">{entry.full_name}</h3>
+                        <p className="text-sm text-gray-600">
+                          Position: {entry.total_position || '-'} • {entry.stages_completed} stages
+                        </p>
                       </div>
-                      <p className="text-gray-600 mb-1">
-                        <span className="font-semibold">{champion.title}</span> • {champion.season_name} {champion.season_year}
-                      </p>
-                      {champion.description && (
-                        <p className="text-sm text-gray-500">{champion.description}</p>
-                      )}
-                    </div>
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => {
-                          setFormData({
-                            season_id: champion.season_id,
-                            user_id: champion.user_id,
-                            title: champion.title,
-                            description: champion.description,
-                          })
-                          setEditingId(champion.id)
-                          setShowForm(true)
-                        }}
-                        className="px-3 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition flex items-center gap-2"
-                      >
-                        <Edit2 size={18} />
-                      </button>
-                      <button
-                        onClick={() => {
-                          setChampionToDelete(champion.id)
-                          setShowDeleteConfirm(true)
-                        }}
-                        className="px-3 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition flex items-center gap-2"
-                      >
-                        <X size={18} />
-                      </button>
-                    </div>
+                    ))}
                   </div>
                 </div>
-              ))}
-            </div>
-          )}
+              )}
 
-          {/* Delete Confirmation Dialog */}
-          {showDeleteConfirm && (
-            <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-              <div className="bg-white rounded-lg shadow-lg max-w-sm w-full p-6">
-                <h3 className="text-lg font-bold text-gray-900 mb-3">Delete Champion</h3>
-                <p className="text-gray-600 mb-6">Are you sure you want to remove this champion record?</p>
-                <div className="flex gap-3">
-                  <button
-                    onClick={handleDelete}
-                    className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition font-semibold"
-                  >
-                    Delete
-                  </button>
-                  <button
-                    onClick={() => {
-                      setShowDeleteConfirm(false)
-                      setChampionToDelete(null)
-                    }}
-                    className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition"
-                  >
-                    Cancel
-                  </button>
+              {/* Full Leaderboard */}
+              <div>
+                <h3 className="text-lg font-bold text-naija-green-900 mb-4">Full Leaderboard</h3>
+                <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                  <div className="overflow-x-auto">
+                    <table className="w-full">
+                      <thead className="bg-gradient-to-r from-naija-green-600 to-naija-green-700">
+                        <tr>
+                          <th className="px-6 py-3 text-left text-sm font-semibold text-white">Rank</th>
+                          <th className="px-6 py-3 text-left text-sm font-semibold text-white">Name</th>
+                          <th className="px-6 py-3 text-center text-sm font-semibold text-white">Position</th>
+                          <th className="px-6 py-3 text-center text-sm font-semibold text-white">Time</th>
+                          <th className="px-6 py-3 text-center text-sm font-semibold text-white">Stages</th>
+                          <th className="px-6 py-3 text-left text-sm font-semibold text-white">Last Stage</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-200">
+                        {leaderboard.map((entry, idx) => (
+                          <tr key={entry.user_id} className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                            <td className="px-6 py-4 text-sm font-bold text-naija-green-600">
+                              <div className="flex items-center gap-2">
+                                {getMedalIcon(entry.rank) && <span>{getMedalIcon(entry.rank)}</span>}
+                                #{entry.rank}
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 font-semibold text-gray-900">{entry.full_name}</td>
+                            <td className="px-6 py-4 text-center">
+                              {entry.total_position ? (
+                                <span className="inline-block bg-naija-green-100 text-naija-green-700 px-3 py-1 rounded-full text-sm font-semibold">
+                                  {entry.total_position}
+                                </span>
+                              ) : (
+                                <span className="text-gray-400">-</span>
+                              )}
+                            </td>
+                            <td className="px-6 py-4 text-center font-mono text-gray-900 text-sm">
+                              {formatTime(entry.final_time_seconds)}
+                            </td>
+                            <td className="px-6 py-4 text-center">
+                              <span className="inline-block bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm font-semibold">
+                                {entry.stages_completed}
+                              </span>
+                            </td>
+                            <td className="px-6 py-4 text-sm text-gray-600">{entry.last_stage_reached}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               </div>
             </div>
           )}
+
+          {/* Info Box */}
+          <div className="mt-8 bg-blue-50 rounded-lg border border-blue-200 p-6">
+            <div className="flex gap-3">
+              <ArrowRight size={20} className="text-blue-600 flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="text-sm font-semibold text-blue-900 mb-1">Auto-Generated Rankings</p>
+                <p className="text-sm text-blue-700">
+                  Rankings are automatically calculated from performance data entered in the Performance Entry page. 
+                  Participants are ranked by their overall position and completion time across all stages.
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
       </main>
     </div>

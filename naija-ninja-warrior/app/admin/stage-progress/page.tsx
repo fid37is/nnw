@@ -1,12 +1,11 @@
-// File Path: app/admin/stage-progress/page.tsx
-
 'use client'
 
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { supabase } from '@/lib/supabase/client'
 import AdminSidebar from '@/components/admin/AdminSidebar'
-import { Users, CheckCircle, XCircle, AlertCircle, BarChart3 } from 'lucide-react'
+import { Users, CheckCircle, XCircle, AlertCircle, BarChart3, User } from 'lucide-react'
+import Image from 'next/image'
 
 interface Stage {
   id: string
@@ -20,6 +19,7 @@ interface Stage {
 interface Performance {
   user_id: string
   full_name: string
+  profile_photo: string | null
   position: number | null
   time_seconds: number | null
   status: string
@@ -61,7 +61,7 @@ export default function AdminStageProgressPage() {
     if (selectedSeasonId && selectedStageId) {
       loadStageProgress()
     }
-  }, [selectedStageId])
+  }, [selectedSeasonId, selectedStageId])
 
   const loadSeasons = async () => {
     try {
@@ -104,10 +104,10 @@ export default function AdminStageProgressPage() {
 
   const loadStageProgress = async () => {
     try {
-      // Get total approved participants for this season
+      // Get total approved participants for this season with their photos
       const { data: appData } = await supabase
         .from('applications')
-        .select('id')
+        .select('id, user_id, photo_url')
         .eq('season_id', selectedSeasonId)
         .eq('status', 'approved')
 
@@ -116,26 +116,48 @@ export default function AdminStageProgressPage() {
       // Get performances for this stage
       const { data: perfData, error } = await supabase
         .from('stage_performances')
-        .select(`
-          user_id,
-          position,
-          time_seconds,
-          status,
-          users (full_name)
-        `)
+        .select('user_id, position, time_seconds, status')
         .eq('competition_stage_id', selectedStageId)
         .order('position', { ascending: true, nullsFirst: false })
         .order('time_seconds', { ascending: true, nullsFirst: false })
 
       if (error) throw error
 
-      const perfs = (perfData || []).map((p: any) => ({
-        user_id: p.user_id,
-        full_name: p.users?.[0]?.full_name || 'Unknown',
-        position: p.position,
-        time_seconds: p.time_seconds,
-        status: p.status,
-      }))
+      // Get user IDs from performances
+      const userIds = perfData?.map(p => p.user_id) || []
+      
+      // Fetch user details (names)
+      let usersMap = new Map()
+      if (userIds.length > 0) {
+        const { data: usersData } = await supabase
+          .from('users')
+          .select('id, full_name')
+          .in('id', userIds)
+
+        usersData?.forEach((user: any) => {
+          usersMap.set(user.id, user)
+        })
+      }
+
+      // Create application map for photos
+      const appMap = new Map()
+      appData?.forEach((app: any) => {
+        appMap.set(app.user_id, app)
+      })
+
+      // Map performances with user data and photos
+      const perfs = (perfData || []).map((p: any) => {
+        const user = usersMap.get(p.user_id)
+        const app = appMap.get(p.user_id)
+        return {
+          user_id: p.user_id,
+          full_name: user?.full_name || 'Unknown',
+          profile_photo: app?.photo_url || null,
+          position: p.position,
+          time_seconds: p.time_seconds,
+          status: p.status,
+        }
+      })
 
       setPerformances(perfs)
 
@@ -305,7 +327,7 @@ export default function AdminStageProgressPage() {
                   <thead className="bg-gradient-to-r from-naija-green-600 to-naija-green-700">
                     <tr>
                       <th className="px-6 py-3 text-left text-sm font-semibold text-white">Rank</th>
-                      <th className="px-6 py-3 text-left text-sm font-semibold text-white">Participant Name</th>
+                      <th className="px-6 py-3 text-left text-sm font-semibold text-white">Participant</th>
                       <th className="px-6 py-3 text-center text-sm font-semibold text-white">Position</th>
                       <th className="px-6 py-3 text-center text-sm font-semibold text-white">Time</th>
                       <th className="px-6 py-3 text-center text-sm font-semibold text-white">Status</th>
@@ -315,12 +337,29 @@ export default function AdminStageProgressPage() {
                     {performances.map((perf, idx) => (
                       <tr key={perf.user_id} className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
                         <td className="px-6 py-4">
-                          <span className="inline-block w-8 h-8 bg-naija-green-600 text-white rounded-full items-center justify-center text-sm font-bold">
+                          <span className="inline-flex w-8 h-8 bg-naija-green-600 text-white rounded-full items-center justify-center text-sm font-bold">
                             {idx + 1}
                           </span>
                         </td>
                         <td className="px-6 py-4">
-                          <p className="font-semibold text-gray-900">{perf.full_name}</p>
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-200 flex-shrink-0">
+                              {perf.profile_photo ? (
+                                <Image
+                                  src={perf.profile_photo}
+                                  alt={perf.full_name}
+                                  width={40}
+                                  height={40}
+                                  className="w-full h-full object-cover"
+                                />
+                              ) : (
+                                <div className="w-full h-full flex items-center justify-center">
+                                  <User size={20} className="text-gray-400" />
+                                </div>
+                              )}
+                            </div>
+                            <p className="font-semibold text-gray-900">{perf.full_name}</p>
+                          </div>
                         </td>
                         <td className="px-6 py-4 text-center">
                           {perf.position ? (

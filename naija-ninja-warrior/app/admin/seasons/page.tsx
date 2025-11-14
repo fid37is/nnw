@@ -1,7 +1,5 @@
 'use client'
 
-/* eslint-disable @typescript-eslint/no-unused-vars */
-
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { supabase } from '@/lib/supabase/client'
@@ -39,8 +37,7 @@ export default function SeasonsPage() {
   const [showActivityForm, setShowActivityForm] = useState(false)
   const [editingSeasonId, setEditingSeasonId] = useState<string | null>(null)
   const [editingActivityId, setEditingActivityId] = useState<string | null>(null)
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
-  const [itemToDelete, setItemToDelete] = useState<{ type: 'season' | 'activity'; id: string } | null>(null)
+  const [selectedSeasonId, setSelectedSeasonId] = useState<string | null>(null)
   const [seasonFormData, setSeasonFormData] = useState({
     name: '',
     year: new Date().getFullYear(),
@@ -134,13 +131,14 @@ export default function SeasonsPage() {
       loadSeasons()
     } catch (err) {
       toast.error('Failed to save season')
+      console.error(err)
     }
   }
 
   const handleSaveActivity = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (!setSelectedSeasonId || !activityFormData.name || !activityFormData.start_date || !activityFormData.end_date) {
+    if (!selectedSeasonId || !activityFormData.name || !activityFormData.start_date || !activityFormData.end_date) {
       toast.error('Please fill in all activity fields')
       return
     }
@@ -158,7 +156,7 @@ export default function SeasonsPage() {
         const { error } = await supabase
           .from('competition_activities')
           .insert([{
-            season_id: setSelectedSeasonId,
+            season_id: selectedSeasonId,
             ...activityFormData,
           }])
 
@@ -177,9 +175,11 @@ export default function SeasonsPage() {
       })
       setEditingActivityId(null)
       setShowActivityForm(false)
+      setSelectedSeasonId(null)
       loadSeasons()
     } catch (err) {
       toast.error('Failed to save activity')
+      console.error(err)
     }
   }
 
@@ -197,6 +197,7 @@ export default function SeasonsPage() {
       loadSeasons()
     } catch (err) {
       toast.error('Failed to delete season')
+      console.error(err)
     }
   }
 
@@ -214,6 +215,7 @@ export default function SeasonsPage() {
       loadSeasons()
     } catch (err) {
       toast.error('Failed to delete activity')
+      console.error(err)
     }
   }
 
@@ -226,10 +228,6 @@ export default function SeasonsPage() {
         </main>
       </div>
     )
-  }
-
-  function setSelectedSeasonId(id: string) {
-    throw new Error('Function not implemented.')
   }
 
   return (
@@ -422,6 +420,15 @@ export default function SeasonsPage() {
                           setSelectedSeasonId(season.id)
                           setShowActivityForm(true)
                           setEditingActivityId(null)
+                          setActivityFormData({
+                            name: '',
+                            type: 'state',
+                            start_date: '',
+                            end_date: '',
+                            location: '',
+                            description: '',
+                            status: 'upcoming',
+                          })
                         }}
                         className="flex items-center gap-1 px-3 py-1 bg-naija-green-100 text-naija-green-700 rounded hover:bg-naija-green-200 transition text-sm font-semibold"
                       >
@@ -580,6 +587,7 @@ export default function SeasonsPage() {
                       onClick={() => {
                         setShowActivityForm(false)
                         setEditingActivityId(null)
+                        setSelectedSeasonId(null)
                       }}
                       className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition text-sm"
                     >
