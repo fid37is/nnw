@@ -49,11 +49,6 @@ const navItems = [
         icon: Clock,
       },
       {
-        label: 'Leaderboard',
-        href: '/admin/leaderboard',
-        icon: Trophy,
-      },
-      {
         label: 'Progress',
         href: '/admin/stage-progress',
         icon: TrendingUp,

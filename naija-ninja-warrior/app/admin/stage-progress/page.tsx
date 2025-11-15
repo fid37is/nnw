@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { supabase } from '@/lib/supabase/client'
 import AdminSidebar from '@/components/admin/AdminSidebar'
-import { Users, CheckCircle, XCircle, AlertCircle, BarChart3, User } from 'lucide-react'
+import { Users, CheckCircle, XCircle, AlertCircle, BarChart3, User, Award, Trophy } from 'lucide-react'
 import Image from 'next/image'
 
 interface Stage {
@@ -22,6 +22,7 @@ interface Performance {
   profile_photo: string | null
   position: number | null
   time_seconds: number | null
+  points: number | null
   status: string
 }
 
@@ -36,6 +37,8 @@ interface StageStats {
   completed: number
   pending: number
   elimination_rate: number
+  total_points_awarded: number
+  average_points: number
 }
 
 export default function AdminStageProgressPage() {
@@ -113,10 +116,10 @@ export default function AdminStageProgressPage() {
 
       const totalParticipants = appData?.length || 0
 
-      // Get performances for this stage
+      // Get performances for this stage with points
       const { data: perfData, error } = await supabase
         .from('stage_performances')
-        .select('user_id, position, time_seconds, status')
+        .select('user_id, position, time_seconds, points, status')
         .eq('competition_stage_id', selectedStageId)
         .order('position', { ascending: true, nullsFirst: false })
         .order('time_seconds', { ascending: true, nullsFirst: false })
@@ -155,6 +158,7 @@ export default function AdminStageProgressPage() {
           profile_photo: app?.photo_url || null,
           position: p.position,
           time_seconds: p.time_seconds,
+          points: p.points || 0,
           status: p.status,
         }
       })
@@ -165,12 +169,16 @@ export default function AdminStageProgressPage() {
       const completed = perfs.filter(p => p.status === 'completed').length
       const pending = totalParticipants - completed
       const eliminationRate = totalParticipants > 0 ? (pending / totalParticipants) * 100 : 0
+      const totalPointsAwarded = perfs.reduce((sum, p) => sum + (p.points || 0), 0)
+      const averagePoints = completed > 0 ? Math.round(totalPointsAwarded / completed) : 0
 
       setStageStats({
         total_participants: totalParticipants,
         completed,
         pending,
         elimination_rate: Math.round(eliminationRate),
+        total_points_awarded: totalPointsAwarded,
+        average_points: averagePoints,
       })
     } catch (err) {
       toast.error('Failed to load stage progress')
@@ -189,6 +197,14 @@ export default function AdminStageProgressPage() {
     if (status === 'ongoing') return 'bg-blue-100 text-blue-800 border-blue-300'
     if (status === 'completed') return 'bg-green-100 text-green-800 border-green-300'
     return 'bg-gray-100 text-gray-800 border-gray-300'
+  }
+
+  const getPositionBadgeColor = (position: number | null) => {
+    if (!position) return 'bg-gray-100 text-gray-700'
+    if (position === 1) return 'bg-yellow-100 text-yellow-800 border-2 border-yellow-400'
+    if (position === 2) return 'bg-gray-200 text-gray-800 border-2 border-gray-400'
+    if (position === 3) return 'bg-orange-100 text-orange-800 border-2 border-orange-400'
+    return 'bg-naija-green-100 text-naija-green-700'
   }
 
   if (loading) {
@@ -216,7 +232,7 @@ export default function AdminStageProgressPage() {
               <BarChart3 size={32} />
               Stage Progress
             </h1>
-            <p className="text-gray-600">Track participant advancement through each stage</p>
+            <p className="text-gray-600">Track participant advancement and points through each stage</p>
           </div>
 
           {/* Selectors */}
@@ -270,11 +286,11 @@ export default function AdminStageProgressPage() {
               </div>
 
               {/* Statistics Grid */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
                 <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg shadow-sm border border-blue-200 p-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-gray-600 text-xs font-semibold">Total Participants</p>
+                      <p className="text-gray-600 text-xs font-semibold">Total</p>
                       <p className="text-2xl font-bold text-blue-700 mt-2">{stageStats.total_participants}</p>
                     </div>
                     <Users size={28} className="text-blue-400" />
@@ -304,10 +320,30 @@ export default function AdminStageProgressPage() {
                 <div className="bg-gradient-to-br from-red-50 to-red-100 rounded-lg shadow-sm border border-red-200 p-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-gray-600 text-xs font-semibold">Elimination Rate</p>
+                      <p className="text-gray-600 text-xs font-semibold">Elim. Rate</p>
                       <p className="text-2xl font-bold text-red-700 mt-2">{stageStats.elimination_rate}%</p>
                     </div>
                     <XCircle size={28} className="text-red-400" />
+                  </div>
+                </div>
+
+                <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg shadow-sm border border-purple-200 p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-gray-600 text-xs font-semibold">Total Points</p>
+                      <p className="text-2xl font-bold text-purple-700 mt-2">{stageStats.total_points_awarded}</p>
+                    </div>
+                    <Award size={28} className="text-purple-400" />
+                  </div>
+                </div>
+
+                <div className="bg-gradient-to-br from-amber-50 to-amber-100 rounded-lg shadow-sm border border-amber-200 p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-gray-600 text-xs font-semibold">Avg Points</p>
+                      <p className="text-2xl font-bold text-amber-700 mt-2">{stageStats.average_points}</p>
+                    </div>
+                    <Trophy size={28} className="text-amber-400" />
                   </div>
                 </div>
               </div>
@@ -330,6 +366,7 @@ export default function AdminStageProgressPage() {
                       <th className="px-6 py-3 text-left text-sm font-semibold text-white">Participant</th>
                       <th className="px-6 py-3 text-center text-sm font-semibold text-white">Position</th>
                       <th className="px-6 py-3 text-center text-sm font-semibold text-white">Time</th>
+                      <th className="px-6 py-3 text-center text-sm font-semibold text-white">Points</th>
                       <th className="px-6 py-3 text-center text-sm font-semibold text-white">Status</th>
                     </tr>
                   </thead>
@@ -363,15 +400,29 @@ export default function AdminStageProgressPage() {
                         </td>
                         <td className="px-6 py-4 text-center">
                           {perf.position ? (
-                            <span className="inline-block bg-naija-green-100 text-naija-green-700 px-3 py-1 rounded-full text-sm font-semibold">
+                            <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-semibold ${getPositionBadgeColor(perf.position)}`}>
+                              {perf.position === 1 && '🥇'}
+                              {perf.position === 2 && '🥈'}
+                              {perf.position === 3 && '🥉'}
+                              {perf.position > 3 && '#'}
                               {perf.position}
                             </span>
                           ) : (
                             <span className="text-gray-400">-</span>
                           )}
                         </td>
-                        <td className="px-6 py-4 text-center font-mono text-gray-900">
+                        <td className="px-6 py-4 text-center font-mono text-gray-900 font-semibold">
                           {formatTime(perf.time_seconds)}
+                        </td>
+                        <td className="px-6 py-4 text-center">
+                          {perf.points !== null && perf.points > 0 ? (
+                            <span className="inline-flex items-center gap-1 px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm font-bold">
+                              <Award size={14} />
+                              {perf.points}
+                            </span>
+                          ) : (
+                            <span className="text-gray-400">-</span>
+                          )}
                         </td>
                         <td className="px-6 py-4 text-center">
                           {perf.status === 'completed' ? (

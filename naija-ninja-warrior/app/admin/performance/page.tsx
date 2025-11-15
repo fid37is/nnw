@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { supabase } from '@/lib/supabase/client'
 import AdminSidebar from '@/components/admin/AdminSidebar'
-import { Clock, Save, AlertTriangle } from 'lucide-react'
+import { Clock, Save, AlertTriangle, Award } from 'lucide-react'
 
 interface Stage {
   id: string
@@ -22,6 +22,7 @@ interface Participant {
   full_name: string
   position: number | null
   time_seconds: number | null
+  points: number | null
   status: string
 }
 
@@ -29,6 +30,42 @@ interface Season {
   id: string
   name: string
   year: number
+}
+
+// Points allocation based on position
+const BASE_POINTS = [
+  50,  // 1st place
+  40,  // 2nd place
+  32,  // 3rd place
+  26,  // 4th place
+  21,  // 5th place
+  17,  // 6th place
+  14,  // 7th place
+  12,  // 8th place
+  10,  // 9th place
+  8,   // 10th place
+  6,   // 11th place
+  5,   // 12th place
+  4,   // 13th place
+  3,   // 14th place
+  2,   // 15th place
+  1,   // 16th+ place
+]
+
+// Calculate base points based on position
+const getBasePoints = (position: number): number => {
+  if (position <= 0) return 0
+  if (position <= BASE_POINTS.length) {
+    return BASE_POINTS[position - 1]
+  }
+  return 1 // Everyone else gets 1 point
+}
+
+// Calculate time bonus (max 25 points)
+const getTimeBonus = (winnerTime: number, competitorTime: number): number => {
+  if (winnerTime <= 0 || competitorTime <= 0) return 0
+  const ratio = winnerTime / competitorTime
+  return Math.round(25 * ratio)
 }
 
 export default function PerformancePage() {
@@ -136,6 +173,7 @@ export default function PerformancePage() {
           user_name: user?.full_name || 'Unknown',
           position: null,
           time_seconds: null,
+          points: null,
           status: 'pending',
         }
       })
@@ -151,7 +189,7 @@ export default function PerformancePage() {
     try {
       const { data, error } = await supabase
         .from('stage_performances')
-        .select('user_id, position, time_seconds, status')
+        .select('user_id, position, time_seconds, points, status')
         .eq('competition_stage_id', selectedStageId)
 
       if (error && error.code !== 'PGRST116') throw error
@@ -227,10 +265,10 @@ export default function PerformancePage() {
         if (error) throw error
       }
 
-      // Recalculate positions for all participants in this stage
-      await updatePositions()
+      // Recalculate positions and points for all participants in this stage
+      await updatePositionsAndPoints()
 
-      toast.success('Performance saved!')
+      toast.success('Performance saved and points calculated!')
       loadPerformances()
     } catch (err) {
       toast.error('Failed to save performance')
@@ -240,9 +278,9 @@ export default function PerformancePage() {
     }
   }
 
-  const updatePositions = async () => {
+  const updatePositionsAndPoints = async () => {
     try {
-      // Get all performances for this stage
+      // Get all performances for this stage sorted by time (fastest first)
       const { data: allPerformances, error } = await supabase
         .from('stage_performances')
         .select('id, user_id, time_seconds')
@@ -251,18 +289,31 @@ export default function PerformancePage() {
         .order('time_seconds', { ascending: true })
 
       if (error) throw error
+      if (!allPerformances || allPerformances.length === 0) return
 
-      // Update positions based on sorted times (lowest time = position 1)
+      // Get the winner's time (fastest time)
+      const winnerTime = allPerformances[0].time_seconds
+
+      // Calculate position, base points, time bonus, and total points for each
       for (let i = 0; i < allPerformances.length; i++) {
+        const performance = allPerformances[i]
+        const position = i + 1
+        const basePoints = getBasePoints(position)
+        const timeBonus = getTimeBonus(winnerTime, performance.time_seconds)
+        const totalPoints = basePoints + timeBonus
+
         const { error: updateError } = await supabase
           .from('stage_performances')
-          .update({ position: i + 1 })
-          .eq('id', allPerformances[i].id)
+          .update({ 
+            position: position,
+            points: totalPoints
+          })
+          .eq('id', performance.id)
 
         if (updateError) throw updateError
       }
     } catch (err) {
-      console.error('Failed to update positions:', err)
+      console.error('Failed to update positions and points:', err)
     }
   }
 
@@ -353,6 +404,30 @@ export default function PerformancePage() {
     return position >= 0 ? position + 1 : null
   }
 
+  const getPointsForUser = (userId: string) => {
+    const position = getPositionForUser(userId)
+    if (!position) return null
+
+    const participantsWithTimes = participants
+      .filter(p => performanceData[p.user_id]?.minutes || performanceData[p.user_id]?.seconds)
+      .map(p => {
+        const minutes = parseInt(performanceData[p.user_id]?.minutes || '0')
+        const seconds = parseInt(performanceData[p.user_id]?.seconds || '0')
+        return {
+          user_id: p.user_id,
+          totalSeconds: minutes * 60 + seconds,
+        }
+      })
+      .sort((a, b) => a.totalSeconds - b.totalSeconds)
+
+    const winnerTime = participantsWithTimes[0]?.totalSeconds || 0
+    const userTime = participantsWithTimes.find(p => p.user_id === userId)?.totalSeconds || 0
+
+    const basePoints = getBasePoints(position)
+    const timeBonus = getTimeBonus(winnerTime, userTime)
+    return basePoints + timeBonus
+  }
+
   const currentStage = stages.find(s => s.id === selectedStageId)
   const participantsWithTimes = participants.filter(p => performanceData[p.user_id]?.minutes || performanceData[p.user_id]?.seconds).length
 
@@ -379,7 +454,22 @@ export default function PerformancePage() {
               <Clock size={32} />
               Record Performance
             </h1>
-            <p className="text-gray-600">Enter completion times for participants</p>
+            <p className="text-gray-600">Enter completion times - points calculated automatically</p>
+          </div>
+
+          {/* Points System Info */}
+          <div className="bg-gradient-to-r from-purple-50 to-blue-50 border-2 border-purple-200 rounded-lg p-4 mb-6">
+            <div className="flex items-start gap-3">
+              <Award className="text-purple-600 mt-0.5 flex-shrink-0" size={24} />
+              <div>
+                <h3 className="font-bold text-purple-900 mb-2">Hybrid Points System</h3>
+                <div className="text-sm text-purple-800 space-y-1">
+                  <p>• <strong>Base Points:</strong> 1st=50pts, 2nd=40pts, 3rd=32pts (diminishing for lower positions)</p>
+                  <p>• <strong>Time Bonus:</strong> Up to 25 bonus points based on how close to winner's time</p>
+                  <p>• <strong>Total Points:</strong> Base Points + Time Bonus (recalculated after each save)</p>
+                </div>
+              </div>
+            </div>
           </div>
 
           {/* Filters */}
@@ -458,6 +548,7 @@ export default function PerformancePage() {
                       <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Position</th>
                       <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Participant</th>
                       <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Time (MM:SS)</th>
+                      <th className="px-6 py-3 text-center text-sm font-semibold text-gray-900">Points</th>
                       <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Action</th>
                     </tr>
                   </thead>
@@ -474,6 +565,7 @@ export default function PerformancePage() {
                       })
                       .map((participant) => {
                         const position = getPositionForUser(participant.user_id)
+                        const points = getPointsForUser(participant.user_id)
                         return (
                           <tr key={participant.user_id} className="hover:bg-gray-50">
                             <td className="px-6 py-3 text-sm">
@@ -526,6 +618,16 @@ export default function PerformancePage() {
                                   className="w-16 px-2 py-1 rounded border border-gray-300 focus:outline-none focus:border-naija-green-600 text-center"
                                 />
                               </div>
+                            </td>
+                            <td className="px-6 py-3 text-center">
+                              {points !== null ? (
+                                <span className="inline-flex items-center gap-1 px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm font-bold">
+                                  <Award size={14} />
+                                  {points}
+                                </span>
+                              ) : (
+                                <span className="text-gray-400">-</span>
+                              )}
                             </td>
                             <td className="px-6 py-3 text-sm">
                               <button

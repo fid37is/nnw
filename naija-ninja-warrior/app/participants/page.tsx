@@ -22,6 +22,8 @@ interface ParticipantStats {
   total_points: number
   challenges_completed: number
   challenges_won: number
+  best_time: number | null
+  average_points: number
   elimination_date?: string | null
 }
 
@@ -153,9 +155,10 @@ export default function ParticipantsPage() {
     try {
       // Fetch performance records for this participant
       const { data: performances, error: perfError } = await supabase
-        .from('performance')
-        .select('points, challenge_id, rank, completed_at')
+        .from('stage_performances')
+        .select('points, time_seconds, position, competition_stage_id, completed_at, status')
         .eq('application_id', participant.id)
+        .eq('status', 'completed')
         .order('completed_at', { ascending: false })
 
       if (perfError) throw perfError
@@ -163,32 +166,26 @@ export default function ParticipantsPage() {
       // Calculate stats
       const totalPoints = performances?.reduce((sum, p) => sum + (p.points || 0), 0) || 0
       const challengesCompleted = performances?.length || 0
-      const challengesWon = performances?.filter(p => p.rank === 1).length || 0
+      const challengesWon = performances?.filter(p => p.position === 1).length || 0
+      
+      // Get best (fastest) time
+      const validTimes = performances?.filter(p => p.time_seconds).map(p => p.time_seconds) || []
+      const bestTime = validTimes.length > 0 ? Math.min(...validTimes) : null
+      
+      // Calculate average points per stage
+      const averagePoints = challengesCompleted > 0 ? Math.round(totalPoints / challengesCompleted) : 0
 
-      // Get current ranking from leaderboard
-      const { data: leaderboard, error: leaderboardError } = await supabase
-        .from('performance')
+      // Get current ranking by comparing total points with all other participants
+      const { data: allPerformances } = await supabase
+        .from('stage_performances')
         .select('application_id, points')
-        .eq('challenge_id', performances?.[0]?.challenge_id || '')
-        
-      if (leaderboardError) throw leaderboardError
-
-      // Calculate ranking based on total points
-      const allScores = await supabase
-        .from('performance')
-        .select('application_id, points')
-        .eq('application_id', participant.id)
-
-      // For simplicity, get ranking by comparing total points
-      const { data: allParticipantScores } = await supabase
-        .from('performance')
-        .select('application_id, points')
+        .eq('status', 'completed')
         .in('application_id', participants.map(p => p.id))
 
       const scoreMap = new Map<string, number>()
-      allParticipantScores?.forEach((score: any) => {
-        const current = scoreMap.get(score.application_id) || 0
-        scoreMap.set(score.application_id, current + (score.points || 0))
+      allPerformances?.forEach((perf: any) => {
+        const current = scoreMap.get(perf.application_id) || 0
+        scoreMap.set(perf.application_id, current + (perf.points || 0))
       })
 
       const sortedScores = Array.from(scoreMap.entries())
@@ -213,6 +210,8 @@ export default function ParticipantsPage() {
         total_points: totalPoints,
         challenges_completed: challengesCompleted,
         challenges_won: challengesWon,
+        best_time: bestTime,
+        average_points: averagePoints,
         elimination_date: eliminationDate,
       })
     } catch (err) {
@@ -222,6 +221,8 @@ export default function ParticipantsPage() {
         total_points: 0,
         challenges_completed: 0,
         challenges_won: 0,
+        best_time: null,
+        average_points: 0,
       })
     } finally {
       setModalLoading(false)
@@ -521,12 +522,12 @@ export default function ParticipantsPage() {
                   </div>
                 </div>
 
-                {/* Stats Content */}
+                                  {/* Stats Content */}
                 <div className="p-6">
                   <h3 className="text-lg font-bold text-gray-900 mb-3">Competition Statistics</h3>
                   
                   {/* Stats Grid */}
-                  <div className="grid grid-cols-4 gap-3 mb-4">
+                  <div className="grid grid-cols-3 gap-3 mb-4">
                     <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-3 border border-blue-200 text-center">
                       <div className="text-2xl font-bold text-blue-700">
                         {participantStats?.ranking || 'N/A'}
@@ -538,14 +539,24 @@ export default function ParticipantsPage() {
                       <div className="text-2xl font-bold text-green-700">
                         {participantStats?.total_points || 0}
                       </div>
-                      <p className="text-xs text-green-600 font-medium mt-1">Points</p>
+                      <p className="text-xs text-green-600 font-medium mt-1">Total Points</p>
                     </div>
                     
                     <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg p-3 border border-purple-200 text-center">
                       <div className="text-2xl font-bold text-purple-700">
+                        {participantStats?.average_points || 0}
+                      </div>
+                      <p className="text-xs text-purple-600 font-medium mt-1">Avg Points</p>
+                    </div>
+                  </div>
+
+                  {/* Secondary Stats */}
+                  <div className="grid grid-cols-3 gap-3 mb-4">
+                    <div className="bg-gradient-to-br from-indigo-50 to-indigo-100 rounded-lg p-3 border border-indigo-200 text-center">
+                      <div className="text-2xl font-bold text-indigo-700">
                         {participantStats?.challenges_completed || 0}
                       </div>
-                      <p className="text-xs text-purple-600 font-medium mt-1">Completed</p>
+                      <p className="text-xs text-indigo-600 font-medium mt-1">Completed</p>
                     </div>
                     
                     <div className="bg-gradient-to-br from-amber-50 to-amber-100 rounded-lg p-3 border border-amber-200 text-center">
@@ -553,6 +564,15 @@ export default function ParticipantsPage() {
                         {participantStats?.challenges_won || 0}
                       </div>
                       <p className="text-xs text-amber-600 font-medium mt-1">Won</p>
+                    </div>
+
+                    <div className="bg-gradient-to-br from-cyan-50 to-cyan-100 rounded-lg p-3 border border-cyan-200 text-center">
+                      <div className="text-xl font-bold text-cyan-700">
+                        {participantStats?.best_time 
+                          ? `${Math.floor(participantStats.best_time / 60)}:${(participantStats.best_time % 60).toString().padStart(2, '0')}`
+                          : 'N/A'}
+                      </div>
+                      <p className="text-xs text-cyan-600 font-medium mt-1">Best Time</p>
                     </div>
                   </div>
 

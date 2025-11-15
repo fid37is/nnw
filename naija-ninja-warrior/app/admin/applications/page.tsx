@@ -20,10 +20,19 @@ interface ApplicationRow {
   submission_date: string
   age: number
   state: string
+  season_id: string
 }
 
 interface Application extends ApplicationRow {
   users: UserData[]
+}
+
+interface MessageTemplate {
+  id: string
+  name: string
+  title: string
+  content: string
+  template_type: 'approval' | 'rejection' | 'general'
 }
 
 export default function AdminApplicationsPage() {
@@ -37,6 +46,8 @@ export default function AdminApplicationsPage() {
   const [bulkActioning, setBulkActioning] = useState<{ [key: string]: boolean }>({})
   const [currentPage, setCurrentPage] = useState(1)
   const itemsPerPage = 10
+  const [templates, setTemplates] = useState<MessageTemplate[]>([])
+  const [currentSeason, setCurrentSeason] = useState<{ id: string; name: string; year: number } | null>(null)
 
   const states = [
     'Abia', 'Adamawa', 'Akwa Ibom', 'Anambra', 'Bauchi', 'Bayelsa', 'Benue',
@@ -102,9 +113,16 @@ export default function AdminApplicationsPage() {
         return
       }
 
+      // Load templates
+      const { data: templatesData } = await supabase
+        .from('message_templates')
+        .select('*')
+
+      setTemplates(templatesData || [])
+
       const { data: appsData, error: appsError } = await supabase
         .from('applications')
-        .select('id, user_id, status, submission_date, age, state')
+        .select('id, user_id, status, submission_date, age, state, season_id')
         .order('submission_date', { ascending: false })
 
       if (appsError) {
@@ -233,65 +251,7 @@ export default function AdminApplicationsPage() {
 
       if (updateError) throw updateError
 
-      const { data: { session } } = await supabase.auth.getSession()
-      if (!session) throw new Error('Not authenticated')
-
-      const approvalMessage = {
-        admin_id: session.user.id,
-        title: '🎉 You\'ve Been Approved!',
-        content: `Congratulations! Your application has been approved for Naija Ninja Warrior.\n\nNext Steps:\n1. Check your email for further instructions\n2. Prepare for the competition\n3. Follow us for updates\n\nExpectations:\n- Attend all training sessions\n- Maintain peak fitness\n- Follow all competition rules\n- Represent the brand with integrity`,
-        message_type: 'announcement',
-        recipient_type: 'specific_users',
-        recipient_ids: selectedApps,
-        priority: 'high',
-        send_email: true,
-        send_in_app: true,
-        send_whatsapp: false,
-        sent_at: new Date().toISOString(),
-      }
-
-      const { data: msgData, error: msgError } = await supabase
-        .from('messages')
-        .insert([approvalMessage])
-        .select()
-
-      if (msgError) throw msgError
-
-      const messageId = msgData[0].id
-      const notificationsData = selectedApps.map((user_id: string) => ({
-        user_id,
-        message_id: messageId,
-      }))
-
-      const { error: notifError } = await supabase
-        .from('user_notifications')
-        .insert(notificationsData)
-
-      if (notifError) throw notifError
-
-      const deliveryData: any[] = []
-      
-      deliveryData.push(...selectedApps.map((user_id: string) => ({
-        message_id: messageId,
-        user_id,
-        delivery_type: 'email',
-      })))
-
-      deliveryData.push(...selectedApps.map((user_id: string) => ({
-        message_id: messageId,
-        user_id,
-        delivery_type: 'in_app',
-      })))
-
-      if (deliveryData.length > 0) {
-        const { error: deliveryError } = await supabase
-          .from('message_delivery')
-          .insert(deliveryData)
-
-        if (deliveryError) throw deliveryError
-      }
-
-      toast.success(`${selectedApps.length} application(s) approved with approval message sent`)
+      toast.success(`${selectedApps.length} application(s) approved. Send notification from Messaging page.`)
       setSelectedApps([])
       loadApplications()
     } catch (err) {
@@ -310,14 +270,14 @@ export default function AdminApplicationsPage() {
 
     setBulkActioning(prev => ({ ...prev, reject: true }))
     try {
-      const { error } = await supabase
+      const { error: updateError } = await supabase
         .from('applications')
         .update({ status: 'rejected' })
         .in('id', selectedApps)
 
-      if (error) throw error
+      if (updateError) throw updateError
 
-      toast.success(`${selectedApps.length} application(s) rejected`)
+      toast.success(`${selectedApps.length} application(s) rejected. Send notification from Messaging page.`)
       setSelectedApps([])
       loadApplications()
     } catch (err) {
@@ -461,7 +421,6 @@ export default function AdminApplicationsPage() {
               {/* Selection Toolbar */}
               <div className="flex items-center justify-between flex-wrap gap-4 mb-4">
                 <div className="flex items-center gap-4">
-                  {/* Select All */}
                   {currentPageApps.length > 0 && (
                     <div className="flex items-center gap-3">
                       <div
@@ -482,7 +441,6 @@ export default function AdminApplicationsPage() {
                 </div>
 
                 <div className="flex items-center gap-4">
-                  {/* Bulk Actions */}
                   {selectedApps.length > 0 && (
                     <div className="flex flex-wrap gap-2">
                       <span className="text-sm font-semibold text-gray-900 flex items-center">
@@ -515,7 +473,6 @@ export default function AdminApplicationsPage() {
                     </div>
                   )}
 
-                  {/* Applications Count */}
                   <p className="text-sm text-gray-600">
                     <span className="font-semibold text-gray-900">{filteredApplications.length}</span> Total
                   </p>

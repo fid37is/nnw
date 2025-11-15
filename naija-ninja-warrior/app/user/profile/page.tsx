@@ -433,7 +433,7 @@ export default function UserProfile() {
               ) : (
                 <>
                   <Save size={18} />
-                  Save Changes
+                  Update
                 </>
               )}
             </button>

@@ -5,6 +5,7 @@ import Image from 'next/image'
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase/client'
 import { ArrowRight, Trophy, Users, Menu, X, User } from 'lucide-react'
+import { toast } from 'sonner'
 
 interface Champion {
   id: string
@@ -67,30 +68,98 @@ export default function Home() {
       /(?:https?:\/\/)?(?:www\.)?youtube\.com\/watch\?v=([a-zA-Z0-9_-]{11})/,
       /(?:https?:\/\/)?(?:www\.)?youtu\.be\/([a-zA-Z0-9_-]{11})/,
     ]
-    
+
     for (const pattern of patterns) {
       const match = url.match(pattern)
       if (match) return match[1]
     }
-    
+
     return ''
+  }
+
+  const [inquiryForm, setInquiryForm] = useState({
+    name: '',
+    email: '',
+    subject: '',
+    message: '',
+  })
+  const [submittingInquiry, setSubmittingInquiry] = useState(false)
+
+  // Add this handler function to the Home component:
+  const handleInquirySubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+
+    if (!inquiryForm.name || !inquiryForm.email || !inquiryForm.subject || !inquiryForm.message) {
+      toast.error('Please fill in all fields')
+      return
+    }
+
+    setSubmittingInquiry(true)
+    try {
+      const { error } = await supabase
+        .from('inquiries')
+        .insert([
+          {
+            name: inquiryForm.name,
+            email: inquiryForm.email,
+            subject: inquiryForm.subject,
+            message: inquiryForm.message,
+            status: 'new',
+          },
+        ])
+
+      if (error) throw error
+
+      toast.success('Thank you! Your inquiry has been sent. We will respond to your email shortly.')
+      setInquiryForm({
+        name: '',
+        email: '',
+        subject: '',
+        message: '',
+      })
+    } catch (err) {
+      console.error('Error submitting inquiry:', err)
+      toast.error('Failed to send inquiry. Please try again.')
+    } finally {
+      setSubmittingInquiry(false)
+    }
   }
 
   const loadData = async () => {
     try {
+      // Load latest season
       const { data: seasonData } = await supabase
         .from('seasons')
         .select('id, name, year, status, application_start_date, application_end_date')
         .order('year', { ascending: false })
         .limit(1)
         .single()
-      
+
+      if (seasonData) {
+        setSeason(seasonData)
+      }
+
+      // Load sponsors - independent of season
+      const { data: sponsorData } = await supabase
+        .from('sponsors')
+        .select('*')
+        .order('created_at', { ascending: false })
+
+      setSponsors(sponsorData || [])
+
+      // Load videos - independent of season
+      const { data: videoData } = await supabase
+        .from('youtube_videos')
+        .select('*')
+        .order('order_position', { ascending: true })
+
+      setVideos(videoData || [])
+
+      // Only load competition data if season exists
       if (!seasonData) {
         setLoading(false)
         return
       }
-
-      setSeason(seasonData)
 
       const { data: stagesData } = await supabase
         .from('competition_stages')
@@ -214,22 +283,6 @@ export default function Home() {
         active: (totalCount || 0) - (eliminatedCount || 0),
         eliminated: eliminatedCount || 0,
       })
-
-      const { data: videoData } = await supabase
-        .from('youtube_videos')
-        .select('*')
-        .order('order_position', { ascending: true })
-        .limit(3)
-
-      setVideos(videoData || [])
-
-      const { data: sponsorData } = await supabase
-        .from('sponsors')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(4)
-
-      setSponsors(sponsorData || [])
     } catch (err) {
       console.error('Failed to load data:', err)
     } finally {
@@ -269,7 +322,7 @@ export default function Home() {
             </div>
             <span className="font-bold text-gray-900 hidden sm:inline">Naija Ninja</span>
           </Link>
-          
+
           <div className="hidden md:flex items-center gap-8">
             <Link href="/leaderboard" className="text-sm font-medium text-gray-600 hover:text-gray-900 transition">
               Leaderboard
@@ -587,24 +640,23 @@ export default function Home() {
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 border-t border-gray-100">
         <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-12 text-center">Supported By</h2>
         {sponsors.length > 0 ? (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
+          <div className={`grid ${sponsors.length === 1 ? 'justify-center' : 'grid-cols-2 md:grid-cols-4'} gap-4 md:gap-6`}>
             {sponsors.map((sponsor) => (
               <a
                 key={sponsor.id}
                 href={sponsor.website_url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="p-6 bg-gray-50 rounded-lg border border-gray-100 hover:border-naija-green-600 transition flex items-center justify-center"
+                className={`py-2 px-6 bg-gray-50 rounded-lg border border-gray-100 hover:border-naija-green-600 transition flex items-center justify-center gap-2 ${sponsors.length === 1 ? 'max-w-sm' : ''}`}
               >
-                {sponsor.logo_url ? (
+                {sponsor.logo_url && (
                   <img
                     src={sponsor.logo_url}
                     alt={sponsor.name}
-                    className="max-w-full max-h-16 object-contain"
+                    className="max-w-full max-h-16 object-contain flex-shrink-0"
                   />
-                ) : (
-                  <p className="font-semibold text-gray-900 text-center text-sm">{sponsor.name}</p>
                 )}
+                <p className="font-semibold text-gray-900 text-center text-sm">{sponsor.name}</p>
               </a>
             ))}
           </div>
@@ -629,11 +681,11 @@ export default function Home() {
           <p className="text-gray-600">Watch epic moments from past competitions</p>
         </div>
         {videos.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className={`grid ${videos.length === 1 ? 'justify-center' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'} gap-6`}>
             {videos.map((video) => {
               const videoId = extractYouTubeId(video.youtube_url)
               return (
-                <div key={video.id} className="rounded-lg overflow-hidden border border-gray-100 hover:border-gray-200 transition">
+                <div key={video.id} className={`rounded-lg overflow-hidden border border-gray-100 hover:border-gray-200 transition ${videos.length === 1 ? 'max-w-2xl' : ''}`}>
                   <div className="aspect-video bg-gray-200">
                     {videoId ? (
                       <iframe
@@ -715,44 +767,64 @@ export default function Home() {
             <p className="text-gray-600">Send us your inquiry and we'll get back to you shortly</p>
           </div>
 
-          <form className="space-y-6 bg-gray-50 p-6 md:p-8 rounded-lg border border-gray-100">
+          <form onSubmit={handleInquirySubmit} className="space-y-6 bg-gray-50 p-6 md:p-8 rounded-lg border border-gray-100">
             <div>
               <label className="block text-sm font-semibold text-gray-900 mb-2">Name</label>
               <input
                 type="text"
+                value={inquiryForm.name}
+                onChange={(e) => setInquiryForm({ ...inquiryForm, name: e.target.value })}
                 placeholder="Your full name"
                 className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-naija-green-600 transition"
+                required
               />
             </div>
             <div>
               <label className="block text-sm font-semibold text-gray-900 mb-2">Email</label>
               <input
                 type="email"
+                value={inquiryForm.email}
+                onChange={(e) => setInquiryForm({ ...inquiryForm, email: e.target.value })}
                 placeholder="your@email.com"
                 className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-naija-green-600 transition"
+                required
               />
             </div>
             <div>
               <label className="block text-sm font-semibold text-gray-900 mb-2">Subject</label>
               <input
                 type="text"
+                value={inquiryForm.subject}
+                onChange={(e) => setInquiryForm({ ...inquiryForm, subject: e.target.value })}
                 placeholder="What is this about?"
                 className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-naija-green-600 transition"
+                required
               />
             </div>
             <div>
               <label className="block text-sm font-semibold text-gray-900 mb-2">Message</label>
               <textarea
                 rows={4}
+                value={inquiryForm.message}
+                onChange={(e) => setInquiryForm({ ...inquiryForm, message: e.target.value })}
                 placeholder="Your message..."
                 className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-naija-green-600 transition resize-none"
+                required
               ></textarea>
             </div>
             <button
               type="submit"
-              className="w-full px-8 py-3 bg-naija-green-600 text-white font-semibold rounded-lg hover:bg-naija-green-700 transition"
+              disabled={submittingInquiry}
+              className="w-full px-8 py-3 bg-naija-green-600 text-white font-semibold rounded-lg hover:bg-naija-green-700 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
-              Send Inquiry
+              {submittingInquiry ? (
+                <>
+                  <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full"></div>
+                  Sending...
+                </>
+              ) : (
+                'Send Inquiry'
+              )}
             </button>
           </form>
         </div>

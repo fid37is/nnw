@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { toast } from 'sonner'
 import { supabase } from '@/lib/supabase/client'
-import { FileText, Upload, Clock, CheckCircle, XCircle, Mail, Bell, MessageSquare, Settings } from 'lucide-react'
+import { FileText, Upload, Clock, CheckCircle, XCircle, Mail, Bell, MessageSquare, Settings, Trash2, RefreshCw, Menu, X } from 'lucide-react'
 import UserDropdown from '@/components/UserDropdown'
 
 interface Application {
@@ -23,18 +23,21 @@ interface User {
   phone: string
 }
 
+interface Message {
+  id: string
+  title: string
+  content: string
+  priority: string
+  message_type: string
+}
+
 interface Notification {
   id: string
   message_id: string
   is_read: boolean
   read_at: string | null
   created_at: string
-  messages: {
-    title: string
-    content: string
-    priority: string
-    message_type: string
-  } | null
+  message: Message | null
 }
 
 interface Preferences {
@@ -60,6 +63,10 @@ export default function UserDashboard() {
     whatsapp_number: '',
   })
   const [savingPreferences, setSavingPreferences] = useState(false)
+  const [selectedMessage, setSelectedMessage] = useState<Notification | null>(null)
+  const [refreshing, setRefreshing] = useState(false)
+  const [deletingMessage, setDeletingMessage] = useState<string | null>(null)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -120,35 +127,33 @@ export default function UserDashboard() {
           setApplication(appData)
         }
 
-        // Get notifications with proper join
+        // Get notifications
         const { data: notifData, error: notifError } = await supabase
           .from('user_notifications')
-          .select(`
-            id,
-            message_id,
-            is_read,
-            read_at,
-            created_at,
-            messages!inner (
-              id,
-              title,
-              content,
-              priority,
-              message_type
-            )
-          `)
+          .select('id, message_id, is_read, read_at, created_at')
           .eq('user_id', session.user.id)
           .order('created_at', { ascending: false })
 
         if (notifError) {
           console.error('Error fetching notifications:', notifError)
         } else {
-          // Transform the data to ensure messages is a single object
-          const transformedNotifications = (notifData || []).map(notif => ({
-            ...notif,
-            messages: Array.isArray(notif.messages) ? notif.messages[0] : notif.messages
-          }))
-          setNotifications(transformedNotifications as Notification[])
+          const messageIds = notifData?.map((n: any) => n.message_id) || []
+          
+          if (messageIds.length > 0) {
+            const { data: messagesData, error: messagesError } = await supabase
+              .from('messages')
+              .select('id, title, content, priority, message_type')
+              .in('id', messageIds)
+
+            if (!messagesError && messagesData) {
+              const messagesMap = new Map((messagesData as any[]).map((m: any) => [m.id, m]))
+              const combinedNotifications = (notifData as any[]).map((notif: any) => ({
+                ...notif,
+                message: messagesMap.get(notif.message_id) || null
+              })) as Notification[]
+              setNotifications(combinedNotifications)
+            }
+          }
         }
 
         // Get preferences
@@ -217,10 +222,92 @@ export default function UserDashboard() {
         .eq('id', notificationId)
 
       setNotifications(prev =>
-        prev.map(n => n.id === notificationId ? { ...n, is_read: true } : n)
+        prev.map((n: any) => n.id === notificationId ? { ...n, is_read: true } : n)
       )
     } catch (err) {
       console.error('Error marking notification as read:', err)
+    }
+  }
+
+  const handleRefresh = async () => {
+    setRefreshing(true)
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) return
+
+      const { data: notifData } = await supabase
+        .from('user_notifications')
+        .select('id, message_id, is_read, read_at, created_at')
+        .eq('user_id', session.user.id)
+        .order('created_at', { ascending: false })
+
+      if (notifData && notifData.length > 0) {
+        const messageIds = (notifData as any[]).map((n: any) => n.message_id)
+        const { data: messagesData } = await supabase
+          .from('messages')
+          .select('id, title, content, priority, message_type')
+          .in('id', messageIds)
+
+        if (messagesData) {
+          const messagesMap = new Map((messagesData as any[]).map((m: any) => [m.id, m]))
+          const combinedNotifications = (notifData as any[]).map((notif: any) => ({
+            ...notif,
+            message: messagesMap.get(notif.message_id) || null
+          })) as Notification[]
+          setNotifications(combinedNotifications)
+        }
+      }
+      toast.success('Messages refreshed')
+    } catch (err) {
+      console.error('Error refreshing:', err)
+      toast.error('Failed to refresh messages')
+    } finally {
+      setRefreshing(false)
+    }
+  }
+
+  const deleteMessage = async (notificationId: string) => {
+    setDeletingMessage(notificationId)
+    try {
+      await supabase
+        .from('user_notifications')
+        .delete()
+        .eq('id', notificationId)
+
+      setNotifications(prev => prev.filter((n: any) => n.id !== notificationId))
+      if (selectedMessage?.id === notificationId) {
+        setSelectedMessage(null)
+      }
+      toast.success('Message deleted')
+    } catch (err) {
+      console.error('Error deleting message:', err)
+      toast.error('Failed to delete message')
+    } finally {
+      setDeletingMessage(null)
+    }
+  }
+
+  const deleteAllMessages = async () => {
+    if (!confirm('Are you sure you want to delete all messages? This cannot be undone.')) return
+
+    setDeletingMessage('all')
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) return
+
+      await supabase
+        .from('user_notifications')
+        .delete()
+        .eq('user_id', session.user.id)
+
+      setNotifications([])
+      setSelectedMessage(null)
+      toast.success('All messages deleted')
+    } catch (err) {
+      console.error('Error deleting all messages:', err)
+      toast.error('Failed to delete messages')
+    } finally {
+      setDeletingMessage(null)
     }
   }
 
@@ -250,19 +337,6 @@ export default function UserDashboard() {
     }
   }
 
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case 'urgent':
-        return 'border-l-4 border-red-500 bg-red-50'
-      case 'high':
-        return 'border-l-4 border-orange-500 bg-orange-50'
-      case 'normal':
-        return 'border-l-4 border-blue-500 bg-blue-50'
-      default:
-        return 'border-l-4 border-gray-500 bg-gray-50'
-    }
-  }
-
   if (loading) {
     return (
       <main className="min-h-screen bg-gradient-to-br from-white via-naija-green-50 to-white">
@@ -283,7 +357,7 @@ export default function UserDashboard() {
     )
   }
 
-  const unreadCount = notifications.filter(n => !n.is_read).length
+  const unreadCount = notifications.filter((n: any) => !n.is_read).length
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-white via-naija-green-50 to-white">
@@ -317,10 +391,10 @@ export default function UserDashboard() {
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-4 mb-6 border-b border-gray-200">
+        <div className="flex gap-4 mb-6 border-b border-gray-200 overflow-x-auto">
           <button
             onClick={() => setActiveTab('application')}
-            className={`px-4 py-3 font-semibold border-b-2 transition ${
+            className={`px-4 py-3 font-semibold border-b-2 transition whitespace-nowrap ${
               activeTab === 'application'
                 ? 'text-naija-green-600 border-naija-green-600'
                 : 'text-gray-600 border-transparent hover:text-gray-900'
@@ -328,12 +402,12 @@ export default function UserDashboard() {
           >
             <div className="flex items-center gap-2">
               <FileText size={18} />
-              Application
+              <span className="hidden sm:inline">Application</span>
             </div>
           </button>
           <button
             onClick={() => setActiveTab('inbox')}
-            className={`px-4 py-3 font-semibold border-b-2 transition relative ${
+            className={`px-4 py-3 font-semibold border-b-2 transition relative whitespace-nowrap ${
               activeTab === 'inbox'
                 ? 'text-naija-green-600 border-naija-green-600'
                 : 'text-gray-600 border-transparent hover:text-gray-900'
@@ -341,7 +415,7 @@ export default function UserDashboard() {
           >
             <div className="flex items-center gap-2">
               <MessageSquare size={18} />
-              Inbox
+              <span className="hidden sm:inline">Inbox</span>
               {unreadCount > 0 && (
                 <span className="ml-1 bg-red-600 text-white text-xs font-bold px-2 py-0.5 rounded-full">
                   {unreadCount}
@@ -351,7 +425,7 @@ export default function UserDashboard() {
           </button>
           <button
             onClick={() => setActiveTab('preferences')}
-            className={`px-4 py-3 font-semibold border-b-2 transition ${
+            className={`px-4 py-3 font-semibold border-b-2 transition whitespace-nowrap ${
               activeTab === 'preferences'
                 ? 'text-naija-green-600 border-naija-green-600'
                 : 'text-gray-600 border-transparent hover:text-gray-900'
@@ -359,7 +433,7 @@ export default function UserDashboard() {
           >
             <div className="flex items-center gap-2">
               <Settings size={18} />
-              Preferences
+              <span className="hidden sm:inline">Preferences</span>
             </div>
           </button>
         </div>
@@ -476,45 +550,149 @@ export default function UserDashboard() {
 
         {/* Inbox Tab */}
         {activeTab === 'inbox' && (
-          <div>
-            <h2 className="text-lg font-bold text-gray-900 mb-4">Your Messages</h2>
-            {notifications.length === 0 ? (
-              <div className="bg-white rounded-lg border border-gray-200 p-8 text-center">
-                <MessageSquare size={48} className="mx-auto text-gray-300 mb-3" />
-                <p className="text-gray-600">No messages yet</p>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {notifications.map(notif => (
-                  <div
-                    key={notif.id}
-                    onClick={() => markAsRead(notif.id)}
-                    className={`p-4 rounded-lg cursor-pointer transition ${
-                      notif.messages ? getPriorityColor(notif.messages.priority) : 'border-l-4 border-gray-500 bg-gray-50'
-                    } ${notif.is_read ? 'opacity-75' : 'opacity-100'}`}
+          <div className="flex flex-col lg:grid lg:grid-cols-3 gap-6 h-auto lg:h-[calc(100vh-200px)]">
+            {/* Messages List - Left */}
+            <div className={`lg:col-span-1 ${selectedMessage ? 'hidden lg:block' : 'block'}`}>
+              <div className="bg-white rounded-lg shadow-sm border border-naija-green-100 h-full lg:h-full flex flex-col">
+                <div className="p-4 border-b border-gray-200 flex items-center justify-between flex-shrink-0">
+                  <h2 className="text-lg font-bold text-gray-900">Messages ({notifications.length})</h2>
+                  <button
+                    onClick={handleRefresh}
+                    disabled={refreshing}
+                    className="p-1.5 hover:bg-gray-100 rounded transition disabled:opacity-50"
+                    title="Refresh messages"
                   >
-                    <div className="flex items-start justify-between mb-2">
-                      <div>
-                        <h3 className="font-semibold text-gray-900">{notif.messages?.title || 'No Title'}</h3>
-                        <p className="text-xs text-gray-600 mt-1">
-                          {new Date(notif.created_at).toLocaleString()}
-                        </p>
-                      </div>
-                      {!notif.is_read && (
-                        <div className="w-3 h-3 bg-naija-green-600 rounded-full"></div>
-                      )}
+                    <RefreshCw size={18} className={refreshing ? 'animate-spin' : ''} />
+                  </button>
+                </div>
+
+                {notifications.length === 0 ? (
+                  <div className="flex-1 flex items-center justify-center p-4 text-center">
+                    <div>
+                      <MessageSquare size={48} className="mx-auto text-gray-300 mb-3" />
+                      <p className="text-gray-600 text-sm">No messages yet</p>
                     </div>
-                    <p className="text-sm text-gray-700 whitespace-pre-line">{notif.messages?.content || 'No content'}</p>
                   </div>
-                ))}
+                ) : (
+                  <>
+                    <div className="flex-1 overflow-y-auto min-h-0">
+                      <div className="space-y-2 p-3">
+                        {notifications.map((notif: any) => (
+                          <button
+                            key={notif.id}
+                            onClick={() => {
+                              setSelectedMessage(notif)
+                              if (!notif.is_read) {
+                                markAsRead(notif.id)
+                              }
+                            }}
+                            className={`w-full text-left p-3 rounded-lg border transition ${
+                              selectedMessage?.id === notif.id
+                                ? 'border-naija-green-600 bg-naija-green-50'
+                                : 'border-gray-200 hover:border-gray-300'
+                            }`}
+                          >
+                            <div className="flex items-start gap-2">
+                              <div className="flex-1 min-w-0">
+                                <h3 className="font-semibold text-sm text-gray-900 line-clamp-1">{notif.message?.title || 'No Title'}</h3>
+                                <p className="text-xs text-gray-600 mt-0.5 line-clamp-1">{notif.message?.content || 'No content'}</p>
+                                <p className="text-xs text-gray-500 mt-1">{new Date(notif.created_at).toLocaleDateString()}</p>
+                              </div>
+                              {!notif.is_read && (
+                                <div className="w-2 h-2 bg-naija-green-600 rounded-full flex-shrink-0 mt-1.5"></div>
+                              )}
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {notifications.length > 0 && (
+                      <div className="p-3 border-t border-gray-200 flex-shrink-0">
+                        <button
+                          onClick={deleteAllMessages}
+                          disabled={deletingMessage === 'all'}
+                          className="w-full px-3 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition text-xs font-semibold disabled:opacity-50 flex items-center justify-center gap-2"
+                        >
+                          <Trash2 size={14} />
+                          Delete All
+                        </button>
+                      </div>
+                    )}
+                  </>
+                )}
               </div>
-            )}
+            </div>
+
+            {/* Message Detail - Right */}
+            <div className={`lg:col-span-2 ${selectedMessage ? 'block' : 'hidden lg:block'}`}>
+              <div className="bg-white rounded-lg shadow-sm border border-naija-green-100 p-4 sm:p-6 h-full lg:h-full flex flex-col">
+                {selectedMessage ? (
+                  <div className="flex flex-col h-full animate-in fade-in duration-200">
+                    <div className="flex items-start justify-between mb-4 pb-4 border-b border-gray-200 flex-shrink-0 gap-3">
+                      <div className="flex-1 min-w-0">
+                        <h2 className="text-xl sm:text-2xl font-bold text-gray-900 break-words">{selectedMessage.message?.title || 'No Title'}</h2>
+                        <p className="text-xs sm:text-sm text-gray-600 mt-2">
+                          {new Date(selectedMessage.created_at).toLocaleString()}
+                        </p>
+                        {selectedMessage.message?.priority && (
+                          <span className={`inline-block mt-2 px-3 py-1 rounded-full text-xs font-semibold ${
+                            selectedMessage.message.priority === 'urgent' ? 'bg-red-100 text-red-800' :
+                            selectedMessage.message.priority === 'high' ? 'bg-orange-100 text-orange-800' :
+                            selectedMessage.message.priority === 'normal' ? 'bg-blue-100 text-blue-800' :
+                            'bg-gray-100 text-gray-800'
+                          }`}>
+                            {selectedMessage.message.priority.toUpperCase()} PRIORITY
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex gap-2 flex-shrink-0">
+                        <button
+                          onClick={() => setSelectedMessage(null)}
+                          className="lg:hidden p-2 hover:bg-gray-100 text-gray-700 rounded-lg transition"
+                          title="Back to messages"
+                        >
+                          <X size={20} />
+                        </button>
+                        <button
+                          onClick={() => deleteMessage(selectedMessage.id)}
+                          disabled={deletingMessage === selectedMessage.id}
+                          className="p-2 hover:bg-red-100 text-red-700 rounded-lg transition disabled:opacity-50"
+                          title="Delete this message"
+                        >
+                          <Trash2 size={20} />
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="flex-1 overflow-y-auto mb-4 min-h-0">
+                      <div className="bg-gray-50 rounded-lg p-4 whitespace-pre-wrap text-sm text-gray-700 leading-relaxed">
+                        {selectedMessage.message?.content || 'No content'}
+                      </div>
+                    </div>
+
+                    {!selectedMessage.is_read && (
+                      <div className="text-xs text-gray-500 text-center flex-shrink-0">
+                        ✓ Message marked as read
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-center h-full">
+                    <div className="text-center">
+                      <MessageSquare size={48} className="mx-auto text-gray-300 mb-3" />
+                      <p className="text-gray-600">Select a message to read</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         )}
 
         {/* Preferences Tab */}
         {activeTab === 'preferences' && (
-          <div className="bg-white rounded-lg shadow-sm border border-naija-green-100 p-6 max-w-2xl">
+          <div className="bg-white rounded-lg shadow-sm border border-naija-green-100 p-4 sm:p-6 max-w-2xl">
             <h2 className="text-lg font-bold text-gray-900 mb-6">Notification Preferences</h2>
             
             <div className="space-y-6">
