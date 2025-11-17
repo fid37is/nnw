@@ -7,6 +7,7 @@ import { LayoutDashboard, Calendar, Users, CheckCircle, FileText, BarChart3, Log
 import { useState } from 'react'
 import { supabase } from '@/lib/supabase/client'
 import { toast } from 'sonner'
+import { useAuthConfig } from '../context/AuthContext'
 
 const navItems = [
   {
@@ -76,6 +77,7 @@ export default function AdminSidebar() {
   const pathname = usePathname()
   const [open, setOpen] = useState(false)
   const [expandedMenu, setExpandedMenu] = useState<string | null>(null)
+  const { logoUrl } = useAuthConfig()
 
   const handleLogout = async () => {
     await supabase.auth.signOut()
@@ -95,7 +97,7 @@ export default function AdminSidebar() {
 
   // Initialize expandedMenu based on current pathname
   const [initExpanded, setInitExpanded] = useState(false)
-  
+
   if (!initExpanded) {
     const activeMenu = navItems.find(item => item.submenu && item.submenu.some((sub: any) => pathname === sub.href || pathname.startsWith(sub.href + '/')))
     if (activeMenu) {
@@ -116,19 +118,20 @@ export default function AdminSidebar() {
 
       {/* Sidebar */}
       <aside
-        className={`fixed left-0 top-0 h-screen w-64 bg-naija-green-900 text-white p-6 overflow-y-auto transition-transform duration-300 z-40 ${
-          open ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
-        }`}
+        className={`fixed left-0 top-0 h-screen w-64 bg-naija-green-900 text-white p-6 overflow-y-auto transition-transform duration-300 z-40 ${open ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+          }`}
       >
         {/* Logo */}
         <Link href="/admin/dashboard" className="flex items-center gap-3 mb-8">
-          <Image
-            src="/logo.png"
-            alt="Logo"
-            width={60}
-            height={60}
-            className="rounded-lg"
-          />
+          {logoUrl && (
+            <Image
+              src={logoUrl}
+              alt="Naija Ninja Logo"
+              width={60}
+              height={60}
+              className="rounded-lg"
+            />
+          )}
           <span className="font-bold text-lg truncate">Admin</span>
         </Link>
 
@@ -146,11 +149,10 @@ export default function AdminSidebar() {
                     {/* Parent Menu Item with Submenu */}
                     <button
                       onClick={() => setExpandedMenu(isExpanded ? null : item.label)}
-                      className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition truncate ${
-                        isActive
+                      className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition truncate ${isActive
                           ? 'bg-naija-green-600 text-white'
                           : 'text-naija-green-100 hover:bg-naija-green-800'
-                      }`}
+                        }`}
                     >
                       <Icon size={20} className="flex-shrink-0" />
                       <span className="font-medium flex-1 text-left truncate">{item.label}</span>
@@ -178,11 +180,10 @@ export default function AdminSidebar() {
                                   setExpandedMenu(null)
                                 }
                               }}
-                              className={`flex items-center gap-3 px-4 py-2 rounded-lg transition truncate ${
-                                isSubActive
+                              className={`flex items-center gap-3 px-4 py-2 rounded-lg transition truncate ${isSubActive
                                   ? 'bg-naija-green-600 text-white'
                                   : 'text-naija-green-100 hover:bg-naija-green-800'
-                              }`}
+                                }`}
                             >
                               <SubIcon size={18} className="flex-shrink-0" />
                               <span className="font-medium text-sm truncate">{subitem.label}</span>
@@ -197,11 +198,10 @@ export default function AdminSidebar() {
                   <Link
                     href={item.href}
                     onClick={() => setOpen(false)}
-                    className={`flex items-center gap-3 px-4 py-3 rounded-lg transition truncate ${
-                      isActive
+                    className={`flex items-center gap-3 px-4 py-3 rounded-lg transition truncate ${isActive
                         ? 'bg-naija-green-600 text-white'
                         : 'text-naija-green-100 hover:bg-naija-green-800'
-                    }`}
+                      }`}
                   >
                     <Icon size={20} className="flex-shrink-0" />
                     <span className="font-medium truncate">{item.label}</span>

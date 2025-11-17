@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { Eye, EyeOff } from 'lucide-react'
 import { supabase } from '@/lib/supabase/client'
+import { toast } from 'sonner'
 
 const NIGERIAN_STATES = [
   'Abia', 'Adamawa', 'Akwa Ibom', 'Anambra', 'Bauchi', 'Bayelsa', 'Benue',
@@ -12,6 +13,29 @@ const NIGERIAN_STATES = [
   'Kwara', 'Lagos', 'Nasarawa', 'Niger', 'Ogun', 'Ondo', 'Osun', 'Oyo',
   'Plateau', 'Rivers', 'Sokoto', 'Taraba', 'Yobe', 'Zamfara', 'FCT'
 ]
+
+// Nigerian phone number validation
+const validateNigerianPhone = (phone: string): { isValid: boolean; message: string } => {
+  // Remove all spaces, dashes, and parentheses
+  const cleaned = phone.replace(/[\s\-\(\)]/g, '')
+  
+  // Check for valid Nigerian formats:
+  // +2347012345678, +2348012345678, 07012345678, 08012345678, 2347012345678, 2348012345678
+  const nigerianPhoneRegex = /^(\+?234|0)?([7-9][0-1])\d{8}$/
+  
+  if (!cleaned) {
+    return { isValid: false, message: 'Phone number is required' }
+  }
+  
+  if (!nigerianPhoneRegex.test(cleaned)) {
+    return { 
+      isValid: false, 
+      message: 'Enter a valid Nigerian phone number (e.g., 08012345678 or +2348012345678)' 
+    }
+  }
+  
+  return { isValid: true, message: '' }
+}
 
 export default function RegisterForm() {
   const [formData, setFormData] = useState({
@@ -31,11 +55,14 @@ export default function RegisterForm() {
   })
 
   const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
   const [step, setStep] = useState(1)
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const [phoneError, setPhoneError] = useState('')
+  const [emergencyPhoneError, setEmergencyPhoneError] = useState('')
+  const [phoneTouched, setPhoneTouched] = useState(false)
+  const [emergencyPhoneTouched, setEmergencyPhoneTouched] = useState(false)
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value, type } = e.target
@@ -45,6 +72,18 @@ export default function RegisterForm() {
       ...prev,
       [name]: type === 'checkbox' ? checked : value
     }))
+
+    // Only validate phone if user has touched the field
+    if (name === 'phone' && phoneTouched) {
+      const validation = validateNigerianPhone(value)
+      setPhoneError(validation.isValid ? '' : validation.message)
+    }
+
+    // Only validate emergency phone if user has touched the field
+    if (name === 'emergencyPhone' && emergencyPhoneTouched) {
+      const validation = validateNigerianPhone(value)
+      setEmergencyPhoneError(validation.isValid ? '' : validation.message)
+    }
 
     // Auto-calculate age from birth date
     if (name === 'birthDate' && value) {
@@ -75,59 +114,67 @@ export default function RegisterForm() {
   const validateStep = () => {
     if (step === 1) {
       if (!formData.fullName.trim()) {
-        setError('Full name is required')
+        toast.error('Full name is required')
         return false
       }
       if (!formData.email.includes('@')) {
-        setError('Valid email is required')
+        toast.error('Valid email is required')
         return false
       }
       if (formData.password.length < 8) {
-        setError('Password must be at least 8 characters')
+        toast.error('Password must be at least 8 characters')
         return false
       }
       if (formData.password !== formData.confirmPassword) {
-        setError('Passwords do not match')
+        toast.error('Passwords do not match')
         return false
       }
     }
 
     if (step === 2) {
-      if (!formData.phone.trim()) {
-        setError('Phone number is required')
+      // Validate phone number and mark as touched
+      setPhoneTouched(true)
+      const phoneValidation = validateNigerianPhone(formData.phone)
+      if (!phoneValidation.isValid) {
+        setPhoneError(phoneValidation.message)
         return false
       }
+      
       if (!formData.state) {
-        setError('State is required')
+        toast.error('State is required')
         return false
       }
       if (!formData.birthDate) {
-        setError('Birth date is required')
+        toast.error('Birth date is required')
         return false
       }
       const age = parseInt(formData.age)
       if (age < 18) {
-        setError('You must be at least 18 years old')
+        toast.error('You must be at least 18 years old')
         return false
       }
     }
 
     if (step === 3) {
       if (!formData.emergencyContact.trim()) {
-        setError('Emergency contact name is required')
+        toast.error('Emergency contact name is required')
         return false
       }
-      if (!formData.emergencyPhone.trim()) {
-        setError('Emergency contact phone is required')
+      
+      // Validate emergency phone and mark as touched
+      setEmergencyPhoneTouched(true)
+      const emergencyPhoneValidation = validateNigerianPhone(formData.emergencyPhone)
+      if (!emergencyPhoneValidation.isValid) {
+        setEmergencyPhoneError(emergencyPhoneValidation.message)
         return false
       }
+      
       if (!formData.waiver) {
-        setError('You must accept the waiver to proceed')
+        toast.error('You must accept the waiver to proceed')
         return false
       }
     }
 
-    setError('')
     return true
   }
 
@@ -142,7 +189,6 @@ export default function RegisterForm() {
     if (!validateStep()) return
 
     setLoading(true)
-    setError('')
 
     try {
       // Sign up with Supabase Auth
@@ -152,13 +198,13 @@ export default function RegisterForm() {
       })
 
       if (authError) {
-        setError(authError.message)
+        toast.error(authError.message)
         setLoading(false)
         return
       }
 
       if (!authData.user) {
-        setError('Registration failed')
+        toast.error('Registration failed')
         setLoading(false)
         return
       }
@@ -183,15 +229,16 @@ export default function RegisterForm() {
         })
 
       if (profileError) {
-        setError('Failed to create user profile')
+        toast.error('Failed to create user profile')
         setLoading(false)
         return
       }
 
+      toast.success('Registration successful! Check your email to verify your account.')
       setSuccess(true)
       setLoading(false)
     } catch (err) {
-      setError('Something went wrong. Please try again.')
+      toast.error('Something went wrong. Please try again.')
       setLoading(false)
     }
   }
@@ -213,7 +260,7 @@ export default function RegisterForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <div className="space-y-6">
       {/* Progress Indicator */}
       <div className="flex gap-2 mb-8">
         {[1, 2, 3].map(num => (
@@ -225,13 +272,6 @@ export default function RegisterForm() {
           />
         ))}
       </div>
-
-      {/* Error Message */}
-      {error && (
-        <div className="bg-naija-red/10 border border-naija-red/30 text-naija-red px-4 py-3 rounded-lg text-sm">
-          {error}
-        </div>
-      )}
 
       {/* Step 1: Account Details */}
       {step === 1 && (
@@ -312,15 +352,25 @@ export default function RegisterForm() {
           <h2 className="text-xl font-bold text-naija-green-900 mb-6">Personal Information</h2>
 
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Phone Number</label>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
+              Phone Number <span className="text-xs font-normal text-gray-500">(WhatsApp preferred)</span>
+            </label>
             <input
               type="tel"
               name="phone"
               value={formData.phone}
               onChange={handleChange}
-              placeholder="+234 XXX XXX XXXX"
-              className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:border-naija-green-600 focus:ring-2 focus:ring-naija-green-100"
+              onBlur={() => setPhoneTouched(true)}
+              placeholder="08012345678"
+              className={`w-full px-4 py-3 rounded-lg border ${
+                phoneTouched && phoneError ? 'border-red-500 focus:border-red-500 focus:ring-red-100' : 'border-gray-300 focus:border-naija-green-600 focus:ring-naija-green-100'
+              } focus:outline-none focus:ring-2`}
             />
+            {phoneTouched && phoneError ? (
+              <p className="text-xs text-red-600 mt-1.5">{phoneError}</p>
+            ) : (
+              <p className="text-xs text-gray-500 mt-1.5">WhatsApp number for updates</p>
+            )}
           </div>
 
           <div>
@@ -403,9 +453,15 @@ export default function RegisterForm() {
               name="emergencyPhone"
               value={formData.emergencyPhone}
               onChange={handleChange}
-              placeholder="+234 XXX XXX XXXX"
-              className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:border-naija-green-600 focus:ring-2 focus:ring-naija-green-100"
+              onBlur={() => setEmergencyPhoneTouched(true)}
+              placeholder="08012345678"
+              className={`w-full px-4 py-3 rounded-lg border ${
+                emergencyPhoneTouched && emergencyPhoneError ? 'border-red-500 focus:border-red-500 focus:ring-red-100' : 'border-gray-300 focus:border-naija-green-600 focus:ring-naija-green-100'
+              } focus:outline-none focus:ring-2`}
             />
+            {emergencyPhoneTouched && emergencyPhoneError && (
+              <p className="text-xs text-red-600 mt-1.5">{emergencyPhoneError}</p>
+            )}
           </div>
 
           <div className="bg-naija-green-50 border border-naija-green-200 rounded-lg p-4">
@@ -445,17 +501,18 @@ export default function RegisterForm() {
           <button
             type="button"
             onClick={handleNext}
-            className="flex-1 px-4 py-3 rounded-lg bg-naija-green-600 text-white font-semibold hover:bg-naija-green-700 transition"
+            disabled={step === 2 && phoneTouched && !!phoneError}
+            className="flex-1 px-4 py-3 rounded-lg bg-naija-green-600 text-white font-semibold hover:bg-naija-green-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Next
           </button>
         ) : (
           <button
-            type="submit"
-            disabled={loading}
-            className="flex-1 px-4 py-3 rounded-lg bg-naija-green-600 text-white font-semibold hover:bg-naija-green-700 transition disabled:opacity-50"
+            onClick={handleSubmit}
+            disabled={loading || !formData.waiver || (emergencyPhoneTouched && !!emergencyPhoneError)}
+            className="flex-1 px-4 py-3 rounded-lg bg-naija-green-600 text-white font-semibold hover:bg-naija-green-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {loading ? 'Creating Account...' : 'Complete Registration'}
+            {loading ? 'Registering...' : 'Register'}
           </button>
         )}
       </div>
@@ -467,6 +524,6 @@ export default function RegisterForm() {
           Login here
         </Link>
       </p>
-    </form>
+    </div>
   )
 }

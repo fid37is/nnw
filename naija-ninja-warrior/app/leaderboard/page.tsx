@@ -5,6 +5,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { supabase } from '@/lib/supabase/client'
 import { Trophy, ArrowLeft, User, Clock } from 'lucide-react'
+import Navbar from '../navbar'
 
 interface LeaderboardEntry {
   rank: number
@@ -79,25 +80,41 @@ export default function LeaderboardPage() {
 
       if (error) throw error
 
-      const userIds = [...new Set(perfData?.map(p => p.user_id) || [])]
+      // Get eliminated users FIRST
+      const { data: eliminatedApps } = await supabase
+        .from('applications')
+        .select('user_id')
+        .eq('season_id', selectedSeasonId)
+        .eq('status', 'eliminated')
+
+      const eliminatedUserIds = new Set(eliminatedApps?.map(app => app.user_id) || [])
+
+      // Filter performance data to exclude eliminated users
+      const filteredPerfData = perfData?.filter(p => !eliminatedUserIds.has(p.user_id)) || []
+
+      const userIds = [...new Set(filteredPerfData.map(p => p.user_id))]
+
+      if (userIds.length === 0) {
+        setLeaderboard([])
+        return
+      }
 
       let usersMap = new Map()
-      if (userIds.length > 0) {
-        const { data: usersData } = await supabase
-          .from('users')
-          .select('id, full_name')
-          .in('id', userIds)
+      const { data: usersData } = await supabase
+        .from('users')
+        .select('id, full_name')
+        .in('id', userIds)
 
-        usersData?.forEach((user: any) => {
-          usersMap.set(user.id, user)
-        })
-      }
+      usersData?.forEach((user: any) => {
+        usersMap.set(user.id, user)
+      })
 
       // Get applications for photos
       const { data: appData } = await supabase
         .from('applications')
         .select('user_id, photo_url')
         .eq('season_id', selectedSeasonId)
+        .in('user_id', userIds)
 
       const appMap = new Map()
       appData?.forEach((app: any) => {
@@ -106,7 +123,7 @@ export default function LeaderboardPage() {
 
       const userStats = new Map()
 
-      perfData?.forEach((perf: any) => {
+      filteredPerfData.forEach((perf: any) => {
         if (!userStats.has(perf.user_id)) {
           userStats.set(perf.user_id, {
             user_id: perf.user_id,
@@ -175,136 +192,108 @@ export default function LeaderboardPage() {
 
   const currentSeason = seasons.find(s => s.id === selectedSeasonId)
 
-  if (loading) {
-    return (
-      <main className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50 flex items-center justify-center">
-        <div className="animate-spin w-12 h-12 border-4 border-green-200 border-t-green-600 rounded-full"></div>
-      </main>
-    )
-  }
-
   return (
-    <main className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
-      {/* Navbar */}
-      <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-200 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition">
-            <div className="w-12 h-12 rounded-lg flex items-center justify-center overflow-hidden shadow-md">
-              <Image
-                src="/logo.png"
-                alt="Naija Ninja Logo"
-                width={48}
-                height={48}
-                className="w-full h-full object-cover"
-                priority
-              />
-            </div>
-            <span className="font-bold text-xl text-gray-900 hidden sm:inline">Naija Ninja</span>
-          </Link>
-          <div className="hidden md:flex items-center gap-8 text-sm font-medium">
-            <Link href="/" className="text-gray-600 hover:text-gray-900 transition">Home</Link>
-            <Link href="/leaderboard" className="text-green-600 font-semibold">Leaderboard</Link>
-            <Link href="/participants" className="text-gray-600 hover:text-gray-900 transition">Participants</Link>
-            <Link href="/merch" className="text-gray-600 hover:text-gray-900 transition">Shop</Link>
-            <Link href="/about" className="text-gray-600 hover:text-gray-900 transition">About</Link>
-          </div>
-          <Link href="/register" className="px-6 py-2.5 bg-gradient-to-r from-green-600 to-green-700 text-white text-sm font-semibold rounded-lg hover:shadow-lg transition-all transform hover:scale-105">
-            Apply Now
-          </Link>
-        </div>
-      </nav>
+    <main className="min-h-screen bg-white">
+      {/* Navbar - Always visible */}
+      <Navbar />
 
       {/* Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
-        {/* Header */}
-        <div className="mb-10">
-          <Link href="/" className="inline-flex items-center gap-2 text-green-600 hover:text-green-700 mb-6 font-medium transition group">
-            <ArrowLeft size={18} className="group-hover:-translate-x-1 transition-transform" />
-            <span className="text-sm">Back to Home</span>
-          </Link>
-          <div className="flex items-center gap-4 mb-3">
-            <Trophy size={40} className="text-green-600" />
-            <h1 className="text-4xl md:text-5xl font-bold text-gray-900">Leaderboard</h1>
-          </div>
-          <p className="text-lg text-gray-600">Live rankings and competitor performance</p>
+      {loading ? (
+        <div className="flex items-center justify-center min-h-[calc(100vh-80px)]">
+          <div className="animate-spin w-12 h-12 border-4 border-green-200 border-t-green-600 rounded-full"></div>
         </div>
-
-        {/* Season Selector */}
-        {seasons.length > 1 && (
-          <div className="mb-10 max-w-xs">
-            <label className="block text-sm font-semibold text-gray-900 mb-2">Season</label>
-            <select
-              value={selectedSeasonId}
-              onChange={e => setSelectedSeasonId(e.target.value)}
-              className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-green-600 font-medium transition"
-            >
-              {seasons.map(s => (
-                <option key={s.id} value={s.id}>
-                  {s.name} {s.year}
-                </option>
-              ))}
-            </select>
+      ) : (
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+          {/* Header */}
+          <div className="mb-10">
+            <Link href="/" className="inline-flex items-center gap-2 text-green-600 hover:text-green-700 mb-6 font-medium transition group">
+              <ArrowLeft size={18} className="group-hover:-translate-x-1 transition-transform" />
+              <span className="text-sm">Back to Home</span>
+            </Link>
+            <div className="flex items-center gap-4 mb-3">
+              <Trophy size={40} className="text-green-600" />
+              <h1 className="text-4xl md:text-5xl font-bold text-gray-900">Leaderboard</h1>
+            </div>
+            <p className="text-lg text-gray-600">Live rankings and competitor performance</p>
           </div>
-        )}
 
-        {/* Leaderboard Cards */}
-        {leaderboard.length === 0 ? (
-          <div className="bg-white rounded-2xl shadow-md p-12 text-center border border-gray-200">
-            <Trophy size={64} className="mx-auto mb-4 text-gray-300" />
-            <p className="text-xl text-gray-600 font-semibold">No competitors yet</p>
-            <p className="text-gray-500 mt-2">Check back soon for rankings!</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-            {leaderboard.map((entry) => (
-              <div
-                key={entry.user_id}
-                className="group relative overflow-hidden rounded-2xl shadow-md hover:shadow-2xl transition-all duration-300 hover:scale-105 cursor-pointer"
+          {/* Season Selector */}
+          {seasons.length > 1 && (
+            <div className="mb-10 max-w-xs">
+              <label className="block text-sm font-semibold text-gray-900 mb-2">Season</label>
+              <select
+                value={selectedSeasonId}
+                onChange={e => setSelectedSeasonId(e.target.value)}
+                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-green-600 font-medium transition"
               >
-                {/* Card Image Container - 3:4 Aspect Ratio */}
-                <div className="relative aspect-[3/4] overflow-hidden bg-gray-200">
-                  {entry.profile_photo ? (
-                    <Image
-                      src={entry.profile_photo}
-                      alt={entry.full_name}
-                      fill
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-gray-300">
-                      <User size={48} className="text-gray-500" />
+                {seasons.map(s => (
+                  <option key={s.id} value={s.id}>
+                    {s.name} {s.year}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+
+          {/* Leaderboard Cards */}
+          {leaderboard.length === 0 ? (
+            <div className="bg-white rounded-2xl shadow-md p-12 text-center border border-gray-200">
+              <Trophy size={64} className="mx-auto mb-4 text-gray-300" />
+              <p className="text-xl text-gray-600 font-semibold">No competitors yet</p>
+              <p className="text-gray-500 mt-2">Check back soon for rankings!</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+              {leaderboard.map((entry) => (
+                <div
+                  key={entry.user_id}
+                  className="group relative overflow-hidden rounded-2xl shadow-md hover:shadow-2xl transition-all duration-300 hover:scale-105 cursor-pointer"
+                >
+                  {/* Card Image Container - 3:4 Aspect Ratio */}
+                  <div className="relative aspect-[3/4] overflow-hidden bg-gray-200">
+                    {entry.profile_photo ? (
+                      <Image
+                        src={entry.profile_photo}
+                        alt={entry.full_name}
+                        fill
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center bg-gray-300">
+                        <User size={48} className="text-gray-500" />
+                      </div>
+                    )}
+
+                    {/* Rank Badge - Top Left */}
+                    <div
+                      className={`absolute top-3 left-3 w-12 h-12 rounded-full bg-gradient-to-br ${getRankGradient(
+                        entry.rank
+                      )} flex items-center justify-center text-2xl font-bold shadow-lg border-2 border-white`}
+                    >
+                      {getMedalEmoji(entry.rank)}
                     </div>
-                  )}
 
-                  {/* Rank Badge - Top Left */}
-                  <div
-                    className={`absolute top-3 left-3 w-12 h-12 rounded-full bg-gradient-to-br ${getRankGradient(
-                      entry.rank
-                    )} flex items-center justify-center text-2xl font-bold shadow-lg border-2 border-white`}
-                  >
-                    {getMedalEmoji(entry.rank)}
-                  </div>
+                    {/* Time Badge - Top Right */}
+                    <div className="absolute top-3 right-3 bg-white rounded-full px-3 py-1 shadow-lg">
+                      <p className="text-xs font-bold text-gray-700">{formatTime(entry.final_time_seconds)}</p>
+                    </div>
 
-                  {/* Time Badge - Top Right */}
-                  <div className="absolute top-3 right-3 bg-white rounded-full px-3 py-1 shadow-lg">
-                    <p className="text-xs font-bold text-gray-700">{formatTime(entry.final_time_seconds)}</p>
-                  </div>
+                    {/* Gradient Overlay at Bottom */}
+                    <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-black via-black/50 to-transparent"></div>
 
-                  {/* Gradient Overlay at Bottom */}
-                  <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-black via-black/50 to-transparent"></div>
-
-                  {/* Name at Bottom - Large and Bold */}
-                  <div className="absolute bottom-0 left-0 right-0 p-4">
-                    <p className="text-white font-black text-2xl leading-tight line-clamp-3">
-                      {entry.full_name}
-                    </p>
+                    {/* Name at Bottom - Large and Bold */}
+                    <div className="absolute bottom-0 left-0 right-0 p-4">
+                      <p className="text-white font-black text-2xl leading-tight line-clamp-3">
+                        {entry.full_name}
+                      </p>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
     </main>
   )
 }

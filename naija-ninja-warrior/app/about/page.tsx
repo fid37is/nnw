@@ -2,49 +2,27 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, Info } from 'lucide-react'
+import Navbar from '../navbar'
 
 export default function AboutPage() {
   return (
-    <main className="min-h-screen bg-white">
+    <main className="min-h-screen bg-white overflow-x-hidden">
       {/* Navbar */}
-      <nav className="sticky top-0 z-50 bg-white border-b border-gray-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2">
-            <div className="w-14 h-14 rounded-lg flex items-center justify-center overflow-hidden">
-              <Image
-                src="/logo.png"
-                alt="Naija Ninja Logo"
-                width={40}
-                height={40}
-                className="w-full h-full object-cover"
-                priority
-              />
-            </div>
-            <span className="font-bold text-gray-900 hidden sm:inline">Naija Ninja</span>
-          </Link>
-          <div className="hidden md:flex items-center gap-8 text-sm font-medium">
-            <Link href="/" className="text-gray-600 hover:text-gray-900">Home</Link>
-            <Link href="/leaderboard" className="text-gray-600 hover:text-gray-900">Leaderboard</Link>
-            <Link href="/participants" className="text-gray-600 hover:text-gray-900">Participants</Link>
-            <Link href="/merch" className="text-gray-600 hover:text-gray-900">Shop</Link>
-            <Link href="/about" className="text-naija-green-600">About</Link>
-          </div>
-          <Link href="/register" className="px-6 py-2 bg-naija-green-600 text-white text-sm font-semibold rounded-lg hover:bg-naija-green-700">
-            Apply
-          </Link>
-        </div>
-      </nav>
+      <Navbar />
 
       {/* Content */}
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
         {/* Header */}
         <div className="mb-12">
           <Link href="/" className="flex items-center gap-2 text-naija-green-600 hover:text-naija-green-700 mb-4 w-fit">
             <ArrowLeft size={18} />
             <span className="text-sm font-medium">Back</span>
           </Link>
-          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-2">About</h1>
+          <div className="flex items-center gap-4 mb-3">
+            <Info size={40} className="text-naija-green-600" />
+            <h1 className="text-4xl md:text-5xl font-bold text-gray-900">About</h1>
+          </div>
           <p className="text-gray-600">Learn about Naija Ninja Warrior</p>
         </div>
 

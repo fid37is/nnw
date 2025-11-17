@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { Eye, EyeOff } from 'lucide-react'
 import { supabase } from '@/lib/supabase/client'
+import { toast } from 'sonner'
 
 export default function LoginForm() {
   const [formData, setFormData] = useState({
@@ -12,7 +13,6 @@ export default function LoginForm() {
   })
 
   const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
   const [showPassword, setShowPassword] = useState(false)
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -25,18 +25,17 @@ export default function LoginForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setError('')
     setLoading(true)
 
     // Validation
     if (!formData.email.includes('@')) {
-      setError('Valid email is required')
+      toast.error('Valid email is required')
       setLoading(false)
       return
     }
 
     if (formData.password.length < 8) {
-      setError('Password must be at least 8 characters')
+      toast.error('Password must be at least 8 characters')
       setLoading(false)
       return
     }
@@ -49,13 +48,13 @@ export default function LoginForm() {
       })
 
       if (error) {
-        setError(error.message)
+        toast.error(error.message)
         setLoading(false)
         return
       }
 
       if (!data.user) {
-        setError('Login failed')
+        toast.error('Login failed')
         setLoading(false)
         return
       }
@@ -68,29 +67,25 @@ export default function LoginForm() {
         .single()
 
       if (userError) {
-        setError('Failed to load user data')
+        toast.error('Failed to load user data')
         setLoading(false)
         return
       }
+
+      // Show success message
+      toast.success('Login successful! Redirecting...')
 
       // Redirect based on role
       const redirectPath = userData.role === 'admin' ? '/admin/dashboard' : '/user/dashboard'
       window.location.href = redirectPath
     } catch (err) {
-      setError('Something went wrong. Please try again.')
+      toast.error('Something went wrong. Please try again.')
       setLoading(false)
     }
   }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6 animate-slide-up">
-      {/* Error Message */}
-      {error && (
-        <div className="bg-naija-red/10 border border-naija-red/30 text-naija-red px-4 py-3 rounded-lg text-sm">
-          {error}
-        </div>
-      )}
-
       {/* Email Field */}
       <div>
         <label className="block text-sm font-semibold text-gray-700 mb-2">Email Address</label>

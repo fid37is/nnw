@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import { Providers } from '../components/Providers'
+import { LogoConfigProvider } from '../components/context/LogoContext'
 import './globals.css'
 
 const inter = Inter({ subsets: ['latin'] })
@@ -18,10 +19,14 @@ export default function RootLayout({
 }: {
   children: React.ReactNode
 }) {
+  const logoUrl = "https://res.cloudinary.com/lordefid/image/upload/v1763343827/fine_zpc6p1.png"
+
   return (
     <html lang="en">
       <body className={inter.className}>
-        <Providers>{children}</Providers>
+        <LogoConfigProvider logoUrl={logoUrl}>
+          <Providers>{children}</Providers>
+        </LogoConfigProvider>
       </body>
     </html>
   )

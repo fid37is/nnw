@@ -2,10 +2,10 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import Image from 'next/image'
 import { Heart, ShoppingBag, ArrowLeft, Loader2, X, Mail } from 'lucide-react'
 import { toast } from 'sonner'
 import { supabase } from '@/lib/supabase/client'
+import Navbar from '../navbar'
 
 interface MerchItem {
   id: string
@@ -264,62 +264,38 @@ export default function MerchPage() {
     }
   }
 
-  if (loading) {
-    return (
-      <main className="min-h-screen bg-white flex items-center justify-center">
-        <div className="animate-spin w-12 h-12 border-4 border-naija-green-200 border-t-naija-green-600 rounded-full"></div>
-      </main>
-    )
-  }
-
   return (
-    <main className="min-h-screen bg-white">
+    <main className="min-h-screen bg-white overflow-x-hidden">
       {/* Navbar */}
-      <nav className="sticky top-0 z-40 bg-white border-b border-gray-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2">
-            <div className="w-14 h-14 rounded-lg flex items-center justify-center overflow-hidden">
-              <Image
-                src="/logo.png"
-                alt="Naija Ninja Logo"
-                width={40}
-                height={40}
-                className="w-full h-full object-cover"
-                priority
-              />
-            </div>
-            <span className="font-bold text-gray-900 hidden sm:inline">Naija Ninja</span>
-          </Link>
-          <div className="hidden md:flex items-center gap-8 text-sm font-medium">
-            <Link href="/" className="text-gray-600 hover:text-gray-900">Home</Link>
-            <Link href="/leaderboard" className="text-gray-600 hover:text-gray-900">Leaderboard</Link>
-            <Link href="/participants" className="text-gray-600 hover:text-gray-900">Participants</Link>
-            <Link href="/merch" className="text-naija-green-600">Shop</Link>
-            <Link href="/about" className="text-gray-600 hover:text-gray-900">About</Link>
-          </div>
-          <button
-            onClick={() => setCartDrawerOpen(true)}
-            className="relative p-2 hover:bg-gray-100 rounded-lg transition"
-          >
-            <ShoppingBag size={24} className="text-naija-green-600" />
-            {cartCount > 0 && (
-              <span className="absolute -top-1 -right-1 bg-red-600 text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center animate-pulse">
-                {cartCount}
-              </span>
-            )}
-          </button>
-        </div>
-      </nav>
+      <Navbar />
+
+      {/* Cart Icon - Top Right */}
+      <div className="fixed top-20 right-4 z-40">
+        <button
+          onClick={() => setCartDrawerOpen(true)}
+          className="relative p-3 bg-white rounded-full shadow-lg hover:shadow-xl transition border border-gray-200 hover:border-naija-green-300"
+        >
+          <ShoppingBag size={24} className="text-naija-green-600" />
+          {cartCount > 0 && (
+            <span className="absolute -top-1 -right-1 bg-red-600 text-white text-xs font-bold w-6 h-6 rounded-full flex items-center justify-center animate-pulse">
+              {cartCount}
+            </span>
+          )}
+        </button>
+      </div>
 
       {/* Content */}
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
         {/* Header */}
         <div className="mb-8">
           <Link href="/" className="flex items-center gap-2 text-naija-green-600 hover:text-naija-green-700 mb-4 w-fit">
             <ArrowLeft size={18} />
             <span className="text-sm font-medium">Back</span>
           </Link>
-          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-2">Shop</h1>
+          <div className="flex items-center gap-4 mb-3">
+            <ShoppingBag size={40} className="text-naija-green-600" />
+            <h1 className="text-4xl md:text-5xl font-bold text-gray-900">Shop</h1>
+          </div>
           <p className="text-gray-600">Exclusive Naija Ninja branded apparel</p>
         </div>
 

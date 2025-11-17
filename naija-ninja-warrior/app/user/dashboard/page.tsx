@@ -6,6 +6,8 @@ import { toast } from 'sonner'
 import { supabase } from '@/lib/supabase/client'
 import { FileText, Upload, Clock, CheckCircle, XCircle, Mail, Bell, MessageSquare, Settings, Trash2, RefreshCw, Menu, X } from 'lucide-react'
 import UserDropdown from '@/components/UserDropdown'
+import Image from 'next/image';
+import { useAuthConfig } from '@/components/context/AuthContext'
 
 interface Application {
   id: string
@@ -66,7 +68,7 @@ export default function UserDashboard() {
   const [selectedMessage, setSelectedMessage] = useState<Notification | null>(null)
   const [refreshing, setRefreshing] = useState(false)
   const [deletingMessage, setDeletingMessage] = useState<string | null>(null)
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const { logoUrl } = useAuthConfig()
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -98,13 +100,13 @@ export default function UserDashboard() {
         if (seasonData) {
           const today = new Date()
           today.setHours(0, 0, 0, 0)
-          
+
           const startDate = new Date(seasonData.application_start_date)
           startDate.setHours(0, 0, 0, 0)
-          
+
           const endDate = new Date(seasonData.application_end_date)
           endDate.setHours(23, 59, 59, 999)
-          
+
           const isOpen = today >= startDate && today <= endDate
           setApplicationOpen(isOpen)
         }
@@ -138,7 +140,7 @@ export default function UserDashboard() {
           console.error('Error fetching notifications:', notifError)
         } else {
           const messageIds = notifData?.map((n: any) => n.message_id) || []
-          
+
           if (messageIds.length > 0) {
             const { data: messagesData, error: messagesError } = await supabase
               .from('messages')
@@ -343,9 +345,13 @@ export default function UserDashboard() {
         <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-naija-green-100">
           <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
             <Link href="/" className="flex items-center gap-2">
-              <div className="w-10 h-10 bg-gradient-to-br from-naija-green-600 to-naija-green-700 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold">NNW</span>
-              </div>
+              <Image
+                src={logoUrl}
+                alt="Naija Ninja Logo"
+                width={60}
+                height={60}
+                className="rounded-lg"
+              />
               <span className="font-bold text-lg text-naija-green-900">Naija Ninja</span>
             </Link>
           </div>
@@ -365,9 +371,13 @@ export default function UserDashboard() {
       <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-naija-green-100">
         <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
-            <div className="w-10 h-10 bg-gradient-to-br from-naija-green-600 to-naija-green-700 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold">NNW</span>
-            </div>
+            <Image
+              src={logoUrl}
+              alt="Naija Ninja Logo"
+              width={60}
+              height={60}
+              className="rounded-lg"
+            />
             <span className="font-bold text-lg text-naija-green-900">Naija Ninja</span>
           </Link>
           <UserDropdown handleLogout={handleLogout} />
@@ -394,11 +404,10 @@ export default function UserDashboard() {
         <div className="flex gap-4 mb-6 border-b border-gray-200 overflow-x-auto">
           <button
             onClick={() => setActiveTab('application')}
-            className={`px-4 py-3 font-semibold border-b-2 transition whitespace-nowrap ${
-              activeTab === 'application'
-                ? 'text-naija-green-600 border-naija-green-600'
-                : 'text-gray-600 border-transparent hover:text-gray-900'
-            }`}
+            className={`px-4 py-3 font-semibold border-b-2 transition whitespace-nowrap ${activeTab === 'application'
+              ? 'text-naija-green-600 border-naija-green-600'
+              : 'text-gray-600 border-transparent hover:text-gray-900'
+              }`}
           >
             <div className="flex items-center gap-2">
               <FileText size={18} />
@@ -407,11 +416,10 @@ export default function UserDashboard() {
           </button>
           <button
             onClick={() => setActiveTab('inbox')}
-            className={`px-4 py-3 font-semibold border-b-2 transition relative whitespace-nowrap ${
-              activeTab === 'inbox'
-                ? 'text-naija-green-600 border-naija-green-600'
-                : 'text-gray-600 border-transparent hover:text-gray-900'
-            }`}
+            className={`px-4 py-3 font-semibold border-b-2 transition relative whitespace-nowrap ${activeTab === 'inbox'
+              ? 'text-naija-green-600 border-naija-green-600'
+              : 'text-gray-600 border-transparent hover:text-gray-900'
+              }`}
           >
             <div className="flex items-center gap-2">
               <MessageSquare size={18} />
@@ -425,11 +433,10 @@ export default function UserDashboard() {
           </button>
           <button
             onClick={() => setActiveTab('preferences')}
-            className={`px-4 py-3 font-semibold border-b-2 transition whitespace-nowrap ${
-              activeTab === 'preferences'
-                ? 'text-naija-green-600 border-naija-green-600'
-                : 'text-gray-600 border-transparent hover:text-gray-900'
-            }`}
+            className={`px-4 py-3 font-semibold border-b-2 transition whitespace-nowrap ${activeTab === 'preferences'
+              ? 'text-naija-green-600 border-naija-green-600'
+              : 'text-gray-600 border-transparent hover:text-gray-900'
+              }`}
           >
             <div className="flex items-center gap-2">
               <Settings size={18} />
@@ -503,7 +510,7 @@ export default function UserDashboard() {
                 </div>
                 <h2 className="text-lg font-bold text-naija-green-900 mb-2">No Application Yet</h2>
                 <p className="text-sm text-gray-600 mb-4">Start your journey to become a Naija Ninja Warrior!</p>
-                
+
                 {checkingApplicationWindow ? (
                   <div className="animate-pulse bg-gray-200 h-10 rounded-lg w-48 mx-auto"></div>
                 ) : applicationOpen ? (
@@ -586,11 +593,10 @@ export default function UserDashboard() {
                                 markAsRead(notif.id)
                               }
                             }}
-                            className={`w-full text-left p-3 rounded-lg border transition ${
-                              selectedMessage?.id === notif.id
-                                ? 'border-naija-green-600 bg-naija-green-50'
-                                : 'border-gray-200 hover:border-gray-300'
-                            }`}
+                            className={`w-full text-left p-3 rounded-lg border transition ${selectedMessage?.id === notif.id
+                              ? 'border-naija-green-600 bg-naija-green-50'
+                              : 'border-gray-200 hover:border-gray-300'
+                              }`}
                           >
                             <div className="flex items-start gap-2">
                               <div className="flex-1 min-w-0">
@@ -636,12 +642,11 @@ export default function UserDashboard() {
                           {new Date(selectedMessage.created_at).toLocaleString()}
                         </p>
                         {selectedMessage.message?.priority && (
-                          <span className={`inline-block mt-2 px-3 py-1 rounded-full text-xs font-semibold ${
-                            selectedMessage.message.priority === 'urgent' ? 'bg-red-100 text-red-800' :
+                          <span className={`inline-block mt-2 px-3 py-1 rounded-full text-xs font-semibold ${selectedMessage.message.priority === 'urgent' ? 'bg-red-100 text-red-800' :
                             selectedMessage.message.priority === 'high' ? 'bg-orange-100 text-orange-800' :
-                            selectedMessage.message.priority === 'normal' ? 'bg-blue-100 text-blue-800' :
-                            'bg-gray-100 text-gray-800'
-                          }`}>
+                              selectedMessage.message.priority === 'normal' ? 'bg-blue-100 text-blue-800' :
+                                'bg-gray-100 text-gray-800'
+                            }`}>
                             {selectedMessage.message.priority.toUpperCase()} PRIORITY
                           </span>
                         )}
@@ -694,7 +699,7 @@ export default function UserDashboard() {
         {activeTab === 'preferences' && (
           <div className="bg-white rounded-lg shadow-sm border border-naija-green-100 p-4 sm:p-6 max-w-2xl">
             <h2 className="text-lg font-bold text-gray-900 mb-6">Notification Preferences</h2>
-            
+
             <div className="space-y-6">
               <div>
                 <label className="flex items-center">
