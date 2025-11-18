@@ -432,7 +432,7 @@ export default function UserProfile() {
   const canEditNickname = isAccepted && !isParticipant
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-white via-naija-green-50 to-white">
+    <main className="min-h-screen">
       <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-naija-green-100">
         <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
@@ -453,7 +453,7 @@ export default function UserProfile() {
         </div>
       </nav>
 
-      <div className="max-w-3xl mx-auto px-4 py-6 md:py-12">
+      <div className="max-w-4xl mx-auto px-4 py-6 md:py-12">
         <div className="mb-6 md:mb-8 flex items-center justify-between">
           <div>
             <h1 className="text-2xl md:text-3xl font-bold text-naija-green-900 mb-2">Your Profile</h1>
