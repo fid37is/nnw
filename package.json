@@ -12,10 +12,10 @@
   "dependencies": {
     "@supabase/supabase-js": "^2.81.0",
     "lucide-react": "^0.553.0",
-    "next": "16.0.1",
+    "next": "^16.0.8",
     "paystack": "^2.0.1",
-    "react": "19.2.0",
-    "react-dom": "19.2.0",
+    "react": "^19.2.1",
+    "react-dom": "^19.2.1",
     "recharts": "^3.4.1",
     "resend": "^6.4.2",
     "sonner": "^2.0.7"
