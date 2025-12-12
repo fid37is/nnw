@@ -5,7 +5,7 @@ import { toast } from 'sonner'
 import { supabase } from '@/lib/supabase/client'
 import AdminSidebar from '@/components/admin/AdminSidebar'
 import AllApplicationsTab from '@/components/admin/AllApplicationsTab'
-import { Eye, Search, Loader2, Calendar, Users, FileText, CheckCircle } from 'lucide-react'
+import { Eye, Search, Loader2, Calendar, Users, FileText, CheckCircle, AlertTriangle } from 'lucide-react'
 
 interface UserData {
   full_name: string
@@ -24,6 +24,7 @@ interface ApplicationRow {
   is_accepted: boolean
   payment_status: 'unpaid' | 'pending' | 'confirmed'
   is_participant: boolean
+  is_eliminated: boolean
   accepted_date: string | null
 }
 
@@ -114,7 +115,7 @@ export default function AdminApplicationsPage() {
 
       const { data: appsData, error: appsError } = await supabase
         .from('applications')
-        .select('id, user_id, status, submission_date, age, state, season_id, is_accepted, payment_status, is_participant, accepted_date')
+        .select('id, user_id, status, submission_date, age, state, season_id, is_accepted, payment_status, is_participant, is_eliminated, accepted_date')
         .order('submission_date', { ascending: false })
 
       if (appsError) {
@@ -164,7 +165,8 @@ export default function AdminApplicationsPage() {
   const participantStats = {
     total: applications.filter(a => a.is_participant).length,
     notApproved: applications.filter(a => a.is_participant && a.status !== 'approved').length,
-    approved: applications.filter(a => a.is_participant && a.status === 'approved').length,
+    approved: applications.filter(a => a.is_participant && a.status === 'approved' && !a.is_eliminated).length,
+    eliminated: applications.filter(a => a.is_participant && a.is_eliminated).length,
   }
 
   const toggleSelectApp = (appId: string) => {
@@ -194,13 +196,14 @@ export default function AdminApplicationsPage() {
       return
     }
 
-    // Filter out already approved participants
+    // Filter out already approved or eliminated participants
     const participantsToApprove = applications.filter(
-      app => selectedApps.includes(app.id) && app.is_participant && app.status !== 'approved'
+      app => selectedApps.includes(app.id) && app.is_participant && 
+      app.status !== 'approved' && !app.is_eliminated
     )
 
     if (participantsToApprove.length === 0) {
-      toast.error('Selected participants are already approved')
+      toast.error('Selected participants are already approved or have been eliminated')
       return
     }
 
@@ -298,7 +301,7 @@ export default function AdminApplicationsPage() {
           ) : (
             <>
               {/* Stats Cards for Participants */}
-              <div className="grid grid-cols-3 gap-3 md:gap-4 mb-8">
+              <div className="grid grid-cols-4 gap-3 md:gap-4 mb-8">
                 <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
                   <p className="text-xs text-gray-600 mb-1 font-semibold">Total Participants</p>
                   <p className="text-2xl font-bold text-naija-green-900">{participantStats.total}</p>
@@ -310,6 +313,10 @@ export default function AdminApplicationsPage() {
                 <div className="bg-white rounded-lg shadow-sm border border-green-200 p-4">
                   <p className="text-xs text-gray-600 mb-1 font-semibold">Approved</p>
                   <p className="text-2xl font-bold text-green-600">{participantStats.approved}</p>
+                </div>
+                <div className="bg-white rounded-lg shadow-sm border border-red-200 p-4">
+                  <p className="text-xs text-gray-600 mb-1 font-semibold">Eliminated</p>
+                  <p className="text-2xl font-bold text-red-600">{participantStats.eliminated}</p>
                 </div>
               </div>
 
@@ -503,8 +510,10 @@ function ParticipantCard({
     e.preventDefault()
     e.stopPropagation()
     
-    if (application.status === 'approved') {
-      toast.info('This participant is already approved')
+    if (application.status === 'approved' || application.is_eliminated) {
+      toast.info(application.is_eliminated
+        ? 'This participant has been eliminated from competition'
+        : 'This participant is already approved')
       return
     }
 
@@ -586,7 +595,12 @@ function ParticipantCard({
           </div>
 
           <div className="flex items-center justify-end gap-3">
-            {application.status === 'approved' ? (
+            {application.is_eliminated ? (
+              <span className="px-3 py-1.5 rounded-full text-xs font-semibold bg-red-100 text-red-800 flex items-center gap-1 whitespace-nowrap">
+                <AlertTriangle size={14} />
+                Eliminated
+              </span>
+            ) : application.status === 'approved' ? (
               <span className="px-3 py-1.5 rounded-full text-xs font-semibold bg-green-100 text-green-800 flex items-center gap-1 whitespace-nowrap">
                 <CheckCircle size={14} />
                 Approved

@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import Image from 'next/image'
-import { Trophy, Users, User } from 'lucide-react'
+import { Trophy, Users, User, Crown } from 'lucide-react'
 
 interface Champion {
   id: string
@@ -22,9 +22,10 @@ interface Runner {
 interface TopCompetitorsProps {
   champion: Champion | null
   runners: Runner[]
+  seasonStatus?: 'active' | 'ended' | 'upcoming' // Add this prop
 }
 
-export default function TopCompetitors({ champion, runners }: TopCompetitorsProps) {
+export default function TopCompetitors({ champion, runners, seasonStatus = 'active' }: TopCompetitorsProps) {
   const medals = ['🥇', '🥈', '🥉']
   const gradients = [
     'from-yellow-400 to-yellow-500',
@@ -32,11 +33,37 @@ export default function TopCompetitors({ champion, runners }: TopCompetitorsProp
     'from-orange-400 to-orange-500'
   ]
 
+  // Dynamic text based on season status
+  const sectionTitle = seasonStatus === 'ended' 
+    ? 'Top Leaders'
+    : 'Top Competitors'
+
+  const sectionDescription = seasonStatus === 'ended'
+    ? 'The champions from the just concluded season'
+    : "The leaders in this season's competition"
+
   return (
     <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 border-t border-gray-100">
       <div className="mb-16 text-center">
-        <h2 className="text-4xl md:text-5xl font-black text-naija-green-900 mb-4">Top Competitors</h2>
-        <p className="text-gray-600 text-lg">The leaders in this season's competition</p>
+        <div className="flex items-center justify-center gap-3 mb-4">
+          {seasonStatus === 'ended' ? (
+            <Crown size={40} className="text-yellow-500" />
+          ) : (
+            <Trophy size={40} className="text-naija-green-600" />
+          )}
+          <h2 className="text-4xl md:text-5xl font-black text-naija-green-900">
+            {sectionTitle}
+          </h2>
+        </div>
+        <p className="text-gray-600 text-lg">{sectionDescription}</p>
+        {seasonStatus === 'ended' && (
+          <div className="mt-3">
+            <span className="inline-flex items-center gap-2 px-4 py-2 bg-yellow-100 text-yellow-800 rounded-full text-sm font-bold border-2 border-yellow-300">
+              <Crown size={18} />
+              Season Concluded
+            </span>
+          </div>
+        )}
       </div>
 
       {champion || runners.length > 0 ? (
@@ -48,6 +75,7 @@ export default function TopCompetitors({ champion, runners }: TopCompetitorsProp
                 medal={medals[0]}
                 gradient={gradients[0]}
                 index={0}
+                isSeasonEnded={seasonStatus === 'ended'}
               />
             )}
 
@@ -58,6 +86,7 @@ export default function TopCompetitors({ champion, runners }: TopCompetitorsProp
                 medal={medals[idx + 1]}
                 gradient={gradients[idx + 1]}
                 index={idx + 1}
+                isSeasonEnded={seasonStatus === 'ended'}
               />
             ))}
           </div>
@@ -90,9 +119,10 @@ interface CompetitorCardProps {
   medal: string
   gradient: string
   index: number
+  isSeasonEnded: boolean
 }
 
-function CompetitorCard({ competitor, medal, gradient, index }: CompetitorCardProps) {
+function CompetitorCard({ competitor, medal, gradient, index, isSeasonEnded }: CompetitorCardProps) {
   return (
     <div 
       className="group relative overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-105 cursor-pointer"
@@ -115,10 +145,27 @@ function CompetitorCard({ competitor, medal, gradient, index }: CompetitorCardPr
         <div className={`absolute top-4 left-4 w-16 h-16 rounded-full bg-gradient-to-br ${gradient} flex items-center justify-center text-4xl shadow-xl border-4 border-white/20 transform group-hover:rotate-12 transition-transform duration-300`}>
           {medal}
         </div>
+
+        {/* Show crown on 1st place if season has ended */}
+        {isSeasonEnded && index === 0 && (
+          <div className="absolute top-4 right-4 animate-pulse">
+            <Crown size={32} className="text-yellow-400 drop-shadow-lg" />
+          </div>
+        )}
         
         <div className="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-black via-black/60 to-transparent"></div>
         
         <div className="absolute bottom-0 left-0 right-0 p-6">
+          {/* Show champion badge only if season ended and it's 1st place */}
+          {isSeasonEnded && index === 0 && (
+            <div className="mb-2">
+              <span className="inline-flex items-center gap-1 px-3 py-1 bg-yellow-500/90 text-white text-xs font-bold rounded-full backdrop-blur-sm">
+                <Crown size={14} />
+                CHAMPION
+              </span>
+            </div>
+          )}
+          
           <p className="text-white font-black text-2xl leading-tight line-clamp-2">
             {competitor.full_name}
           </p>
