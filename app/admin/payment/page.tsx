@@ -27,6 +27,7 @@ interface ApplicationRow {
   is_participant: boolean
   accepted_date: string | null
   payment_method?: string
+  payment_confirmed_date?: string | null
 }
 
 interface Application extends ApplicationRow {
@@ -78,11 +79,11 @@ export default function AdminPaymentManagementPage() {
         return
       }
 
+      // Modified query - removed is_participant filter to show all accepted applicants
       const { data: appsData, error: appsError } = await supabase
         .from('applications')
-        .select('id, user_id, status, submission_date, age, state, season_id, is_accepted, payment_status, payment_reference, payment_submitted_at, is_participant, accepted_date, payment_method')
+        .select('id, user_id, status, submission_date, age, state, season_id, is_accepted, payment_status, payment_reference, payment_submitted_at, is_participant, accepted_date, payment_method, payment_confirmed_date')
         .eq('is_accepted', true)
-        .eq('is_participant', false)
         .order('payment_submitted_at', { ascending: false, nullsFirst: false })
 
       if (appsError) throw appsError
@@ -182,7 +183,7 @@ export default function AdminPaymentManagementPage() {
 
       if (error) throw error
 
-      toast.success('Payment confirmed! Applicant is now a participant and will appear in the All Participants tab.')
+      toast.success('Payment confirmed! Applicant is now a participant and will also appear in the All Participants tab.')
       loadPaymentApplications()
     } catch (err) {
       console.error('Error confirming payment:', err)
@@ -201,14 +202,12 @@ export default function AdminPaymentManagementPage() {
       const { data: { session } } = await supabase.auth.getSession()
       if (!session) throw new Error('Not authenticated')
 
-      // Get the payment verification template
       const { data: templateData } = await supabase
         .from('message_templates')
         .select('*')
         .eq('template_type', 'payment_verification')
         .single()
 
-      // Use template or default message
       const messageTitle = templateData?.title || 'Payment Verification Required'
       const messageContent = templateData?.content || `Hello,
 
@@ -229,7 +228,6 @@ Thank you for your patience!
 Best regards,
 NAIJA Star Challenge Team`
 
-      // Create message record
       const { data: messageData, error: messageError } = await supabase
         .from('messages')
         .insert([
@@ -252,13 +250,11 @@ NAIJA Star Challenge Team`
 
       const messageId = messageData[0].id
 
-      // Create notification for the user
       await supabase.from('user_notifications').insert([{
         user_id: app.user_id,
         message_id: messageId,
       }])
 
-      // Create delivery records
       await supabase.from('message_delivery').insert([
         {
           message_id: messageId,
@@ -272,7 +268,6 @@ NAIJA Star Challenge Team`
         }
       ])
 
-      // Update application with contact timestamp
       await supabase
         .from('applications')
         .update({
@@ -299,6 +294,7 @@ NAIJA Star Challenge Team`
     total: applications.length,
     awaitingPayment: applications.filter(a => a.payment_status === 'unpaid').length,
     pendingReview: applications.filter(a => a.payment_status === 'pending').length,
+    confirmed: applications.filter(a => a.payment_status === 'confirmed').length,
   }
 
   const isAllSelected = selectedApps.length === applications.filter(a => a.payment_status === 'pending').length && 
@@ -326,7 +322,6 @@ NAIJA Star Challenge Team`
             <p className="text-gray-600">Review and confirm payment submissions from accepted applicants</p>
           </div>
 
-          {/* Tabs */}
           <div className="flex gap-2 mb-6 border-b border-gray-200">
             <button
               onClick={() => setActiveTab('payments')}
@@ -356,24 +351,21 @@ NAIJA Star Challenge Team`
             </button>
           </div>
 
-          {/* Tab Content */}
           {activeTab === 'payments' ? (
             <>
-              {/* Info Banner */}
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
                 <div className="flex items-start gap-3">
                   <AlertCircle className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
                   <div>
                     <p className="text-sm font-semibold text-blue-900 mb-1">Payment Workflow</p>
                     <p className="text-xs text-blue-700">
-                      Only <strong>Accepted</strong> applicants appear here. Once you confirm their payment, they automatically become <strong>Participants</strong> and move to the "All Participants" tab for final approval.
+                      Only <strong>Accepted</strong> applicants appear here. Once you confirm their payment, they become <strong>Participants</strong> and remain visible here throughout the season. They will also appear in the "All Participants" tab.
                     </p>
                   </div>
                 </div>
               </div>
 
-              {/* Stats Cards */}
-              <div className="grid grid-cols-3 gap-4 mb-8">
+              <div className="grid grid-cols-4 gap-4 mb-8">
                 <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
                   <p className="text-xs text-gray-600 mb-1 font-semibold">Total Accepted</p>
                   <p className="text-2xl font-bold text-naija-green-900">{stats.total}</p>
@@ -386,9 +378,12 @@ NAIJA Star Challenge Team`
                   <p className="text-xs text-gray-600 mb-1 font-semibold">Pending Review</p>
                   <p className="text-2xl font-bold text-orange-600">{stats.pendingReview}</p>
                 </div>
+                <div className="bg-white rounded-lg shadow-sm border border-green-200 p-4">
+                  <p className="text-xs text-gray-600 mb-1 font-semibold">Confirmed</p>
+                  <p className="text-2xl font-bold text-green-600">{stats.confirmed}</p>
+                </div>
               </div>
 
-              {/* Applications List */}
               {applications.length === 0 ? (
                 <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8 text-center">
                   <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-4">
@@ -403,7 +398,6 @@ NAIJA Star Challenge Team`
                 </div>
               ) : (
                 <>
-                  {/* Action Toolbar */}
                   <div className="flex items-center justify-between flex-wrap gap-4 mb-4">
                     <div className="flex items-center gap-4">
                       {applications.filter(a => a.payment_status === 'pending').length > 0 && (
@@ -477,7 +471,6 @@ NAIJA Star Challenge Team`
         </div>
       </main>
 
-      {/* Payment Proof Modal */}
       {showProofModal && selectedApp && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg max-w-3xl w-full max-h-[90vh] overflow-y-auto">
@@ -490,46 +483,50 @@ NAIJA Star Challenge Team`
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => {
-                      handleConfirmPayment(selectedApp.id)
-                      setShowProofModal(false)
-                      setSelectedApp(null)
-                    }}
-                    disabled={confirming === selectedApp.id}
-                    className="px-3 py-1.5 bg-green-600 text-white text-sm font-semibold rounded-lg hover:bg-green-700 transition disabled:opacity-50 flex items-center gap-1.5"
-                  >
-                    {confirming === selectedApp.id ? (
-                      <>
-                        <Loader2 size={14} className="animate-spin" />
-                        Confirming...
-                      </>
-                    ) : (
-                      <>
-                        <CheckCircle size={14} />
-                        Confirm
-                      </>
-                    )}
-                  </button>
-                  <button
-                    onClick={() => {
-                      handleRequestVerification(selectedApp.id)
-                    }}
-                    disabled={contacting === selectedApp.id}
-                    className="px-3 py-1.5 bg-orange-600 text-white text-sm font-semibold rounded-lg hover:bg-orange-700 transition disabled:opacity-50 flex items-center gap-1.5"
-                  >
-                    {contacting === selectedApp.id ? (
-                      <>
-                        <Loader2 size={14} className="animate-spin" />
-                        Sending...
-                      </>
-                    ) : (
-                      <>
-                        <Send size={14} />
-                        Request
-                      </>
-                    )}
-                  </button>
+                  {selectedApp.payment_status !== 'confirmed' && (
+                    <>
+                      <button
+                        onClick={() => {
+                          handleConfirmPayment(selectedApp.id)
+                          setShowProofModal(false)
+                          setSelectedApp(null)
+                        }}
+                        disabled={confirming === selectedApp.id}
+                        className="px-3 py-1.5 bg-green-600 text-white text-sm font-semibold rounded-lg hover:bg-green-700 transition disabled:opacity-50 flex items-center gap-1.5"
+                      >
+                        {confirming === selectedApp.id ? (
+                          <>
+                            <Loader2 size={14} className="animate-spin" />
+                            Confirming...
+                          </>
+                        ) : (
+                          <>
+                            <CheckCircle size={14} />
+                            Confirm
+                          </>
+                        )}
+                      </button>
+                      <button
+                        onClick={() => {
+                          handleRequestVerification(selectedApp.id)
+                        }}
+                        disabled={contacting === selectedApp.id}
+                        className="px-3 py-1.5 bg-orange-600 text-white text-sm font-semibold rounded-lg hover:bg-orange-700 transition disabled:opacity-50 flex items-center gap-1.5"
+                      >
+                        {contacting === selectedApp.id ? (
+                          <>
+                            <Loader2 size={14} className="animate-spin" />
+                            Sending...
+                          </>
+                        ) : (
+                          <>
+                            <Send size={14} />
+                            Request
+                          </>
+                        )}
+                      </button>
+                    </>
+                  )}
                   <button
                     onClick={() => {
                       setShowProofModal(false)
@@ -585,16 +582,19 @@ function PaymentCard({
   const [isHovering, setIsHovering] = useState(false)
 
   const canSelect = application.payment_status === 'pending'
+  const isConfirmed = application.payment_status === 'confirmed'
 
   return (
     <div className="relative">
       <div
         className={`relative border rounded-lg transition-all pl-12 p-4 ${
-          isSelected
-            ? 'bg-naija-green-50 border-naija-green-500'
-            : isHovering
-              ? 'bg-gray-50 border-gray-300'
-              : 'bg-white border-gray-200'
+          isConfirmed
+            ? 'bg-green-50 border-green-300'
+            : isSelected
+              ? 'bg-naija-green-50 border-naija-green-500'
+              : isHovering
+                ? 'bg-gray-50 border-gray-300'
+                : 'bg-white border-gray-200'
         }`}
         onMouseEnter={() => setIsHovering(true)}
         onMouseLeave={() => setIsHovering(false)}
@@ -615,6 +615,12 @@ function PaymentCard({
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
               </svg>
             )}
+          </div>
+        )}
+
+        {isConfirmed && (
+          <div className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 w-6 h-6 rounded-full bg-green-600 flex items-center justify-center">
+            <CheckCircle className="w-4 h-4 text-white" />
           </div>
         )}
 
@@ -656,6 +662,11 @@ function PaymentCard({
                     )}
                   </p>
                 )}
+                {application.payment_confirmed_date && (
+                  <p className="text-xs text-green-600 flex items-center gap-1 mt-1 font-semibold">
+                    <CheckCircle size={12} /> Confirmed: {new Date(application.payment_confirmed_date).toLocaleDateString()}
+                  </p>
+                )}
               </div>
             ) : (
               <p className="text-sm text-gray-400 flex items-center gap-2 whitespace-nowrap">
@@ -666,7 +677,12 @@ function PaymentCard({
           </div>
 
           <div className="flex items-center justify-end gap-2 flex-shrink-0">
-            {application.payment_status === 'pending' && application.payment_reference ? (
+            {isConfirmed ? (
+              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-green-100 text-green-700 rounded-lg font-semibold text-xs whitespace-nowrap">
+                <CheckCircle size={14} />
+                Payment Confirmed
+              </span>
+            ) : application.payment_status === 'pending' && application.payment_reference ? (
               <button
                 onClick={onViewProof}
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition font-semibold text-xs whitespace-nowrap"
@@ -784,7 +800,6 @@ function PaymentConfigurationTab() {
 
   return (
     <div className="space-y-6">
-      {/* Info Banner */}
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
         <div className="flex items-start gap-3">
           <AlertCircle className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
@@ -797,7 +812,6 @@ function PaymentConfigurationTab() {
         </div>
       </div>
 
-      {/* Payment Amount Card */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
         <div className="flex items-center gap-3 mb-4">
           <DollarSign className="w-5 h-5 text-naija-green-600" />
@@ -821,7 +835,6 @@ function PaymentConfigurationTab() {
         </div>
       </div>
 
-      {/* Payment Methods Card */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
         <div className="flex items-center gap-3 mb-4">
           <CreditCard className="w-5 h-5 text-naija-green-600" />
@@ -829,7 +842,6 @@ function PaymentConfigurationTab() {
         </div>
 
         <div className="space-y-4">
-          {/* Paystack Toggle */}
           <div className="flex items-start gap-4 p-4 border border-gray-200 rounded-lg">
             <div
               onClick={() => setConfig({ ...config, paystack_enabled: !config.paystack_enabled })}
@@ -851,7 +863,6 @@ function PaymentConfigurationTab() {
             </div>
           </div>
 
-          {/* Bank Transfer Toggle */}
           <div className="border border-gray-200 rounded-lg p-4">
             <div className="flex items-start gap-4 mb-4">
               <div
@@ -922,7 +933,6 @@ function PaymentConfigurationTab() {
         </div>
       </div>
 
-      {/* Preview Card */}
       <div className="bg-gradient-to-br from-naija-green-50 to-white rounded-xl shadow-sm border border-naija-green-200 p-6">
         <h3 className="text-lg font-bold text-gray-900 mb-4">Preview - User View</h3>
         <div className="bg-white rounded-lg border border-gray-200 p-6">
@@ -955,7 +965,6 @@ function PaymentConfigurationTab() {
         </div>
       </div>
 
-      {/* Save Button */}
       <div className="flex justify-end gap-3">
         <button
           onClick={handleSave}

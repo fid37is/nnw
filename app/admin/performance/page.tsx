@@ -1,18 +1,17 @@
 'use client'
 
-/* eslint-disable @typescript-eslint/no-unused-vars */
-
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { supabase } from '@/lib/supabase/client'
 import AdminSidebar from '@/components/admin/AdminSidebar'
-import { Clock, Save, AlertTriangle, Award } from 'lucide-react'
+import { Clock, Save, AlertTriangle, Award, TrendingUp } from 'lucide-react'
 
 interface Stage {
   id: string
   name: string
   stage_order: number
   max_winners: number | null
+  is_final: boolean
 }
 
 interface Participant {
@@ -20,9 +19,11 @@ interface Participant {
   user_id: string
   user_name: string
   full_name: string
+  photo_url: string | null
   position: number | null
   time_seconds: number | null
   points: number | null
+  cumulative_points: number | null
   status: string
 }
 
@@ -34,34 +35,17 @@ interface Season {
 
 // Points allocation based on position
 const BASE_POINTS = [
-  50,  // 1st place
-  40,  // 2nd place
-  32,  // 3rd place
-  26,  // 4th place
-  21,  // 5th place
-  17,  // 6th place
-  14,  // 7th place
-  12,  // 8th place
-  10,  // 9th place
-  8,   // 10th place
-  6,   // 11th place
-  5,   // 12th place
-  4,   // 13th place
-  3,   // 14th place
-  2,   // 15th place
-  1,   // 16th+ place
+  50, 40, 32, 26, 21, 17, 14, 12, 10, 8, 6, 5, 4, 3, 2, 1
 ]
 
-// Calculate base points based on position
 const getBasePoints = (position: number): number => {
   if (position <= 0) return 0
   if (position <= BASE_POINTS.length) {
     return BASE_POINTS[position - 1]
   }
-  return 1 // Everyone else gets 1 point
+  return 1
 }
 
-// Calculate time bonus (max 25 points)
 const getTimeBonus = (winnerTime: number, competitorTime: number): number => {
   if (winnerTime <= 0 || competitorTime <= 0) return 0
   const ratio = winnerTime / competitorTime
@@ -122,7 +106,7 @@ export default function PerformancePage() {
     try {
       const { data, error } = await supabase
         .from('competition_stages')
-        .select('id, name, stage_order, max_winners')
+        .select('id, name, stage_order, max_winners, is_final')
         .eq('season_id', seasonId)
         .order('stage_order', { ascending: true })
 
@@ -140,9 +124,10 @@ export default function PerformancePage() {
     try {
       const { data: appsData, error: appsError } = await supabase
         .from('applications')
-        .select('id, user_id, status')
+        .select('id, user_id, status, photo_url, is_eliminated')
         .eq('season_id', seasonId)
         .eq('status', 'approved')
+        .eq('is_eliminated', false)
 
       if (appsError) throw appsError
 
@@ -164,6 +149,9 @@ export default function PerformancePage() {
         usersMap.set(user.id, user)
       })
 
+      // Get cumulative points for each participant
+      const cumulativePoints = await getCumulativePoints(seasonId, userIds)
+
       const participantsList = appsData.map((app: any) => {
         const user = usersMap.get(app.user_id)
         return {
@@ -171,9 +159,11 @@ export default function PerformancePage() {
           user_id: app.user_id,
           full_name: user?.full_name || 'Unknown',
           user_name: user?.full_name || 'Unknown',
+          photo_url: app.photo_url || null,
           position: null,
           time_seconds: null,
           points: null,
+          cumulative_points: cumulativePoints.get(app.user_id) || 0,
           status: 'pending',
         }
       })
@@ -185,11 +175,51 @@ export default function PerformancePage() {
     }
   }
 
+  const getCumulativePoints = async (seasonId: string, userIds: string[]) => {
+    const cumulativeMap = new Map<string, number>()
+    
+    try {
+      const { data: allStages } = await supabase
+        .from('competition_stages')
+        .select('id, stage_order')
+        .eq('season_id', seasonId)
+        .order('stage_order', { ascending: true })
+
+      if (!allStages || allStages.length === 0) return cumulativeMap
+
+      const currentStageOrder = stages.find(s => s.id === selectedStageId)?.stage_order || 999
+
+      // Get all performances up to current stage
+      const stageIds = allStages
+        .filter(s => s.stage_order < currentStageOrder)
+        .map(s => s.id)
+
+      if (stageIds.length === 0) return cumulativeMap
+
+      const { data: performances } = await supabase
+        .from('stage_performances')
+        .select('user_id, points')
+        .in('competition_stage_id', stageIds)
+        .in('user_id', userIds)
+
+      if (performances) {
+        performances.forEach((perf: any) => {
+          const current = cumulativeMap.get(perf.user_id) || 0
+          cumulativeMap.set(perf.user_id, current + (perf.points || 0))
+        })
+      }
+    } catch (err) {
+      console.error('Error getting cumulative points:', err)
+    }
+
+    return cumulativeMap
+  }
+
   const loadPerformances = async () => {
     try {
       const { data, error } = await supabase
         .from('stage_performances')
-        .select('user_id, position, time_seconds, points, status')
+        .select('user_id, position, time_seconds, points, cumulative_points, status')
         .eq('competition_stage_id', selectedStageId)
 
       if (error && error.code !== 'PGRST116') throw error
@@ -215,17 +245,16 @@ export default function PerformancePage() {
   const handleSavePerformance = async (userId: string) => {
     const perf = performanceData[userId]
     if (!perf || (!perf.minutes && !perf.seconds)) {
-      toast.error('Enter time in minutes and seconds')
+      toast.error('Enter time in MM:SS format')
       return
     }
 
     setSavingUserId(userId)
 
     try {
-      // Convert minutes and seconds to total seconds
       const minutes = parseInt(perf.minutes || '0')
       const seconds = parseInt(perf.seconds || '0')
-      const totalSeconds = minutes * 60 + seconds
+      const totalSeconds = (minutes * 60) + seconds
 
       if (totalSeconds <= 0) {
         toast.error('Time must be greater than zero')
@@ -233,7 +262,6 @@ export default function PerformancePage() {
         return
       }
 
-      // Check if performance already exists
       const { data: existingPerf } = await supabase
         .from('stage_performances')
         .select('id')
@@ -265,10 +293,11 @@ export default function PerformancePage() {
         if (error) throw error
       }
 
-      // Recalculate positions and points for all participants in this stage
       await updatePositionsAndPoints()
+      await updateCumulativePoints()
 
       toast.success('Performance saved and points calculated!')
+      loadParticipants(selectedSeasonId)
       loadPerformances()
     } catch (err) {
       toast.error('Failed to save performance')
@@ -280,7 +309,6 @@ export default function PerformancePage() {
 
   const updatePositionsAndPoints = async () => {
     try {
-      // Get all performances for this stage sorted by time (fastest first)
       const { data: allPerformances, error } = await supabase
         .from('stage_performances')
         .select('id, user_id, time_seconds')
@@ -291,10 +319,8 @@ export default function PerformancePage() {
       if (error) throw error
       if (!allPerformances || allPerformances.length === 0) return
 
-      // Get the winner's time (fastest time)
       const winnerTime = allPerformances[0].time_seconds
 
-      // Calculate position, base points, time bonus, and total points for each
       for (let i = 0; i < allPerformances.length; i++) {
         const performance = allPerformances[i]
         const position = i + 1
@@ -317,6 +343,19 @@ export default function PerformancePage() {
     }
   }
 
+  const updateCumulativePoints = async () => {
+    try {
+      // Call the database function to update cumulative points
+      const { error } = await supabase.rpc('update_cumulative_points', {
+        p_season_id: selectedSeasonId
+      })
+
+      if (error) throw error
+    } catch (err) {
+      console.error('Failed to update cumulative points:', err)
+    }
+  }
+
   const calculateEliminations = () => {
     const currentStage = stages.find(s => s.id === selectedStageId)
     if (!currentStage || !currentStage.max_winners) {
@@ -324,18 +363,27 @@ export default function PerformancePage() {
       return
     }
 
-    // Get all participants with recorded times
     const participantsWithTimes = participants
-      .filter(p => performanceData[p.user_id]?.minutes || performanceData[p.user_id]?.seconds)
+      .filter(p => {
+        const perf = performanceData[p.user_id]
+        return perf && (perf.minutes || perf.seconds)
+      })
       .map(p => {
-        const minutes = parseInt(performanceData[p.user_id]?.minutes || '0')
-        const seconds = parseInt(performanceData[p.user_id]?.seconds || '0')
+        const perf = performanceData[p.user_id]
+        const minutes = parseInt(perf?.minutes || '0')
+        const seconds = parseInt(perf?.seconds || '0')
+        const totalSeconds = (minutes * 60) + seconds
         return {
           ...p,
-          totalSeconds: minutes * 60 + seconds,
+          totalSeconds: totalSeconds,
         }
       })
-      .sort((a, b) => a.totalSeconds - b.totalSeconds) // Sort by time (lowest first)
+      .sort((a, b) => {
+        if (a.totalSeconds === b.totalSeconds) {
+          return (b.cumulative_points || 0) - (a.cumulative_points || 0)
+        }
+        return a.totalSeconds - b.totalSeconds
+      })
 
     if (participantsWithTimes.length === 0) {
       toast.error('No performances recorded yet')
@@ -348,7 +396,7 @@ export default function PerformancePage() {
     }
 
     const maxWinners = currentStage.max_winners
-    const toEliminate = participantsWithTimes.slice(maxWinners) // Everyone after the max_winners
+    const toEliminate = participantsWithTimes.slice(maxWinners)
 
     setEliminationPreview(toEliminate.map(p => p.user_id))
     setShowEliminationConfirm(true)
@@ -356,17 +404,22 @@ export default function PerformancePage() {
 
   const handleElimination = async () => {
     try {
-      // Update application status to 'eliminated' for those who didn't make it
+      const currentStage = stages.find(s => s.id === selectedStageId)
+      
       for (const userId of eliminationPreview) {
         const participant = participants.find(p => p.user_id === userId)
         if (participant) {
           const { error } = await supabase
             .from('applications')
-            .update({ status: 'eliminated' })
+            .update({ is_eliminated: true })
             .eq('id', participant.id)
 
           if (error) throw error
         }
+      }
+
+      if (currentStage?.is_final) {
+        await setSeasonChampions()
       }
 
       toast.success(`${eliminationPreview.length} participant(s) eliminated`)
@@ -376,6 +429,61 @@ export default function PerformancePage() {
     } catch (err) {
       console.error(err)
       toast.error('Failed to eliminate participants')
+    }
+  }
+
+  const setSeasonChampions = async () => {
+    try {
+      const finalists = participants
+        .filter(p => {
+          const perf = performanceData[p.user_id]
+          return perf && (perf.minutes || perf.seconds)
+        })
+        .map(p => {
+          const perf = performanceData[p.user_id]
+          const minutes = parseInt(perf?.minutes || '0')
+          const seconds = parseInt(perf?.seconds || '0')
+          const totalSeconds = (minutes * 60) + seconds
+          return {
+            ...p,
+            totalSeconds: totalSeconds,
+          }
+        })
+        .sort((a, b) => {
+          if (a.totalSeconds === b.totalSeconds) {
+            return (b.cumulative_points || 0) - (a.cumulative_points || 0)
+          }
+          return a.totalSeconds - b.totalSeconds
+        })
+
+      const championsData = finalists.slice(0, 3).map((finalist, index) => ({
+        season_id: selectedSeasonId,
+        user_id: finalist.user_id,
+        full_name: finalist.full_name,
+        photo_url: finalist.photo_url,
+        final_points: finalist.cumulative_points || 0,
+        position: index + 1
+      }))
+
+      for (const champion of championsData) {
+        const { error } = await supabase
+          .from('champions')
+          .upsert(champion, { onConflict: 'season_id,user_id' })
+
+        if (error) throw error
+      }
+
+      const { error: seasonError } = await supabase
+        .from('seasons')
+        .update({ status: 'ended' })
+        .eq('id', selectedSeasonId)
+
+      if (seasonError) throw seasonError
+
+      toast.success('Champions have been set! Season completed.')
+    } catch (err) {
+      console.error('Failed to set champions:', err)
+      toast.error('Failed to set champions')
     }
   }
 
@@ -389,16 +497,27 @@ export default function PerformancePage() {
 
   const getPositionForUser = (userId: string) => {
     const participantsWithTimes = participants
-      .filter(p => performanceData[p.user_id]?.minutes || performanceData[p.user_id]?.seconds)
+      .filter(p => {
+        const perf = performanceData[p.user_id]
+        return perf && (perf.minutes || perf.seconds)
+      })
       .map(p => {
-        const minutes = parseInt(performanceData[p.user_id]?.minutes || '0')
-        const seconds = parseInt(performanceData[p.user_id]?.seconds || '0')
+        const perf = performanceData[p.user_id]
+        const minutes = parseInt(perf?.minutes || '0')
+        const seconds = parseInt(perf?.seconds || '0')
+        const totalSeconds = (minutes * 60) + seconds
         return {
           user_id: p.user_id,
-          totalSeconds: minutes * 60 + seconds,
+          totalSeconds: totalSeconds,
+          cumulative_points: p.cumulative_points || 0,
         }
       })
-      .sort((a, b) => a.totalSeconds - b.totalSeconds)
+      .sort((a, b) => {
+        if (a.totalSeconds === b.totalSeconds) {
+          return b.cumulative_points - a.cumulative_points
+        }
+        return a.totalSeconds - b.totalSeconds
+      })
 
     const position = participantsWithTimes.findIndex(p => p.user_id === userId)
     return position >= 0 ? position + 1 : null
@@ -409,13 +528,18 @@ export default function PerformancePage() {
     if (!position) return null
 
     const participantsWithTimes = participants
-      .filter(p => performanceData[p.user_id]?.minutes || performanceData[p.user_id]?.seconds)
+      .filter(p => {
+        const perf = performanceData[p.user_id]
+        return perf && (perf.minutes || perf.seconds)
+      })
       .map(p => {
-        const minutes = parseInt(performanceData[p.user_id]?.minutes || '0')
-        const seconds = parseInt(performanceData[p.user_id]?.seconds || '0')
+        const perf = performanceData[p.user_id]
+        const minutes = parseInt(perf?.minutes || '0')
+        const seconds = parseInt(perf?.seconds || '0')
+        const totalSeconds = (minutes * 60) + seconds
         return {
           user_id: p.user_id,
-          totalSeconds: minutes * 60 + seconds,
+          totalSeconds: totalSeconds,
         }
       })
       .sort((a, b) => a.totalSeconds - b.totalSeconds)
@@ -429,7 +553,10 @@ export default function PerformancePage() {
   }
 
   const currentStage = stages.find(s => s.id === selectedStageId)
-  const participantsWithTimes = participants.filter(p => performanceData[p.user_id]?.minutes || performanceData[p.user_id]?.seconds).length
+  const participantsWithTimes = participants.filter(p => {
+    const perf = performanceData[p.user_id]
+    return perf && (perf.minutes || perf.seconds)
+  }).length
 
   if (loading) {
     return (
@@ -448,31 +575,43 @@ export default function PerformancePage() {
 
       <main className="flex-1 lg:ml-64 min-h-screen bg-gradient-to-br from-white via-naija-green-50 to-white">
         <div className="max-w-7xl mx-auto px-4 py-8 lg:p-8">
-          {/* Header */}
           <div className="mb-8">
             <h1 className="text-3xl font-bold text-naija-green-900 flex items-center gap-2">
               <Clock size={32} />
               Record Performance
             </h1>
-            <p className="text-gray-600">Enter completion times - points calculated automatically</p>
+            <p className="text-gray-600">Enter completion times - points calculated automatically with cumulative tracking</p>
           </div>
 
-          {/* Points System Info */}
+          {currentStage?.is_final && (
+            <div className="bg-gradient-to-r from-yellow-50 to-amber-50 border-2 border-yellow-400 rounded-lg p-4 mb-6">
+              <div className="flex items-start gap-3">
+                <Award className="text-yellow-600 mt-0.5 flex-shrink-0" size={24} />
+                <div>
+                  <h3 className="font-bold text-yellow-900 mb-2">🏆 FINAL STAGE</h3>
+                  <p className="text-sm text-yellow-800">
+                    This is the final stage. After elimination, the top 3 finalists will be set as the season champions!
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
           <div className="bg-gradient-to-r from-purple-50 to-blue-50 border-2 border-purple-200 rounded-lg p-4 mb-6">
             <div className="flex items-start gap-3">
               <Award className="text-purple-600 mt-0.5 flex-shrink-0" size={24} />
               <div>
-                <h3 className="font-bold text-purple-900 mb-2">Hybrid Points System</h3>
+                <h3 className="font-bold text-purple-900 mb-2">Hybrid Points System with Cumulative Tracking</h3>
                 <div className="text-sm text-purple-800 space-y-1">
                   <p>• <strong>Base Points:</strong> 1st=50pts, 2nd=40pts, 3rd=32pts (diminishing for lower positions)</p>
                   <p>• <strong>Time Bonus:</strong> Up to 25 bonus points based on how close to winner's time</p>
-                  <p>• <strong>Total Points:</strong> Base Points + Time Bonus (recalculated after each save)</p>
+                  <p>• <strong>Cumulative Points:</strong> Total points from all previous stages (shown for tiebreaker reference)</p>
+                  <p>• <strong>Tiebreaker Rule:</strong> If two contestants finish with the same time, the one with higher cumulative points advances</p>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Filters */}
           <div className="bg-white rounded-lg shadow-sm border border-naija-green-100 p-4 mb-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
@@ -501,7 +640,7 @@ export default function PerformancePage() {
                   {stages.length === 0 && <option>No stages</option>}
                   {stages.map(s => (
                     <option key={s.id} value={s.id}>
-                      {s.name} {s.max_winners ? `(Top ${s.max_winners} advance)` : ''}
+                      {s.name} {s.max_winners ? `(Top ${s.max_winners} advance)` : ''} {s.is_final ? '🏆 FINAL' : ''}
                     </option>
                   ))}
                 </select>
@@ -509,7 +648,6 @@ export default function PerformancePage() {
             </div>
           </div>
 
-          {/* Stage Info */}
           {currentStage && (
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
               <div className="flex items-start gap-3">
@@ -525,7 +663,7 @@ export default function PerformancePage() {
                       onClick={calculateEliminations}
                       className="mt-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition text-sm font-semibold"
                     >
-                      Process Eliminations
+                      {currentStage.is_final ? '🏆 Set Champions & Process Eliminations' : 'Process Eliminations'}
                     </button>
                   )}
                 </div>
@@ -533,7 +671,6 @@ export default function PerformancePage() {
             </div>
           )}
 
-          {/* Participants Table */}
           {participants.length === 0 ? (
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8 text-center">
               <p className="text-gray-600 font-semibold">No approved participants</p>
@@ -548,19 +685,31 @@ export default function PerformancePage() {
                       <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Position</th>
                       <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Participant</th>
                       <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Time (MM:SS)</th>
-                      <th className="px-6 py-3 text-center text-sm font-semibold text-gray-900">Points</th>
+                      <th className="px-6 py-3 text-center text-sm font-semibold text-gray-900">Stage Points</th>
+                      <th className="px-6 py-3 text-center text-sm font-semibold text-gray-900">
+                        <div className="flex items-center justify-center gap-1">
+                          <TrendingUp size={16} />
+                          Cumulative
+                        </div>
+                      </th>
                       <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Action</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-200">
                     {participants
                       .sort((a, b) => {
-                        const timeA = performanceData[a.user_id] 
-                          ? (parseInt(performanceData[a.user_id].minutes || '0') * 60 + parseInt(performanceData[a.user_id].seconds || '0'))
+                        const perfA = performanceData[a.user_id]
+                        const perfB = performanceData[b.user_id]
+                        const timeA = (perfA && (perfA.minutes || perfA.seconds))
+                          ? (parseInt(perfA.minutes || '0') * 60) + parseInt(perfA.seconds || '0')
                           : Infinity
-                        const timeB = performanceData[b.user_id]
-                          ? (parseInt(performanceData[b.user_id].minutes || '0') * 60 + parseInt(performanceData[b.user_id].seconds || '0'))
+                        const timeB = (perfB && (perfB.minutes || perfB.seconds))
+                          ? (parseInt(perfB.minutes || '0') * 60) + parseInt(perfB.seconds || '0')
                           : Infinity
+                        
+                        if (timeA === timeB) {
+                          return (b.cumulative_points || 0) - (a.cumulative_points || 0)
+                        }
                         return timeA - timeB
                       })
                       .map((participant) => {
@@ -568,72 +717,78 @@ export default function PerformancePage() {
                         const points = getPointsForUser(participant.user_id)
                         return (
                           <tr key={participant.user_id} className="hover:bg-gray-50">
-                            <td className="px-6 py-3 text-sm">
-                              {position ? (
-                                <span className="inline-flex items-center justify-center w-8 h-8 bg-naija-green-600 text-white rounded-full text-xs font-bold">
-                                  {position}
+                            <td className="px-6 py-3 text-sm font-bold text-gray-900">
+                              {position ? `#${position}` : '-'}
+                            </td>
+                            <td className="px-6 py-3">
+                              <div className="flex items-center gap-3">
+                                {participant.photo_url && (
+                                  <img 
+                                    src={participant.photo_url} 
+                                    alt={participant.full_name}
+                                    className="w-10 h-10 rounded-full object-cover"
+                                  />
+                                )}
+                                <span className="text-sm font-semibold text-gray-900">
+                                  {participant.full_name}
                                 </span>
-                              ) : (
-                                <span className="text-gray-400">-</span>
-                              )}
+                              </div>
                             </td>
-                            <td className="px-6 py-3 text-sm font-medium text-gray-900">
-                              {participant.full_name}
-                            </td>
-                            <td className="px-6 py-3 text-sm">
+                            <td className="px-6 py-3">
                               <div className="flex items-center gap-2">
                                 <input
                                   type="number"
+                                  placeholder="MM"
                                   min="0"
                                   value={performanceData[participant.user_id]?.minutes || ''}
-                                  onChange={e => setPerformanceData({
-                                    ...performanceData,
-                                    [participant.user_id]: {
-                                      ...performanceData[participant.user_id],
-                                      minutes: e.target.value,
-                                    }
-                                  })}
-                                  placeholder="MM"
-                                  className="w-16 px-2 py-1 rounded border border-gray-300 focus:outline-none focus:border-naija-green-600 text-center"
+                                  onChange={(e) => {
+                                    setPerformanceData({
+                                      ...performanceData,
+                                      [participant.user_id]: {
+                                        minutes: e.target.value,
+                                        seconds: performanceData[participant.user_id]?.seconds || ''
+                                      }
+                                    })
+                                  }}
+                                  className="w-16 px-2 py-1.5 border border-gray-300 rounded text-sm text-center focus:outline-none focus:border-naija-green-600"
                                 />
-                                <span className="text-gray-500 font-bold">:</span>
+                                <span className="text-gray-500 font-semibold">:</span>
                                 <input
                                   type="number"
+                                  placeholder="SS"
                                   min="0"
                                   max="59"
                                   value={performanceData[participant.user_id]?.seconds || ''}
-                                  onChange={e => {
+                                  onChange={(e) => {
                                     const val = parseInt(e.target.value || '0')
-                                    if (val <= 59) {
-                                      setPerformanceData({
-                                        ...performanceData,
-                                        [participant.user_id]: {
-                                          ...performanceData[participant.user_id],
-                                          seconds: e.target.value,
-                                        }
-                                      })
-                                    }
+                                    if (val > 59) return
+                                    setPerformanceData({
+                                      ...performanceData,
+                                      [participant.user_id]: {
+                                        minutes: performanceData[participant.user_id]?.minutes || '',
+                                        seconds: e.target.value
+                                      }
+                                    })
                                   }}
-                                  placeholder="SS"
-                                  className="w-16 px-2 py-1 rounded border border-gray-300 focus:outline-none focus:border-naija-green-600 text-center"
+                                  className="w-16 px-2 py-1.5 border border-gray-300 rounded text-sm text-center focus:outline-none focus:border-naija-green-600"
                                 />
                               </div>
                             </td>
                             <td className="px-6 py-3 text-center">
-                              {points !== null ? (
-                                <span className="inline-flex items-center gap-1 px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm font-bold">
-                                  <Award size={14} />
-                                  {points}
-                                </span>
-                              ) : (
-                                <span className="text-gray-400">-</span>
-                              )}
+                              <span className="text-sm font-bold text-naija-green-700">
+                                {points ? `${points} pts` : '-'}
+                              </span>
                             </td>
-                            <td className="px-6 py-3 text-sm">
+                            <td className="px-6 py-3 text-center">
+                              <span className="text-sm font-semibold text-purple-700">
+                                {participant.cumulative_points || 0} pts
+                              </span>
+                            </td>
+                            <td className="px-6 py-3">
                               <button
                                 onClick={() => handleSavePerformance(participant.user_id)}
                                 disabled={savingUserId === participant.user_id}
-                                className="px-3 py-1 bg-naija-green-600 text-white rounded hover:bg-naija-green-700 transition flex items-center gap-1 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="px-3 py-1.5 bg-naija-green-600 text-white rounded hover:bg-naija-green-700 transition flex items-center gap-1.5 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                               >
                                 {savingUserId === participant.user_id ? (
                                   <>
@@ -657,16 +812,23 @@ export default function PerformancePage() {
             </div>
           )}
 
-          {/* Elimination Confirmation Dialog */}
           {showEliminationConfirm && (
             <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
               <div className="bg-white rounded-lg shadow-lg max-w-md w-full p-6">
                 <h3 className="text-lg font-bold text-gray-900 mb-3 flex items-center gap-2">
                   <AlertTriangle className="text-red-600" size={24} />
-                  Confirm Eliminations
+                  {currentStage?.is_final ? 'Set Champions & Confirm Eliminations' : 'Confirm Eliminations'}
                 </h3>
+                {currentStage?.is_final && (
+                  <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mb-4">
+                    <p className="text-sm text-yellow-800 font-semibold">
+                      🏆 The top 3 finalists will be set as champions and the season will be marked as complete.
+                    </p>
+                  </div>
+                )}
                 <p className="text-gray-600 mb-4">
-                  The following {eliminationPreview.length} participant(s) will be eliminated based on their times:
+                  The following {eliminationPreview.length} participant(s) will be eliminated based on their times 
+                  {eliminationPreview.length > 1 ? ' (tiebreakers resolved by cumulative points)' : ''}:
                 </p>
                 <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-6 max-h-48 overflow-y-auto">
                   <ul className="space-y-1">
@@ -675,7 +837,10 @@ export default function PerformancePage() {
                       const time = formatTime(userId)
                       return (
                         <li key={userId} className="text-sm text-gray-900">
-                          <strong>{participant?.full_name}</strong> - {time}
+                          <strong>{participant?.full_name}</strong> - {time} 
+                          <span className="text-gray-600 ml-2">
+                            (Σ{participant?.cumulative_points || 0} pts)
+                          </span>
                         </li>
                       )
                     })}
@@ -686,7 +851,7 @@ export default function PerformancePage() {
                     onClick={handleElimination}
                     className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition font-semibold"
                   >
-                    Confirm Elimination
+                    {currentStage?.is_final ? 'Set Champions & Confirm' : 'Confirm Elimination'}
                   </button>
                   <button
                     onClick={() => {

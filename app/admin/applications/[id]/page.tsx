@@ -5,7 +5,7 @@ import { use } from 'react'
 import Link from 'next/link'
 import { toast } from 'sonner'
 import { supabase } from '@/lib/supabase/client'
-import { ArrowLeft, Send, CheckCircle, XCircle, Clock } from 'lucide-react'
+import { ArrowLeft, Send, CheckCircle, XCircle, Clock, RotateCcw, AlertTriangle } from 'lucide-react'
 
 interface ApplicationDetail {
   id: string
@@ -50,6 +50,9 @@ export default function AdminApplicationDetailPage({
   const [updating, setUpdating] = useState(false)
   const [comment, setComment] = useState('')
   const [comments, setComments] = useState<Comment[]>([])
+  const [showStatusModal, setShowStatusModal] = useState(false)
+  const [selectedNewStatus, setSelectedNewStatus] = useState<'pending' | 'under_review' | 'rejected' | null>(null)
+  const [showRevokeModal, setShowRevokeModal] = useState(false)
 
   useEffect(() => {
     if (!id) return
@@ -141,7 +144,9 @@ export default function AdminApplicationDetailPage({
 
       setApplication({ ...application, status: newStatus })
       const statusLabel = newStatus === 'under_review' ? 'Under Review' : newStatus === 'rejected' ? 'Rejected' : 'Pending'
-      toast.success(`Application marked as ${statusLabel}`)
+      toast.success(`Status changed to ${statusLabel}`)
+      setShowStatusModal(false)
+      setSelectedNewStatus(null)
     } catch (err) {
       console.error('Error updating status:', err)
       toast.error('Failed to update status')
@@ -159,17 +164,57 @@ export default function AdminApplicationDetailPage({
         .from('applications')
         .update({
           is_accepted: true,
+          status: 'approved',
           accepted_date: new Date().toISOString()
         })
         .eq('id', application.id)
 
       if (error) throw error
 
-      setApplication({ ...application, is_accepted: true, accepted_date: new Date().toISOString() })
+      setApplication({ 
+        ...application, 
+        is_accepted: true, 
+        status: 'approved',
+        accepted_date: new Date().toISOString() 
+      })
       toast.success('Application accepted! Now go to Messaging Center to send acceptance notification.', { duration: 6000 })
     } catch (err) {
       console.error('Error accepting application:', err)
       toast.error('Failed to accept application')
+    } finally {
+      setUpdating(false)
+    }
+  }
+
+  const handleRevokeAcceptance = async () => {
+    if (!application) return
+
+    setUpdating(true)
+    try {
+      const { error } = await supabase
+        .from('applications')
+        .update({
+          is_accepted: false,
+          status: 'pending',
+          accepted_date: null,
+          payment_status: 'unpaid'
+        })
+        .eq('id', application.id)
+
+      if (error) throw error
+
+      setApplication({ 
+        ...application, 
+        is_accepted: false, 
+        status: 'pending',
+        accepted_date: null,
+        payment_status: 'unpaid'
+      })
+      toast.success('Acceptance revoked. Application reset to pending status.')
+      setShowRevokeModal(false)
+    } catch (err) {
+      console.error('Error revoking acceptance:', err)
+      toast.error('Failed to revoke acceptance')
     } finally {
       setUpdating(false)
     }
@@ -366,38 +411,84 @@ export default function AdminApplicationDetailPage({
           </div>
         </div>
 
-        {/* Action Buttons */}
-        {!application.is_accepted && (
-          <div className="bg-white rounded-lg shadow-sm border border-naija-green-100 p-4 mb-6">
-            <h2 className="font-semibold text-gray-900 mb-3">Actions</h2>
-            <div className="flex flex-col sm:flex-row gap-3">
+        {/* Action Buttons - Always Available */}
+        <div className="bg-white rounded-lg shadow-sm border border-naija-green-100 p-4 mb-6">
+          <h2 className="font-semibold text-gray-900 mb-3">Manage Application Status</h2>
+          
+          <div className="flex flex-col gap-3">
+            {/* Primary Actions Row */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <button
-                onClick={() => handleStatusUpdate('under_review')}
-                disabled={updating}
-                className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition disabled:opacity-50"
+                onClick={() => {
+                  setSelectedNewStatus('under_review')
+                  setShowStatusModal(true)
+                }}
+                disabled={updating || (application.status === 'under_review' && !application.is_accepted)}
+                className="flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <Clock size={18} />
                 Under Review
               </button>
+              
+              {!application.is_accepted ? (
+                <button
+                  onClick={handleAccept}
+                  disabled={updating}
+                  className="flex items-center justify-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition disabled:opacity-50"
+                >
+                  <CheckCircle size={18} />
+                  Accept
+                </button>
+              ) : (
+                <button
+                  onClick={() => setShowRevokeModal(true)}
+                  disabled={updating}
+                  className="flex items-center justify-center gap-2 px-4 py-2 bg-orange-600 text-white rounded-lg font-semibold hover:bg-orange-700 transition disabled:opacity-50"
+                >
+                  <RotateCcw size={18} />
+                  Revoke
+                </button>
+              )}
+              
               <button
-                onClick={handleAccept}
-                disabled={updating}
-                className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition disabled:opacity-50"
-              >
-                <CheckCircle size={18} />
-                Accept
-              </button>
-              <button
-                onClick={() => handleStatusUpdate('rejected')}
-                disabled={updating}
-                className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700 transition disabled:opacity-50"
+                onClick={() => {
+                  setSelectedNewStatus('rejected')
+                  setShowStatusModal(true)
+                }}
+                disabled={updating || (application.status === 'rejected' && !application.is_accepted)}
+                className="flex items-center justify-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <XCircle size={18} />
                 Reject
               </button>
             </div>
+
+            {/* Reset to Pending */}
+            <button
+              onClick={() => {
+                setSelectedNewStatus('pending')
+                setShowStatusModal(true)
+              }}
+              disabled={updating || (application.status === 'pending' && !application.is_accepted)}
+              className="flex items-center justify-center gap-2 px-4 py-2 border-2 border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <RotateCcw size={18} />
+              Reset to Pending
+            </button>
           </div>
-        )}
+
+          {/* Current Status Info */}
+          <div className="mt-4 p-3 bg-gray-50 rounded-lg text-sm">
+            <p className="text-gray-700">
+              <span className="font-semibold">Current Status:</span> {getStatusLabel()}
+            </p>
+            {application.is_accepted && application.accepted_date && (
+              <p className="text-gray-600 text-xs mt-1">
+                Accepted on: {new Date(application.accepted_date).toLocaleString()}
+              </p>
+            )}
+          </div>
+        </div>
 
         {/* Comments Section */}
         <div className="bg-white rounded-lg shadow-sm border border-naija-green-100 p-4">
@@ -442,6 +533,93 @@ export default function AdminApplicationDetailPage({
           </div>
         </div>
       </div>
+
+      {/* Status Change Confirmation Modal */}
+      {showStatusModal && selectedNewStatus && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-lg max-w-md w-full p-6">
+            <div className="flex items-start gap-3 mb-4">
+              <AlertTriangle className="text-yellow-600 flex-shrink-0 mt-1" size={24} />
+              <div>
+                <h3 className="text-lg font-bold text-gray-900 mb-2">Confirm Status Change</h3>
+                <p className="text-gray-600 text-sm">
+                  {application.is_accepted && selectedNewStatus !== 'pending' ? (
+                    <>This will change the status but <strong>keep the accepted flag</strong>. To fully revoke acceptance, use the "Revoke" button instead.</>
+                  ) : (
+                    <>Are you sure you want to change this application's status to <strong className="capitalize">{selectedNewStatus.replace('_', ' ')}</strong>?</>
+                  )}
+                </p>
+                {selectedNewStatus === 'rejected' && application.is_accepted && (
+                  <p className="text-orange-600 text-sm font-semibold mt-2">
+                    ⚠️ The applicant will remain accepted but status will show rejected. Consider using "Revoke" if you want to fully reverse the acceptance.
+                  </p>
+                )}
+              </div>
+            </div>
+            <div className="flex gap-3">
+              <button
+                onClick={() => handleStatusUpdate(selectedNewStatus)}
+                disabled={updating}
+                className="flex-1 px-4 py-2 bg-naija-green-600 text-white rounded-lg hover:bg-naija-green-700 transition font-semibold disabled:opacity-50"
+              >
+                {updating ? 'Updating...' : 'Confirm'}
+              </button>
+              <button
+                onClick={() => {
+                  setShowStatusModal(false)
+                  setSelectedNewStatus(null)
+                }}
+                disabled={updating}
+                className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition disabled:opacity-50"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Revoke Acceptance Confirmation Modal */}
+      {showRevokeModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-lg max-w-md w-full p-6">
+            <div className="flex items-start gap-3 mb-4">
+              <AlertTriangle className="text-red-600 flex-shrink-0 mt-1" size={24} />
+              <div>
+                <h3 className="text-lg font-bold text-gray-900 mb-2">Revoke Acceptance</h3>
+                <p className="text-gray-600 text-sm mb-3">
+                  This will completely revoke the acceptance and reset the application to pending status. This action will:
+                </p>
+                <ul className="text-sm text-gray-600 space-y-1 list-disc list-inside">
+                  <li>Remove accepted status</li>
+                  <li>Reset to pending status</li>
+                  <li>Reset payment status to unpaid</li>
+                  <li>Clear acceptance date</li>
+                </ul>
+                <p className="text-red-600 text-sm font-semibold mt-3">
+                  ⚠️ This action should be used carefully as it resets all acceptance-related data.
+                </p>
+              </div>
+            </div>
+            <div className="flex gap-3">
+              <button
+                onClick={handleRevokeAcceptance}
+                disabled={updating}
+                className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition font-semibold disabled:opacity-50"
+              >
+                {updating ? 'Revoking...' : 'Yes, Revoke'}
+              </button>
+              <button
+                onClick={() => setShowRevokeModal(false)}
+                disabled={updating}
+                className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition disabled:opacity-50"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   )
 }

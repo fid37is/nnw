@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { supabase } from '@/lib/supabase/client'
-import { Search, ArrowLeft, User, Users as UsersIcon } from 'lucide-react'
+import { Search, ArrowLeft, User, Users as UsersIcon, X } from 'lucide-react'
 import Navbar from '../navbar'
 
 interface Participant {
@@ -16,6 +16,7 @@ interface Participant {
   age: number
   state: string
   geo_zone: string | null
+  is_eliminated: boolean
 }
 
 interface ParticipantStats {
@@ -84,9 +85,9 @@ export default function ParticipantsPage() {
     try {
       const { data: appsData, error: appsError } = await supabase
         .from('applications')
-        .select('id, user_id, status, photo_url, age, state, geo_zone')
+        .select('id, user_id, status, photo_url, age, state, geo_zone, is_eliminated')
         .eq('season_id', selectedSeasonId)
-        .in('status', ['approved', 'eliminated'])
+        .eq('status', 'approved')
 
       if (appsError) throw appsError
 
@@ -116,10 +117,11 @@ export default function ParticipantsPage() {
           user_id: app.user_id,
           full_name: user?.full_name || 'Unknown',
           photo_url: app.photo_url || null,
-          status: app.status === 'eliminated' ? 'eliminated' : 'active',
+          status: app.is_eliminated ? 'eliminated' : 'active',
           age: app.age,
           state: app.state,
           geo_zone: app.geo_zone || null,
+          is_eliminated: app.is_eliminated || false,
         }
       })
 
@@ -189,14 +191,14 @@ export default function ParticipantsPage() {
       const ranking = sortedScores.findIndex(([id]) => id === participant.id) + 1
 
       let eliminationDate = null
-      if (participant.status === 'eliminated') {
+      if (participant.is_eliminated) {
         const { data: appData } = await supabase
           .from('applications')
-          .select('reviewed_at')
+          .select('eliminated_at')
           .eq('id', participant.id)
           .single()
 
-        eliminationDate = appData?.reviewed_at || null
+        eliminationDate = appData?.eliminated_at || null
       }
 
       setParticipantStats({
@@ -228,22 +230,19 @@ export default function ParticipantsPage() {
     setParticipantStats(null)
   }
 
-  const activeCount = participants.filter(p => p.status === 'active').length
-  const eliminatedCount = participants.filter(p => p.status === 'eliminated').length
+  const activeCount = participants.filter(p => !p.is_eliminated).length
+  const eliminatedCount = participants.filter(p => p.is_eliminated).length
 
   return (
     <main className="min-h-screen bg-white overflow-x-hidden">
-      {/* Navbar */}
       <Navbar />
 
-      {/* Content */}
       {loading ? (
         <div className="flex items-center justify-center min-h-[calc(100vh-80px)]">
           <div className="animate-spin w-8 h-8 border-4 border-naija-green-200 border-t-naija-green-600 rounded-full"></div>
         </div>
       ) : (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
-          {/* Header */}
           <div className="mb-8">
             <Link href="/" className="inline-flex items-center gap-2 text-naija-green-600 hover:text-naija-green-700 mb-6 font-medium transition group">
               <ArrowLeft size={18} className="group-hover:-translate-x-1 transition-transform" />
@@ -256,7 +255,6 @@ export default function ParticipantsPage() {
             <p className="text-gray-600">Browse all competitors</p>
           </div>
 
-          {/* Season Selector */}
           {seasons.length > 1 && (
             <div className="mb-8 max-w-xs mx-auto">
               <label className="block text-sm font-semibold text-gray-700 mb-2">Select Season</label>
@@ -274,7 +272,6 @@ export default function ParticipantsPage() {
             </div>
           )}
 
-          {/* Stats */}
           <div className="grid grid-cols-3 gap-4 mb-8">
             <div className="p-4 bg-gray-50 rounded-lg border border-gray-200 text-center">
               <div className="text-2xl md:text-3xl font-bold text-gray-900">{participants.length}</div>
@@ -290,7 +287,6 @@ export default function ParticipantsPage() {
             </div>
           </div>
 
-          {/* Search */}
           <div className="relative mb-8 max-w-md mx-auto">
             <Search size={20} className="absolute left-3 top-2.5 text-gray-400" />
             <input
@@ -302,7 +298,6 @@ export default function ParticipantsPage() {
             />
           </div>
 
-          {/* Status Filter */}
           <div className="flex gap-2 mb-8 justify-center flex-wrap">
             {(['all', 'active', 'eliminated'] as const).map(status => (
               <button
@@ -318,7 +313,6 @@ export default function ParticipantsPage() {
             ))}
           </div>
 
-          {/* Participants Grid */}
           {filteredParticipants.length === 0 ? (
             <div className="text-center py-12 bg-gray-50 rounded-lg border border-gray-200">
               <p className="text-gray-600 font-medium">No participants found</p>
@@ -376,7 +370,6 @@ export default function ParticipantsPage() {
         </div>
       )}
 
-      {/* Modal */}
       {selectedParticipant && (
         <div
           className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
@@ -486,7 +479,7 @@ export default function ParticipantsPage() {
                     </div>
                   </div>
 
-                  {selectedParticipant.status === 'eliminated' && participantStats?.elimination_date && (
+                  {selectedParticipant.is_eliminated && participantStats?.elimination_date && (
                     <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
                       <h4 className="font-semibold text-red-900 text-sm mb-1">Elimination</h4>
                       <p className="text-xs text-red-700">
@@ -545,5 +538,3 @@ export default function ParticipantsPage() {
     </main>
   )
 }
-
-import { X } from 'lucide-react'
