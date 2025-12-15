@@ -11,6 +11,7 @@ interface Participant {
   id: string
   user_id: string
   full_name: string
+  preferred_name: string | null
   status: string
   photo_url?: string | null
   age: number
@@ -33,6 +34,7 @@ interface Season {
   id: string
   name: string
   year: number
+  status: string
 }
 
 export default function ParticipantsPage() {
@@ -100,7 +102,7 @@ export default function ParticipantsPage() {
       const userIds = [...new Set(appsData.map(app => app.user_id))]
       const { data: usersData, error: usersError } = await supabase
         .from('users')
-        .select('id, full_name')
+        .select('id, full_name, preferred_name')
         .in('id', userIds)
 
       if (usersError) throw usersError
@@ -116,12 +118,13 @@ export default function ParticipantsPage() {
           id: app.id,
           user_id: app.user_id,
           full_name: user?.full_name || 'Unknown',
+          preferred_name: user?.preferred_name || null,
           photo_url: app.photo_url || null,
           status: app.is_eliminated ? 'eliminated' : 'active',
           age: app.age,
           state: app.state,
           geo_zone: app.geo_zone || null,
-          is_eliminated: app.is_eliminated || false,
+          is_eliminated: app.is_eliminated || false
         }
       })
 
@@ -142,9 +145,10 @@ export default function ParticipantsPage() {
     }
 
     if (searchTerm) {
-      filtered = filtered.filter(p =>
-        p.full_name.toLowerCase().includes(searchTerm.toLowerCase())
-      )
+      filtered = filtered.filter(p => {
+        const displayName = p.preferred_name || p.full_name
+        return displayName.toLowerCase().includes(searchTerm.toLowerCase())
+      })
     }
 
     setFilteredParticipants(filtered)
@@ -230,6 +234,10 @@ export default function ParticipantsPage() {
     setParticipantStats(null)
   }
 
+  const getDisplayName = (participant: Participant) => {
+    return participant.preferred_name || participant.full_name
+  }
+
   const activeCount = participants.filter(p => !p.is_eliminated).length
   const eliminatedCount = participants.filter(p => p.is_eliminated).length
 
@@ -287,30 +295,33 @@ export default function ParticipantsPage() {
             </div>
           </div>
 
-          <div className="relative mb-8 max-w-md mx-auto">
-            <Search size={20} className="absolute left-3 top-2.5 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Search name..."
-              value={searchTerm}
-              onChange={e => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-naija-green-600"
-            />
-          </div>
+          {/* Search and Filters on Same Row */}
+          <div className="flex flex-col md:flex-row gap-4 mb-8 items-center justify-between">
+            <div className="relative flex-1 max-w-md w-full">
+              <Search size={20} className="absolute left-3 top-2.5 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Search name..."
+                value={searchTerm}
+                onChange={e => setSearchTerm(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-naija-green-600"
+              />
+            </div>
 
-          <div className="flex gap-2 mb-8 justify-center flex-wrap">
-            {(['all', 'active', 'eliminated'] as const).map(status => (
-              <button
-                key={status}
-                onClick={() => setStatusFilter(status)}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition ${statusFilter === status
-                  ? status === 'active' ? 'bg-green-600 text-white' : status === 'eliminated' ? 'bg-red-600 text-white' : 'bg-naija-green-600 text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }`}
-              >
-                {status.charAt(0).toUpperCase() + status.slice(1)}
-              </button>
-            ))}
+            <div className="flex gap-2 flex-wrap justify-center md:justify-end">
+              {(['all', 'active', 'eliminated'] as const).map(status => (
+                <button
+                  key={status}
+                  onClick={() => setStatusFilter(status)}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition ${statusFilter === status
+                    ? status === 'active' ? 'bg-green-600 text-white' : status === 'eliminated' ? 'bg-red-600 text-white' : 'bg-naija-green-600 text-white'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
+                >
+                  {status.charAt(0).toUpperCase() + status.slice(1)}
+                </button>
+              ))}
+            </div>
           </div>
 
           {filteredParticipants.length === 0 ? (
@@ -332,7 +343,7 @@ export default function ParticipantsPage() {
                     {participant.photo_url ? (
                       <Image
                         src={participant.photo_url}
-                        alt={participant.full_name}
+                        alt={getDisplayName(participant)}
                         fill
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                       />
@@ -355,7 +366,7 @@ export default function ParticipantsPage() {
 
                     <div className="absolute bottom-0 left-0 right-0 p-4">
                       <p className="text-white font-bold text-base leading-tight line-clamp-2 mb-1">
-                        {participant.full_name}, {participant.age}
+                        {getDisplayName(participant)}, {participant.age}
                       </p>
                       <p className="text-white/90 text-xs leading-tight">
                         {participant.state}
@@ -389,7 +400,7 @@ export default function ParticipantsPage() {
                   {selectedParticipant.photo_url ? (
                     <Image
                       src={selectedParticipant.photo_url}
-                      alt={selectedParticipant.full_name}
+                      alt={getDisplayName(selectedParticipant)}
                       fill
                       className="object-cover"
                     />
@@ -419,7 +430,7 @@ export default function ParticipantsPage() {
 
                   <div className="absolute bottom-0 left-0 right-0 p-6">
                     <h2 className="text-3xl font-bold text-white mb-1">
-                      {selectedParticipant.full_name}
+                      {getDisplayName(selectedParticipant)}
                     </h2>
                     <p className="text-white/90 text-lg">
                       Age {selectedParticipant.age} • {selectedParticipant.state}
@@ -496,8 +507,8 @@ export default function ParticipantsPage() {
                     <h4 className="font-semibold text-gray-900 text-sm mb-2">Participant Details</h4>
                     <div className="space-y-1.5 text-sm">
                       <div className="flex justify-between">
-                        <span className="text-gray-600">Full Name:</span>
-                        <span className="font-medium text-gray-900">{selectedParticipant.full_name}</span>
+                        <span className="text-gray-600">Name:</span>
+                        <span className="font-medium text-gray-900">{getDisplayName(selectedParticipant)}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-gray-600">Age:</span>

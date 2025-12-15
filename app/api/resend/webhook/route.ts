@@ -6,12 +6,9 @@ import { createClient } from '@supabase/supabase-js'
 import { Resend } from 'resend'
 import crypto from 'crypto'
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY! // Use service role key for server-side operations
-)
-
-const resend = new Resend(process.env.RESEND_API_KEY!)
+// Force dynamic rendering to avoid build-time evaluation
+export const dynamic = 'force-dynamic'
+export const runtime = 'nodejs'
 
 // Verify webhook signature from Resend
 function verifySignature(payload: string, signature: string, secret: string): boolean {
@@ -23,6 +20,26 @@ function verifySignature(payload: string, signature: string, secret: string): bo
 
 export async function POST(request: NextRequest) {
   try {
+    // Initialize Supabase client at runtime (not at module level)
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+    const resendApiKey = process.env.RESEND_API_KEY
+
+    // Check for required environment variables
+    if (!supabaseUrl || !supabaseServiceKey) {
+      console.error('Missing Supabase environment variables')
+      return Response.json({ error: 'Server configuration error' }, { status: 500 })
+    }
+
+    if (!resendApiKey) {
+      console.error('Missing Resend API key')
+      return Response.json({ error: 'Server configuration error' }, { status: 500 })
+    }
+
+    // Create clients at runtime
+    const supabase = createClient(supabaseUrl, supabaseServiceKey)
+    const resend = new Resend(resendApiKey)
+
     // Get the raw body for signature verification
     const rawBody = await request.text()
     const payload = JSON.parse(rawBody)

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { use } from 'react'
+import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { toast } from 'sonner'
 import { supabase } from '@/lib/supabase/client'
@@ -45,6 +46,9 @@ export default function AdminApplicationDetailPage({
   params: Promise<{ id: string }>
 }) {
   const { id } = use(params)
+  const searchParams = useSearchParams()
+  const fromParticipants = searchParams.get('from') === 'participants'
+  
   const [application, setApplication] = useState<ApplicationDetail | null>(null)
   const [loading, setLoading] = useState(true)
   const [updating, setUpdating] = useState(false)
@@ -283,7 +287,7 @@ export default function AdminApplicationDetailPage({
     if (application.is_accepted && application.payment_status === 'unpaid') {
       return 'bg-green-100 text-green-800'
     }
-    if (application.is_accepted) {
+    if (application.is_accepted && application.payment_status === 'confirmed') {
       return 'bg-green-100 text-green-800'
     }
     if (application.status === 'rejected') {
@@ -301,6 +305,9 @@ export default function AdminApplicationDetailPage({
     }
     if (application.is_accepted && application.payment_status === 'unpaid') {
       return 'ACCEPTED - AWAITING PAYMENT'
+    }
+    if (application.is_accepted && application.payment_status === 'confirmed') {
+      return 'PAYMENT CONFIRMED'
     }
     if (application.is_accepted) {
       return 'ACCEPTED'
@@ -411,84 +418,86 @@ export default function AdminApplicationDetailPage({
           </div>
         </div>
 
-        {/* Action Buttons - Always Available */}
-        <div className="bg-white rounded-lg shadow-sm border border-naija-green-100 p-4 mb-6">
-          <h2 className="font-semibold text-gray-900 mb-3">Manage Application Status</h2>
-          
-          <div className="flex flex-col gap-3">
-            {/* Primary Actions Row */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        {/* Action Buttons - Only show if NOT from participants tab */}
+        {!fromParticipants && (
+          <div className="bg-white rounded-lg shadow-sm border border-naija-green-100 p-4 mb-6">
+            <h2 className="font-semibold text-gray-900 mb-3">Manage Application Status</h2>
+            
+            <div className="flex flex-col gap-3">
+              {/* Primary Actions Row */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <button
+                  onClick={() => {
+                    setSelectedNewStatus('under_review')
+                    setShowStatusModal(true)
+                  }}
+                  disabled={updating || (application.status === 'under_review' && !application.is_accepted)}
+                  className="flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <Clock size={18} />
+                  Under Review
+                </button>
+                
+                {!application.is_accepted ? (
+                  <button
+                    onClick={handleAccept}
+                    disabled={updating}
+                    className="flex items-center justify-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition disabled:opacity-50"
+                  >
+                    <CheckCircle size={18} />
+                    Accept
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => setShowRevokeModal(true)}
+                    disabled={updating}
+                    className="flex items-center justify-center gap-2 px-4 py-2 bg-orange-600 text-white rounded-lg font-semibold hover:bg-orange-700 transition disabled:opacity-50"
+                  >
+                    <RotateCcw size={18} />
+                    Revoke
+                  </button>
+                )}
+                
+                <button
+                  onClick={() => {
+                    setSelectedNewStatus('rejected')
+                    setShowStatusModal(true)
+                  }}
+                  disabled={updating || (application.status === 'rejected' && !application.is_accepted)}
+                  className="flex items-center justify-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <XCircle size={18} />
+                  Reject
+                </button>
+              </div>
+
+              {/* Reset to Pending */}
               <button
                 onClick={() => {
-                  setSelectedNewStatus('under_review')
+                  setSelectedNewStatus('pending')
                   setShowStatusModal(true)
                 }}
-                disabled={updating || (application.status === 'under_review' && !application.is_accepted)}
-                className="flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={updating || (application.status === 'pending' && !application.is_accepted)}
+                className="flex items-center justify-center gap-2 px-4 py-2 border-2 border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <Clock size={18} />
-                Under Review
-              </button>
-              
-              {!application.is_accepted ? (
-                <button
-                  onClick={handleAccept}
-                  disabled={updating}
-                  className="flex items-center justify-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition disabled:opacity-50"
-                >
-                  <CheckCircle size={18} />
-                  Accept
-                </button>
-              ) : (
-                <button
-                  onClick={() => setShowRevokeModal(true)}
-                  disabled={updating}
-                  className="flex items-center justify-center gap-2 px-4 py-2 bg-orange-600 text-white rounded-lg font-semibold hover:bg-orange-700 transition disabled:opacity-50"
-                >
-                  <RotateCcw size={18} />
-                  Revoke
-                </button>
-              )}
-              
-              <button
-                onClick={() => {
-                  setSelectedNewStatus('rejected')
-                  setShowStatusModal(true)
-                }}
-                disabled={updating || (application.status === 'rejected' && !application.is_accepted)}
-                className="flex items-center justify-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <XCircle size={18} />
-                Reject
+                <RotateCcw size={18} />
+                Reset to Pending
               </button>
             </div>
 
-            {/* Reset to Pending */}
-            <button
-              onClick={() => {
-                setSelectedNewStatus('pending')
-                setShowStatusModal(true)
-              }}
-              disabled={updating || (application.status === 'pending' && !application.is_accepted)}
-              className="flex items-center justify-center gap-2 px-4 py-2 border-2 border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <RotateCcw size={18} />
-              Reset to Pending
-            </button>
-          </div>
-
-          {/* Current Status Info */}
-          <div className="mt-4 p-3 bg-gray-50 rounded-lg text-sm">
-            <p className="text-gray-700">
-              <span className="font-semibold">Current Status:</span> {getStatusLabel()}
-            </p>
-            {application.is_accepted && application.accepted_date && (
-              <p className="text-gray-600 text-xs mt-1">
-                Accepted on: {new Date(application.accepted_date).toLocaleString()}
+            {/* Current Status Info */}
+            <div className="mt-4 p-3 bg-gray-50 rounded-lg text-sm">
+              <p className="text-gray-700">
+                <span className="font-semibold">Current Status:</span> {getStatusLabel()}
               </p>
-            )}
+              {application.is_accepted && application.accepted_date && (
+                <p className="text-gray-600 text-xs mt-1">
+                  Accepted on: {new Date(application.accepted_date).toLocaleString()}
+                </p>
+              )}
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Comments Section */}
         <div className="bg-white rounded-lg shadow-sm border border-naija-green-100 p-4">
