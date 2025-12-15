@@ -4,16 +4,18 @@ import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { supabase } from '@/lib/supabase/client'
 import AdminSidebar from '@/components/admin/AdminSidebar'
-import { Trophy, ArrowRight } from 'lucide-react'
+import { Trophy, Crown, Award, Calendar } from 'lucide-react'
+import Image from 'next/image'
 
-interface LeaderboardEntry {
-  rank: number
+interface Champion {
+  id: string
+  season_id: string
   user_id: string
   full_name: string
-  total_position: number | null
-  final_time_seconds: number | null
-  stages_completed: number
-  last_stage_reached: string | null
+  photo_url: string | null
+  final_points: number
+  position: number
+  created_at: string
 }
 
 interface Season {
@@ -23,92 +25,63 @@ interface Season {
   status: string
 }
 
+interface SeasonWithChampion {
+  season: Season
+  champion: Champion | null
+}
+
 export default function AdminChampionsPage() {
-  const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([])
-  const [seasons, setSeasons] = useState<Season[]>([])
-  const [selectedSeasonId, setSelectedSeasonId] = useState<string>('')
+  const [seasonsWithChampions, setSeasonsWithChampions] = useState<SeasonWithChampion[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    loadSeasons()
+    loadAllChampions()
   }, [])
 
-  useEffect(() => {
-    if (selectedSeasonId) {
-      loadLeaderboard()
-    }
-  }, [selectedSeasonId])
-
-  const loadSeasons = async () => {
+  const loadAllChampions = async () => {
     try {
-      const { data, error } = await supabase
+      // Get all ended seasons
+      const { data: seasons, error: seasonsError } = await supabase
         .from('seasons')
         .select('id, name, year, status')
+        .eq('status', 'ended')
         .order('year', { ascending: false })
 
-      if (error) throw error
-      setSeasons(data || [])
-      if (data && data.length > 0) {
-        setSelectedSeasonId(data[0].id)
+      if (seasonsError) throw seasonsError
+
+      if (!seasons || seasons.length === 0) {
+        setSeasonsWithChampions([])
+        setLoading(false)
+        return
       }
+
+      // Get champions for all seasons (only position 1 - the actual champion)
+      const { data: champions, error: championsError } = await supabase
+        .from('champions')
+        .select('*')
+        .eq('position', 1) // Only get the champion (1st place)
+        .in('season_id', seasons.map(s => s.id))
+
+      if (championsError) throw championsError
+
+      // Map champions to their seasons
+      const championsMap = new Map(
+        (champions || []).map(champ => [champ.season_id, champ])
+      )
+
+      const seasonsWithChamps = seasons.map(season => ({
+        season,
+        champion: championsMap.get(season.id) || null
+      }))
+
+      setSeasonsWithChampions(seasonsWithChamps)
     } catch (err) {
-      toast.error('Failed to load seasons')
+      toast.error('Failed to load champions')
       console.error(err)
     } finally {
       setLoading(false)
     }
   }
-
-  const loadLeaderboard = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('season_leaderboard')
-        .select(`
-          user_id,
-          total_position,
-          final_time_seconds,
-          stages_completed,
-          last_stage_reached,
-          users (full_name)
-        `)
-        .eq('season_id', selectedSeasonId)
-        .order('total_position', { ascending: true, nullsFirst: false })
-        .order('final_time_seconds', { ascending: true, nullsFirst: false })
-
-      if (error) throw error
-
-      const entries = (data || []).map((entry: any, index: number) => ({
-        rank: index + 1,
-        user_id: entry.user_id,
-        full_name: entry.users?.[0]?.full_name || 'Unknown',
-        total_position: entry.total_position,
-        final_time_seconds: entry.final_time_seconds,
-        stages_completed: entry.stages_completed || 0,
-        last_stage_reached: entry.last_stage_reached || 'Not started',
-      }))
-
-      setLeaderboard(entries)
-    } catch (err) {
-      toast.error('Failed to load leaderboard')
-      console.error(err)
-    }
-  }
-
-  const formatTime = (seconds: number | null) => {
-    if (!seconds) return '-'
-    const mins = Math.floor(seconds / 60)
-    const secs = seconds % 60
-    return `${mins}:${secs.toString().padStart(2, '0')}`
-  }
-
-  const getMedalIcon = (rank: number) => {
-    if (rank === 1) return '🥇'
-    if (rank === 2) return '🥈'
-    if (rank === 3) return '🥉'
-    return null
-  }
-
-  const currentSeason = seasons.find(s => s.id === selectedSeasonId)
 
   if (loading) {
     return (
@@ -130,123 +103,211 @@ export default function AdminChampionsPage() {
           {/* Header */}
           <div className="mb-8">
             <h1 className="text-3xl font-bold text-naija-green-900 flex items-center gap-2">
-              <Trophy size={32} />
-              Season Champions
+              <Crown size={32} className="text-yellow-500" />
+              Champions Hall of Fame
             </h1>
-            <p className="text-gray-600">Auto-generated rankings from performance data</p>
+            <p className="text-gray-600">All season champions throughout the competition history</p>
           </div>
 
-          {/* Season Selector - Only if multiple seasons */}
-          {seasons.length > 1 && (
-            <div className="bg-white rounded-lg shadow-sm border border-naija-green-100 p-4 mb-6 max-w-xs">
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Select Season</label>
-              <select
-                value={selectedSeasonId}
-                onChange={e => setSelectedSeasonId(e.target.value)}
-                className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:border-naija-green-600"
-              >
-                {seasons.map(s => (
-                  <option key={s.id} value={s.id}>
-                    {s.name} {s.year}
-                  </option>
-                ))}
-              </select>
-            </div>
-          )}
-
-          {/* Current Season Info */}
-          {currentSeason && (
-            <div className="bg-white rounded-lg shadow-sm border border-naija-green-100 p-6 mb-8">
-              <h2 className="text-xl font-bold text-naija-green-900 mb-2">{currentSeason.name} {currentSeason.year}</h2>
-              <p className="text-sm text-gray-600">
-                Status: <span className="font-semibold capitalize">{currentSeason.status}</span>
+          {/* Champions List */}
+          {seasonsWithChampions.length === 0 ? (
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-12 text-center">
+              <Trophy size={64} className="mx-auto mb-4 text-gray-400" />
+              <p className="text-gray-600 font-semibold text-xl">No champions yet</p>
+              <p className="text-gray-500 text-sm mt-2">
+                Complete a season and set champions to see them here
               </p>
             </div>
-          )}
-
-          {/* Champions List */}
-          {leaderboard.length === 0 ? (
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8 text-center">
-              <Trophy size={32} className="mx-auto mb-3 text-gray-400" />
-              <p className="text-gray-600 font-semibold">No performance data yet</p>
-            </div>
           ) : (
-            <div className="space-y-4">
-              {/* Top 3 Featured */}
-              {leaderboard.slice(0, 3).length > 0 && (
-                <div className="mb-8">
-                  <h3 className="text-lg font-bold text-naija-green-900 mb-4">Top 3</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    {leaderboard.slice(0, 3).map(entry => (
-                      <div
-                        key={entry.user_id}
-                        className={`rounded-lg shadow-md border-2 p-6 text-center ${
-                          entry.rank === 1
-                            ? 'bg-gradient-to-br from-yellow-50 to-amber-50 border-yellow-300'
-                            : entry.rank === 2
-                            ? 'bg-gradient-to-br from-gray-50 to-slate-50 border-gray-300'
-                            : 'bg-gradient-to-br from-orange-50 to-amber-50 border-orange-300'
-                        }`}
-                      >
-                        <div className="text-5xl mb-3">{getMedalIcon(entry.rank)}</div>
-                        <h3 className="text-xl font-bold text-gray-900 mb-2">{entry.full_name}</h3>
-                        <p className="text-sm text-gray-600">
-                          Position: {entry.total_position || '-'} • {entry.stages_completed} stages
-                        </p>
+            <div className="space-y-8">
+              {/* Grid View - Featured Champions */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {seasonsWithChampions.map(({ season, champion }) => (
+                  <div
+                    key={season.id}
+                    className="group bg-white rounded-2xl shadow-lg overflow-hidden border-2 border-gray-200 hover:border-yellow-400 hover:shadow-2xl transition-all duration-300 transform hover:scale-105"
+                  >
+                    {champion ? (
+                      <>
+                        {/* Champion Photo */}
+                        <div className="relative h-72 bg-gradient-to-br from-gray-200 to-gray-300">
+                          {champion.photo_url ? (
+                            <Image
+                              src={champion.photo_url}
+                              alt={champion.full_name}
+                              fill
+                              className="object-cover group-hover:scale-110 transition-transform duration-500"
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center">
+                              <Trophy size={80} className="text-gray-400" />
+                            </div>
+                          )}
+                          
+                          {/* Crown Badge */}
+                          <div className="absolute top-4 left-4 w-16 h-16 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-full flex items-center justify-center shadow-xl border-4 border-white/50 group-hover:rotate-12 transition-transform duration-300">
+                            <Crown size={32} className="text-white" />
+                          </div>
+
+                          {/* Season Badge */}
+                          <div className="absolute top-4 right-4">
+                            <div className="bg-black/70 backdrop-blur-sm px-3 py-1 rounded-full">
+                              <p className="text-white text-xs font-bold">{season.year}</p>
+                            </div>
+                          </div>
+
+                          {/* Gradient Overlay */}
+                          <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-black via-black/60 to-transparent"></div>
+                        </div>
+
+                        {/* Champion Info */}
+                        <div className="p-6">
+                          <div className="mb-3">
+                            <span className="inline-flex items-center gap-1 px-3 py-1 bg-yellow-500 text-white rounded-full text-xs font-bold">
+                              <Crown size={12} />
+                              CHAMPION
+                            </span>
+                          </div>
+                          
+                          <h3 className="text-2xl font-black text-gray-900 mb-1 line-clamp-2">
+                            {champion.full_name}
+                          </h3>
+                          
+                          <p className="text-sm text-gray-600 mb-3 font-semibold">
+                            {season.name} {season.year}
+                          </p>
+                          
+                          <div className="flex items-center gap-2 text-purple-700 mb-3">
+                            <Award size={18} />
+                            <span className="font-bold">{champion.final_points} points</span>
+                          </div>
+                          
+                          <div className="pt-3 border-t border-gray-200">
+                            <div className="flex items-center gap-2 text-xs text-gray-500">
+                              <Calendar size={14} />
+                              Crowned: {new Date(champion.created_at).toLocaleDateString()}
+                            </div>
+                          </div>
+                        </div>
+                      </>
+                    ) : (
+                      /* No Champion Yet */
+                      <div className="p-8 text-center">
+                        <Trophy size={48} className="mx-auto mb-3 text-gray-300" />
+                        <h3 className="text-lg font-bold text-gray-900 mb-1">
+                          {season.name} {season.year}
+                        </h3>
+                        <p className="text-sm text-gray-500">No champion set yet</p>
                       </div>
-                    ))}
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              {/* Table View - All Champions Summary */}
+              <div className="mt-12">
+                <h2 className="text-2xl font-bold text-naija-green-900 mb-6 flex items-center gap-2">
+                  <Trophy size={28} />
+                  Champions Timeline
+                </h2>
+                
+                <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                  <table className="w-full">
+                    <thead className="bg-gradient-to-r from-yellow-500 to-yellow-600">
+                      <tr>
+                        <th className="px-6 py-3 text-left text-sm font-semibold text-white">Season</th>
+                        <th className="px-6 py-3 text-left text-sm font-semibold text-white">Year</th>
+                        <th className="px-6 py-3 text-left text-sm font-semibold text-white">Champion</th>
+                        <th className="px-6 py-3 text-center text-sm font-semibold text-white">Final Points</th>
+                        <th className="px-6 py-3 text-left text-sm font-semibold text-white">Crowned</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-200">
+                      {seasonsWithChampions.map(({ season, champion }, idx) => (
+                        <tr key={season.id} className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                          <td className="px-6 py-4 font-semibold text-gray-900">
+                            {season.name}
+                          </td>
+                          <td className="px-6 py-4 text-gray-900 font-medium">
+                            {season.year}
+                          </td>
+                          <td className="px-6 py-4">
+                            {champion ? (
+                              <div className="flex items-center gap-3">
+                                <Crown size={20} className="text-yellow-500" />
+                                <span className="font-semibold text-gray-900">
+                                  {champion.full_name}
+                                </span>
+                              </div>
+                            ) : (
+                              <span className="text-gray-400 italic">Not set</span>
+                            )}
+                          </td>
+                          <td className="px-6 py-4 text-center">
+                            {champion ? (
+                              <span className="inline-flex items-center gap-1 px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm font-bold">
+                                <Award size={14} />
+                                {champion.final_points}
+                              </span>
+                            ) : (
+                              <span className="text-gray-400">-</span>
+                            )}
+                          </td>
+                          <td className="px-6 py-4 text-sm text-gray-600">
+                            {champion 
+                              ? new Date(champion.created_at).toLocaleDateString()
+                              : '-'
+                            }
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              {/* Stats Summary */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+                <div className="bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-lg border-2 border-yellow-300 p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-yellow-800 text-sm font-semibold">Total Seasons</p>
+                      <p className="text-3xl font-black text-yellow-900 mt-1">
+                        {seasonsWithChampions.length}
+                      </p>
+                    </div>
+                    <Calendar size={40} className="text-yellow-400" />
                   </div>
                 </div>
-              )}
 
-              {/* Full Leaderboard */}
-              <div>
-                <h3 className="text-lg font-bold text-naija-green-900 mb-4">Full Leaderboard</h3>
-                <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-                  <div className="overflow-x-auto">
-                    <table className="w-full">
-                      <thead className="bg-gradient-to-r from-naija-green-600 to-naija-green-700">
-                        <tr>
-                          <th className="px-6 py-3 text-left text-sm font-semibold text-white">Rank</th>
-                          <th className="px-6 py-3 text-left text-sm font-semibold text-white">Name</th>
-                          <th className="px-6 py-3 text-center text-sm font-semibold text-white">Position</th>
-                          <th className="px-6 py-3 text-center text-sm font-semibold text-white">Time</th>
-                          <th className="px-6 py-3 text-center text-sm font-semibold text-white">Stages</th>
-                          <th className="px-6 py-3 text-left text-sm font-semibold text-white">Last Stage</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-gray-200">
-                        {leaderboard.map((entry, idx) => (
-                          <tr key={entry.user_id} className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                            <td className="px-6 py-4 text-sm font-bold text-naija-green-600">
-                              <div className="flex items-center gap-2">
-                                {getMedalIcon(entry.rank) && <span>{getMedalIcon(entry.rank)}</span>}
-                                #{entry.rank}
-                              </div>
-                            </td>
-                            <td className="px-6 py-4 font-semibold text-gray-900">{entry.full_name}</td>
-                            <td className="px-6 py-4 text-center">
-                              {entry.total_position ? (
-                                <span className="inline-block bg-naija-green-100 text-naija-green-700 px-3 py-1 rounded-full text-sm font-semibold">
-                                  {entry.total_position}
-                                </span>
-                              ) : (
-                                <span className="text-gray-400">-</span>
-                              )}
-                            </td>
-                            <td className="px-6 py-4 text-center font-mono text-gray-900 text-sm">
-                              {formatTime(entry.final_time_seconds)}
-                            </td>
-                            <td className="px-6 py-4 text-center">
-                              <span className="inline-block bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm font-semibold">
-                                {entry.stages_completed}
-                              </span>
-                            </td>
-                            <td className="px-6 py-4 text-sm text-gray-600">{entry.last_stage_reached}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg border-2 border-purple-300 p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-purple-800 text-sm font-semibold">Champions Crowned</p>
+                      <p className="text-3xl font-black text-purple-900 mt-1">
+                        {seasonsWithChampions.filter(s => s.champion).length}
+                      </p>
+                    </div>
+                    <Crown size={40} className="text-purple-400" />
+                  </div>
+                </div>
+
+                <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-lg border-2 border-green-300 p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-green-800 text-sm font-semibold">Avg Champion Points</p>
+                      <p className="text-3xl font-black text-green-900 mt-1">
+                        {seasonsWithChampions.filter(s => s.champion).length > 0
+                          ? Math.round(
+                              seasonsWithChampions
+                                .filter(s => s.champion)
+                                .reduce((sum, s) => sum + (s.champion?.final_points || 0), 0) /
+                              seasonsWithChampions.filter(s => s.champion).length
+                            )
+                          : 0}
+                      </p>
+                    </div>
+                    <Award size={40} className="text-green-400" />
                   </div>
                 </div>
               </div>
@@ -256,12 +317,12 @@ export default function AdminChampionsPage() {
           {/* Info Box */}
           <div className="mt-8 bg-blue-50 rounded-lg border border-blue-200 p-6">
             <div className="flex gap-3">
-              <ArrowRight size={20} className="text-blue-600 flex-shrink-0 mt-0.5" />
+              <Trophy size={20} className="text-blue-600 flex-shrink-0 mt-0.5" />
               <div>
-                <p className="text-sm font-semibold text-blue-900 mb-1">Auto-Generated Rankings</p>
+                <p className="text-sm font-semibold text-blue-900 mb-1">Hall of Fame</p>
                 <p className="text-sm text-blue-700">
-                  Rankings are automatically calculated from performance data entered in the Performance Entry page. 
-                  Participants are ranked by their overall position and completion time across all stages.
+                  This page displays all champions from every completed season. Champions are automatically 
+                  added when you process eliminations on the final stage of each season.
                 </p>
               </div>
             </div>

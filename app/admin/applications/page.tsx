@@ -5,7 +5,7 @@ import { toast } from 'sonner'
 import { supabase } from '@/lib/supabase/client'
 import AdminSidebar from '@/components/admin/AdminSidebar'
 import AllApplicationsTab from '@/components/admin/AllApplicationsTab'
-import { Eye, Search, Loader2, Calendar, Users, FileText, CheckCircle } from 'lucide-react'
+import { Eye, Search, Calendar, Users, FileText, CheckCircle, AlertTriangle } from 'lucide-react'
 
 interface UserData {
   full_name: string
@@ -24,6 +24,7 @@ interface ApplicationRow {
   is_accepted: boolean
   payment_status: 'unpaid' | 'pending' | 'confirmed'
   is_participant: boolean
+  is_eliminated: boolean
   accepted_date: string | null
 }
 
@@ -37,8 +38,6 @@ export default function AdminApplicationsPage() {
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
   const [stateFilter, setStateFilter] = useState('')
-  const [selectedApps, setSelectedApps] = useState<string[]>([])
-  const [bulkApproving, setBulkApproving] = useState(false)
   const [currentPage, setCurrentPage] = useState(1)
   const itemsPerPage = 10
   const [activeTab, setActiveTab] = useState<'all' | 'participants'>('all')
@@ -60,8 +59,8 @@ export default function AdminApplicationsPage() {
     let baseApplications = applications
     
     if (activeTab === 'participants') {
-      // Only show participants (those whose payment has been confirmed)
-      baseApplications = applications.filter(app => app.is_participant)
+      // Only show participants whose payment has been confirmed
+      baseApplications = applications.filter(app => app.is_participant && app.payment_status === 'confirmed')
     }
 
     let filtered = baseApplications
@@ -114,7 +113,7 @@ export default function AdminApplicationsPage() {
 
       const { data: appsData, error: appsError } = await supabase
         .from('applications')
-        .select('id, user_id, status, submission_date, age, state, season_id, is_accepted, payment_status, is_participant, accepted_date')
+        .select('id, user_id, status, submission_date, age, state, season_id, is_accepted, payment_status, is_participant, is_eliminated, accepted_date')
         .order('submission_date', { ascending: false })
 
       if (appsError) {
@@ -160,71 +159,11 @@ export default function AdminApplicationsPage() {
     }
   }
 
-  // Stats for participants tab
+  // Stats for participants tab - only count confirmed payments
   const participantStats = {
-    total: applications.filter(a => a.is_participant).length,
-    notApproved: applications.filter(a => a.is_participant && a.status !== 'approved').length,
-    approved: applications.filter(a => a.is_participant && a.status === 'approved').length,
-  }
-
-  const toggleSelectApp = (appId: string) => {
-    setSelectedApps(prev =>
-      prev.includes(appId)
-        ? prev.filter(id => id !== appId)
-        : [...prev, appId]
-    )
-  }
-
-  const toggleSelectAll = () => {
-    const currentPageApps = filteredApplications.slice(
-      (currentPage - 1) * itemsPerPage,
-      currentPage * itemsPerPage
-    )
-    
-    if (selectedApps.length === currentPageApps.length && currentPageApps.length > 0) {
-      setSelectedApps([])
-    } else {
-      setSelectedApps(currentPageApps.map(app => app.id))
-    }
-  }
-
-  const handleBulkApprove = async () => {
-    if (selectedApps.length === 0) {
-      toast.error('Please select participants')
-      return
-    }
-
-    // Filter out already approved participants
-    const participantsToApprove = applications.filter(
-      app => selectedApps.includes(app.id) && app.is_participant && app.status !== 'approved'
-    )
-
-    if (participantsToApprove.length === 0) {
-      toast.error('Selected participants are already approved')
-      return
-    }
-
-    setBulkApproving(true)
-    try {
-      const { error: updateError } = await supabase
-        .from('applications')
-        .update({ status: 'approved' })
-        .in('id', participantsToApprove.map(p => p.id))
-
-      if (updateError) throw updateError
-
-      toast.success(
-        `${participantsToApprove.length} participant(s) approved! Go to Messaging Center to send approval notifications using templates.`,
-        { duration: 6000 }
-      )
-      setSelectedApps([])
-      loadApplications()
-    } catch (err) {
-      console.error('Error approving participants:', err)
-      toast.error('Failed to approve participants')
-    } finally {
-      setBulkApproving(false)
-    }
+    total: applications.filter(a => a.is_participant && a.payment_status === 'confirmed').length,
+    approved: applications.filter(a => a.is_participant && a.payment_status === 'confirmed' && a.status === 'approved' && !a.is_eliminated).length,
+    eliminated: applications.filter(a => a.is_participant && a.payment_status === 'confirmed' && a.is_eliminated).length,
   }
 
   if (loading) {
@@ -242,8 +181,6 @@ export default function AdminApplicationsPage() {
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   )
-
-  const isAllSelected = selectedApps.length === currentPageApps.length && currentPageApps.length > 0
 
   return (
     <div className="flex">
@@ -271,7 +208,7 @@ export default function AdminApplicationsPage() {
               <span className={`px-2 py-0.5 rounded-full text-xs ${
                 activeTab === 'all' ? 'bg-naija-green-100 text-naija-green-700' : 'bg-gray-100 text-gray-600'
               }`}>
-                {applications.filter(a => !a.is_participant).length}
+                {applications.length}
               </span>
             </button>
             <button
@@ -287,7 +224,7 @@ export default function AdminApplicationsPage() {
               <span className={`px-2 py-0.5 rounded-full text-xs ${
                 activeTab === 'participants' ? 'bg-naija-green-100 text-naija-green-700' : 'bg-gray-100 text-gray-600'
               }`}>
-                {applications.filter(a => a.is_participant).length}
+                {applications.filter(a => a.is_participant && a.payment_status === 'confirmed').length}
               </span>
             </button>
           </div>
@@ -303,13 +240,13 @@ export default function AdminApplicationsPage() {
                   <p className="text-xs text-gray-600 mb-1 font-semibold">Total Participants</p>
                   <p className="text-2xl font-bold text-naija-green-900">{participantStats.total}</p>
                 </div>
-                <div className="bg-white rounded-lg shadow-sm border border-orange-200 p-4">
-                  <p className="text-xs text-gray-600 mb-1 font-semibold">Awaiting Approval</p>
-                  <p className="text-2xl font-bold text-orange-600">{participantStats.notApproved}</p>
-                </div>
                 <div className="bg-white rounded-lg shadow-sm border border-green-200 p-4">
                   <p className="text-xs text-gray-600 mb-1 font-semibold">Approved</p>
                   <p className="text-2xl font-bold text-green-600">{participantStats.approved}</p>
+                </div>
+                <div className="bg-white rounded-lg shadow-sm border border-red-200 p-4">
+                  <p className="text-xs text-gray-600 mb-1 font-semibold">Eliminated</p>
+                  <p className="text-2xl font-bold text-red-600">{participantStats.eliminated}</p>
                 </div>
               </div>
 
@@ -369,74 +306,17 @@ export default function AdminApplicationsPage() {
                   <p className="text-gray-600">
                     {searchTerm || stateFilter
                       ? 'Try adjusting your filters'
-                      : 'No participants have completed payment yet'}
+                      : 'No participants have confirmed payment yet'}
                   </p>
                 </div>
               ) : (
                 <>
-                  {/* Selection Toolbar */}
-                  <div className="flex items-center justify-between flex-wrap gap-4 mb-4">
-                    <div className="flex items-center gap-4">
-                      {currentPageApps.length > 0 && (
-                        <div className="flex items-center gap-3">
-                          <div
-                            onClick={toggleSelectAll}
-                            className={`w-5 h-5 rounded border-2 cursor-pointer transition-all flex items-center justify-center ${
-                              isAllSelected ? 'bg-naija-green-600 border-naija-green-600' : 'border-gray-300 hover:border-naija-green-400'
-                            }`}
-                          >
-                            {isAllSelected && (
-                              <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                              </svg>
-                            )}
-                          </div>
-                          <span className="text-sm text-gray-600">Select All</span>
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="flex items-center gap-4">
-                      {selectedApps.length > 0 && (
-                        <div className="flex flex-wrap gap-2">
-                          <span className="text-sm font-semibold text-gray-900 flex items-center">
-                            {selectedApps.length} selected
-                          </span>
-                          <button
-                            onClick={handleBulkApprove}
-                            disabled={bulkApproving}
-                            className="px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-semibold hover:bg-green-700 disabled:opacity-50 transition flex items-center gap-2"
-                          >
-                            {bulkApproving ? (
-                              <>
-                                <Loader2 size={16} className="animate-spin" />
-                                Approving...
-                              </>
-                            ) : (
-                              <>
-                                <CheckCircle size={16} />
-                                Approve Selected
-                              </>
-                            )}
-                          </button>
-                        </div>
-                      )}
-
-                      <p className="text-sm text-gray-600">
-                        <span className="font-semibold text-gray-900">{filteredApplications.length}</span> Total
-                      </p>
-                    </div>
-                  </div>
-
                   {/* Participants List */}
                   <div>
                     {currentPageApps.map((app) => (
                       <ParticipantCard
                         key={app.id}
                         application={app}
-                        isSelected={selectedApps.includes(app.id)}
-                        onToggleSelect={() => toggleSelectApp(app.id)}
-                        onRefresh={loadApplications}
                       />
                     ))}
                   </div>
@@ -487,76 +367,20 @@ export default function AdminApplicationsPage() {
 
 function ParticipantCard({
   application,
-  isSelected,
-  onToggleSelect,
-  onRefresh,
 }: {
   application: Application
-  isSelected: boolean
-  onToggleSelect: () => void
-  onRefresh: () => void
 }) {
   const [isHovering, setIsHovering] = useState(false)
-  const [approving, setApproving] = useState(false)
-
-  const handleApprove = async (e: React.MouseEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
-    
-    if (application.status === 'approved') {
-      toast.info('This participant is already approved')
-      return
-    }
-
-    setApproving(true)
-    try {
-      const { error } = await supabase
-        .from('applications')
-        .update({ status: 'approved' })
-        .eq('id', application.id)
-
-      if (error) throw error
-
-      toast.success('Participant approved! Go to Messaging Center to send approval notification using templates.')
-      onRefresh()
-    } catch (err) {
-      console.error('Error approving participant:', err)
-      toast.error('Failed to approve participant')
-    } finally {
-      setApproving(false)
-    }
-  }
 
   return (
     <div className="relative">
       <div
-        className={`relative border rounded-lg transition-all pl-12 p-4 mb-2 ${
-          isSelected
-            ? 'bg-naija-green-50 border-naija-green-500'
-            : isHovering
-              ? 'bg-gray-50 border-gray-300'
-              : 'bg-white border-gray-200'
+        className={`relative border rounded-lg transition-all p-4 mb-2 ${
+          isHovering ? 'bg-gray-50 border-gray-300' : 'bg-white border-gray-200'
         }`}
         onMouseEnter={() => setIsHovering(true)}
         onMouseLeave={() => setIsHovering(false)}
       >
-        <div
-          onClick={(e) => {
-            e.preventDefault()
-            e.stopPropagation()
-            onToggleSelect()
-          }}
-          className={`absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 w-5 h-5 rounded border-2 cursor-pointer transition-all flex items-center justify-center ${
-            isSelected ? 'bg-naija-green-600 border-naija-green-600' : 'border-gray-300 hover:border-naija-green-400'
-          } ${isHovering || isSelected ? 'opacity-100' : 'opacity-0'}`}
-        >
-          {isSelected && (
-            <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-            </svg>
-          )}
-        </div>
-
         <div className="grid grid-cols-1 md:grid-cols-6 gap-4 items-center">
           <div className="min-w-0">
             <h3 className="text-sm font-semibold text-gray-900 truncate">
@@ -586,37 +410,29 @@ function ParticipantCard({
           </div>
 
           <div className="flex items-center justify-end gap-3">
-            {application.status === 'approved' ? (
+            {application.is_eliminated ? (
+              <span className="px-3 py-1.5 rounded-full text-xs font-semibold bg-red-100 text-red-800 flex items-center gap-1 whitespace-nowrap">
+                <AlertTriangle size={14} />
+                Eliminated
+              </span>
+            ) : application.status === 'approved' ? (
               <span className="px-3 py-1.5 rounded-full text-xs font-semibold bg-green-100 text-green-800 flex items-center gap-1 whitespace-nowrap">
                 <CheckCircle size={14} />
                 Approved
               </span>
             ) : (
-              <button
-                onClick={handleApprove}
-                disabled={approving}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition font-semibold text-xs whitespace-nowrap disabled:opacity-50"
-              >
-                {approving ? (
-                  <>
-                    <Loader2 size={14} className="animate-spin" />
-                    Approving...
-                  </>
-                ) : (
-                  <>
-                    <CheckCircle size={14} />
-                    Approve
-                  </>
-                )}
-              </button>
+              <span className="px-3 py-1.5 rounded-full text-xs font-semibold bg-gray-100 text-gray-800 flex items-center gap-1 whitespace-nowrap">
+                <CheckCircle size={14} />
+                Participant
+              </span>
             )}
 
             <a
-              href={`/admin/applications/${application.id}`}
+              href={`/admin/applications/${application.id}?from=participants`}
               className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-naija-green-100 text-naija-green-700 rounded-lg hover:bg-naija-green-200 transition font-semibold text-xs whitespace-nowrap"
             >
               <Eye size={14} />
-              Review
+              View Details
             </a>
           </div>
         </div>

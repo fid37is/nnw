@@ -10,6 +10,7 @@ import SponsorsSection from '../components/sections/SponsorsSection'
 import VideoHighlights from '../components/sections/VideoHighlights'
 import FAQSection from '../components/sections/FAQSection'
 import InquirySection from '../components/sections/InquirySection'
+import SocialMediaSection from '../components/sections/SocialMediaSection'
 import CTASection from '../components/sections/CTASection'
 
 interface Champion {
@@ -19,6 +20,7 @@ interface Champion {
   full_name: string
   position: number
   photo_url: string | null
+  final_points?: number
 }
 
 interface Runner {
@@ -83,6 +85,7 @@ export default function Home() {
 
   const loadData = async () => {
     try {
+      // Get the most recent season
       const { data: seasonData } = await supabase
         .from('seasons')
         .select('id, name, year, status, application_start_date, application_end_date')
@@ -94,6 +97,7 @@ export default function Home() {
         setSeason(seasonData)
       }
 
+      // Load sponsors
       const { data: sponsorData } = await supabase
         .from('sponsors')
         .select('*')
@@ -101,6 +105,7 @@ export default function Home() {
 
       setSponsors(sponsorData || [])
 
+      // Load videos
       const { data: videoData } = await supabase
         .from('youtube_videos')
         .select('*')
@@ -113,123 +118,57 @@ export default function Home() {
         return
       }
 
-      const { data: stagesData } = await supabase
-        .from('competition_stages')
-        .select('id')
+      // Load champion from champions table (position 1)
+      const { data: championData } = await supabase
+        .from('champions')
+        .select('*')
         .eq('season_id', seasonData.id)
+        .eq('position', 1)
+        .single()
 
-      if (!stagesData || stagesData.length === 0) {
-        setLoading(false)
-        return
-      }
-
-      const stageIds = stagesData.map(s => s.id)
-
-      const { data: perfData } = await supabase
-        .from('stage_performances')
-        .select('user_id, position, time_seconds, status')
-        .in('competition_stage_id', stageIds)
-        .eq('status', 'completed')
-
-      const userIds = [...new Set(perfData?.map(p => p.user_id) || [])]
-
-      if (userIds.length === 0) {
-        setLoading(false)
-        return
-      }
-
-      const { data: usersData } = await supabase
-        .from('users')
-        .select('id, full_name')
-        .in('id', userIds)
-
-      let usersMap = new Map()
-      usersData?.forEach((user: any) => {
-        usersMap.set(user.id, user)
-      })
-
-      const { data: appData } = await supabase
-        .from('applications')
-        .select('user_id, photo_url')
-        .eq('season_id', seasonData.id)
-        .in('user_id', userIds)
-
-      let appMap = new Map()
-      appData?.forEach((app: any) => {
-        appMap.set(app.user_id, app)
-      })
-
-      const userStats = new Map()
-      perfData?.forEach((perf: any) => {
-        if (!userStats.has(perf.user_id)) {
-          userStats.set(perf.user_id, {
-            user_id: perf.user_id,
-            total_position: 0,
-            final_time_seconds: 0,
-            stages_completed: 0,
-          })
-        }
-
-        const stats = userStats.get(perf.user_id)
-        stats.total_position += perf.position || 0
-        stats.final_time_seconds += perf.time_seconds || 0
-        stats.stages_completed += 1
-      })
-
-      const entries = Array.from(userStats.values())
-        .map((stats: any) => {
-          const user = usersMap.get(stats.user_id)
-          const app = appMap.get(stats.user_id)
-          return {
-            user_id: stats.user_id,
-            full_name: user?.full_name || 'Unknown',
-            photo_url: app?.photo_url || null,
-            total_position: stats.total_position,
-            final_time_seconds: stats.final_time_seconds,
-            stages_completed: stats.stages_completed,
-          }
-        })
-        .sort((a, b) => {
-          if (a.total_position !== b.total_position) {
-            return a.total_position - b.total_position
-          }
-          return a.final_time_seconds - b.final_time_seconds
-        })
-
-      if (entries.length > 0) {
+      if (championData) {
         setChampion({
-          id: entries[0].user_id,
-          user_id: entries[0].user_id,
-          season_id: seasonData.id,
-          full_name: entries[0].full_name,
-          photo_url: entries[0].photo_url,
-          position: 1,
+          id: championData.id,
+          user_id: championData.user_id,
+          season_id: championData.season_id,
+          full_name: championData.full_name,
+          position: championData.position,
+          photo_url: championData.photo_url,
+          final_points: championData.final_points,
         })
       }
 
-      if (entries.length > 1) {
-        const runnersArray = entries.slice(1, 3).map((entry, idx) => ({
-          id: entry.user_id,
-          user_id: entry.user_id,
-          full_name: entry.full_name,
-          photo_url: entry.photo_url,
-          position: idx + 2,
-        }))
-        setRunners(runnersArray)
+      // Load runners-up from champions table (positions 2 and 3)
+      const { data: runnersData } = await supabase
+        .from('champions')
+        .select('*')
+        .eq('season_id', seasonData.id)
+        .in('position', [2, 3])
+        .order('position', { ascending: true })
+
+      if (runnersData) {
+        setRunners(runnersData.map(runner => ({
+          id: runner.id,
+          user_id: runner.user_id,
+          full_name: runner.full_name,
+          position: runner.position,
+          photo_url: runner.photo_url,
+        })))
       }
 
+      // Load stats - count approved applications
       const { count: totalCount } = await supabase
         .from('applications')
         .select('id', { count: 'exact' })
         .eq('season_id', seasonData.id)
-        .in('user_id', userIds)
+        .eq('status', 'approved')
 
       const { count: eliminatedCount } = await supabase
         .from('applications')
         .select('id', { count: 'exact' })
         .eq('season_id', seasonData.id)
-        .in('user_id', userIds)
-        .eq('status', 'eliminated')
+        .eq('status', 'approved')
+        .eq('is_eliminated', true)
 
       setStats({
         total: totalCount || 0,
@@ -288,6 +227,8 @@ export default function Home() {
           <FAQSection />
           
           <InquirySection />
+          
+          <SocialMediaSection />
           
           <CTASection 
             champion={champion} 

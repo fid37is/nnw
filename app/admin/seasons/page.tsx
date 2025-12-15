@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { supabase } from '@/lib/supabase/client'
 import AdminSidebar from '@/components/admin/AdminSidebar'
-import { Plus, Edit2, Trash2, Calendar, Zap } from 'lucide-react'
+import { Plus, Edit2, Trash2, Calendar, Zap, Archive, AlertTriangle } from 'lucide-react'
 
 interface Activity {
   id: string
@@ -23,6 +23,7 @@ interface Season {
   name: string
   year: number
   status: 'upcoming' | 'active' | 'ended'
+  archived: boolean
   start_date: string
   end_date: string
   application_start_date: string
@@ -35,6 +36,9 @@ export default function SeasonsPage() {
   const [loading, setLoading] = useState(true)
   const [showSeasonForm, setShowSeasonForm] = useState(false)
   const [showActivityForm, setShowActivityForm] = useState(false)
+  const [showArchiveModal, setShowArchiveModal] = useState(false)
+  const [seasonToArchive, setSeasonToArchive] = useState<Season | null>(null)
+  const [archiveLoading, setArchiveLoading] = useState(false)
   const [editingSeasonId, setEditingSeasonId] = useState<string | null>(null)
   const [editingActivityId, setEditingActivityId] = useState<string | null>(null)
   const [selectedSeasonId, setSelectedSeasonId] = useState<string | null>(null)
@@ -183,8 +187,32 @@ export default function SeasonsPage() {
     }
   }
 
+  const handleArchiveSeason = async () => {
+    if (!seasonToArchive) return
+
+    setArchiveLoading(true)
+    try {
+      // Call the archive function
+      const { error } = await supabase.rpc('archive_season_data', {
+        season_id_param: seasonToArchive.id
+      })
+
+      if (error) throw error
+
+      toast.success('Season archived successfully! Old data cleaned up.')
+      setShowArchiveModal(false)
+      setSeasonToArchive(null)
+      loadSeasons()
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to archive season')
+      console.error(err)
+    } finally {
+      setArchiveLoading(false)
+    }
+  }
+
   const handleDeleteSeason = async (id: string) => {
-    if (!confirm('Delete this season and all its activities?')) return
+    if (!confirm('Permanently delete this season? This cannot be undone!')) return
 
     try {
       const { error } = await supabase
@@ -362,12 +390,20 @@ export default function SeasonsPage() {
               </div>
             ) : (
               seasons.map(season => (
-                <div key={season.id} className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                <div key={season.id} className={`bg-white rounded-lg shadow-sm border p-6 ${season.archived ? 'border-orange-300 bg-orange-50' : 'border-gray-200'}`}>
                   <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
                     <div>
-                      <h3 className="text-xl font-bold text-naija-green-900">
-                        {season.name} {season.year}
-                      </h3>
+                      <div className="flex items-center gap-3 mb-2">
+                        <h3 className="text-xl font-bold text-naija-green-900">
+                          {season.name} {season.year}
+                        </h3>
+                        {season.archived && (
+                          <span className="px-3 py-1 bg-orange-500 text-white rounded-full text-xs font-bold flex items-center gap-1">
+                            <Archive size={12} />
+                            ARCHIVED
+                          </span>
+                        )}
+                      </div>
                       <div className="flex flex-wrap gap-4 mt-2 text-sm text-gray-600">
                         <span>🏆 {new Date(season.start_date).toLocaleDateString()} - {new Date(season.end_date).toLocaleDateString()}</span>
                         <span>📝 Applications: {new Date(season.application_start_date).toLocaleDateString()} - {new Date(season.application_end_date).toLocaleDateString()}</span>
@@ -381,24 +417,39 @@ export default function SeasonsPage() {
                       </div>
                     </div>
                     <div className="flex gap-2">
-                      <button
-                        onClick={() => {
-                          setSeasonFormData({
-                            name: season.name,
-                            year: season.year,
-                            status: season.status,
-                            start_date: season.start_date,
-                            end_date: season.end_date,
-                            application_start_date: season.application_start_date,
-                            application_end_date: season.application_end_date,
-                          })
-                          setEditingSeasonId(season.id)
-                          setShowSeasonForm(true)
-                        }}
-                        className="px-3 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition flex items-center gap-2"
-                      >
-                        <Edit2 size={18} />
-                      </button>
+                      {!season.archived && season.status === 'ended' && (
+                        <button
+                          onClick={() => {
+                            setSeasonToArchive(season)
+                            setShowArchiveModal(true)
+                          }}
+                          className="px-3 py-2 bg-orange-100 text-orange-700 rounded-lg hover:bg-orange-200 transition flex items-center gap-2"
+                          title="Archive & Clean Up"
+                        >
+                          <Archive size={18} />
+                          Archive
+                        </button>
+                      )}
+                      {!season.archived && (
+                        <button
+                          onClick={() => {
+                            setSeasonFormData({
+                              name: season.name,
+                              year: season.year,
+                              status: season.status,
+                              start_date: season.start_date,
+                              end_date: season.end_date,
+                              application_start_date: season.application_start_date,
+                              application_end_date: season.application_end_date,
+                            })
+                            setEditingSeasonId(season.id)
+                            setShowSeasonForm(true)
+                          }}
+                          className="px-3 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition flex items-center gap-2"
+                        >
+                          <Edit2 size={18} />
+                        </button>
+                      )}
                       <button
                         onClick={() => handleDeleteSeason(season.id)}
                         className="px-3 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition flex items-center gap-2"
@@ -409,82 +460,159 @@ export default function SeasonsPage() {
                   </div>
 
                   {/* Activities */}
-                  <div className="border-t pt-6">
-                    <div className="flex items-center justify-between mb-4">
-                      <h4 className="font-bold text-gray-900 flex items-center gap-2">
-                        <Zap size={18} />
-                        Competition Activities
-                      </h4>
-                      <button
-                        onClick={() => {
-                          setSelectedSeasonId(season.id)
-                          setShowActivityForm(true)
-                          setEditingActivityId(null)
-                          setActivityFormData({
-                            name: '',
-                            type: 'state',
-                            start_date: '',
-                            end_date: '',
-                            location: '',
-                            description: '',
-                            status: 'upcoming',
-                          })
-                        }}
-                        className="flex items-center gap-1 px-3 py-1 bg-naija-green-100 text-naija-green-700 rounded hover:bg-naija-green-200 transition text-sm font-semibold"
-                      >
-                        <Plus size={16} />
-                        Add Activity
-                      </button>
-                    </div>
-
-                    {season.activities && season.activities.length > 0 ? (
-                      <div className="space-y-2">
-                        {season.activities.map(activity => (
-                          <div key={activity.id} className="bg-gray-50 rounded-lg p-3 flex items-center justify-between">
-                            <div className="flex-1">
-                              <p className="font-semibold text-gray-900">{activity.name}</p>
-                              <p className="text-xs text-gray-600">
-                                {activity.type.toUpperCase()} • {new Date(activity.start_date).toLocaleDateString()} - {new Date(activity.end_date).toLocaleDateString()}
-                              </p>
-                            </div>
-                            <div className="flex gap-2">
-                              <button
-                                onClick={() => {
-                                  setActivityFormData({
-                                    name: activity.name,
-                                    type: activity.type,
-                                    start_date: activity.start_date,
-                                    end_date: activity.end_date,
-                                    location: activity.location,
-                                    description: activity.description,
-                                    status: activity.status,
-                                  })
-                                  setEditingActivityId(activity.id)
-                                  setSelectedSeasonId(season.id)
-                                  setShowActivityForm(true)
-                                }}
-                                className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs hover:bg-blue-200 transition"
-                              >
-                                Edit
-                              </button>
-                              <button
-                                onClick={() => handleDeleteActivity(activity.id)}
-                                className="px-2 py-1 bg-red-100 text-red-700 rounded text-xs hover:bg-red-200 transition"
-                              >
-                                Delete
-                              </button>
-                            </div>
-                          </div>
-                        ))}
+                  {!season.archived && (
+                    <div className="border-t pt-6">
+                      <div className="flex items-center justify-between mb-4">
+                        <h4 className="font-bold text-gray-900 flex items-center gap-2">
+                          <Zap size={18} />
+                          Competition Activities
+                        </h4>
+                        <button
+                          onClick={() => {
+                            setSelectedSeasonId(season.id)
+                            setShowActivityForm(true)
+                            setEditingActivityId(null)
+                            setActivityFormData({
+                              name: '',
+                              type: 'state',
+                              start_date: '',
+                              end_date: '',
+                              location: '',
+                              description: '',
+                              status: 'upcoming',
+                            })
+                          }}
+                          className="flex items-center gap-1 px-3 py-1 bg-naija-green-100 text-naija-green-700 rounded hover:bg-naija-green-200 transition text-sm font-semibold"
+                        >
+                          <Plus size={16} />
+                          Add Activity
+                        </button>
                       </div>
-                    ) : (
-                      <p className="text-sm text-gray-500 italic">No activities yet</p>
-                    )}
-                  </div>
+
+                      {season.activities && season.activities.length > 0 ? (
+                        <div className="space-y-2">
+                          {season.activities.map(activity => (
+                            <div key={activity.id} className="bg-gray-50 rounded-lg p-3 flex items-center justify-between">
+                              <div className="flex-1">
+                                <p className="font-semibold text-gray-900">{activity.name}</p>
+                                <p className="text-xs text-gray-600">
+                                  {activity.type.toUpperCase()} • {new Date(activity.start_date).toLocaleDateString()} - {new Date(activity.end_date).toLocaleDateString()}
+                                </p>
+                              </div>
+                              <div className="flex gap-2">
+                                <button
+                                  onClick={() => {
+                                    setActivityFormData({
+                                      name: activity.name,
+                                      type: activity.type,
+                                      start_date: activity.start_date,
+                                      end_date: activity.end_date,
+                                      location: activity.location,
+                                      description: activity.description,
+                                      status: activity.status,
+                                    })
+                                    setEditingActivityId(activity.id)
+                                    setSelectedSeasonId(season.id)
+                                    setShowActivityForm(true)
+                                  }}
+                                  className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs hover:bg-blue-200 transition"
+                                >
+                                  Edit
+                                </button>
+                                <button
+                                  onClick={() => handleDeleteActivity(activity.id)}
+                                  className="px-2 py-1 bg-red-100 text-red-700 rounded text-xs hover:bg-red-200 transition"
+                                >
+                                  Delete
+                                </button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-sm text-gray-500 italic">No activities yet</p>
+                      )}
+                    </div>
+                  )}
                 </div>
               ))
             )}
           </div>
+
+          {/* Archive Confirmation Modal */}
+          {showArchiveModal && seasonToArchive && (
+            <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
+              <div className="bg-white rounded-xl shadow-2xl max-w-lg w-full p-6">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="p-3 bg-orange-100 rounded-full">
+                    <AlertTriangle size={24} className="text-orange-600" />
+                  </div>
+                  <h2 className="text-2xl font-bold text-gray-900">Archive Season?</h2>
+                </div>
+
+                <div className="mb-6">
+                  <p className="text-gray-700 mb-4">
+                    You're about to archive <strong>{seasonToArchive.name} {seasonToArchive.year}</strong>.
+                  </p>
+
+                  <div className="bg-red-50 border-2 border-red-200 rounded-lg p-4 mb-4">
+                    <h3 className="font-bold text-red-900 mb-2 flex items-center gap-2">
+                      <Trash2 size={16} />
+                      Will Be Deleted:
+                    </h3>
+                    <ul className="text-sm text-red-800 space-y-1 ml-4">
+                      <li>• All applications and participant data</li>
+                      <li>• All competition stages</li>
+                      <li>• All stage performances and scores</li>
+                      <li>• All competition activities</li>
+                    </ul>
+                  </div>
+
+                  <div className="bg-green-50 border-2 border-green-200 rounded-lg p-4">
+                    <h3 className="font-bold text-green-900 mb-2 flex items-center gap-2">
+                      <Archive size={16} />
+                      Will Be Preserved:
+                    </h3>
+                    <ul className="text-sm text-green-800 space-y-1 ml-4">
+                      <li>• Champions and runner-ups</li>
+                      <li>• Season information (name, year, dates)</li>
+                      <li>• Hall of Fame records</li>
+                    </ul>
+                  </div>
+                </div>
+
+                <div className="flex gap-3">
+                  <button
+                    onClick={handleArchiveSeason}
+                    disabled={archiveLoading}
+                    className="flex-1 px-4 py-3 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition font-semibold disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  >
+                    {archiveLoading ? (
+                      <>
+                        <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full"></div>
+                        Archiving...
+                      </>
+                    ) : (
+                      <>
+                        <Archive size={18} />
+                        Yes, Archive Season
+                      </>
+                    )}
+                  </button>
+                  <button
+                    onClick={() => {
+                      setShowArchiveModal(false)
+                      setSeasonToArchive(null)
+                    }}
+                    disabled={archiveLoading}
+                    className="flex-1 px-4 py-3 border-2 border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition font-semibold disabled:opacity-50"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Activity Form Modal */}
           {showActivityForm && (

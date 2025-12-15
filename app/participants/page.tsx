@@ -4,18 +4,20 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { supabase } from '@/lib/supabase/client'
-import { Search, ArrowLeft, User, Users as UsersIcon } from 'lucide-react'
+import { Search, ArrowLeft, User, Users as UsersIcon, X } from 'lucide-react'
 import Navbar from '../navbar'
 
 interface Participant {
   id: string
   user_id: string
   full_name: string
+  preferred_name: string | null
   status: string
   photo_url?: string | null
   age: number
   state: string
   geo_zone: string | null
+  is_eliminated: boolean
 }
 
 interface ParticipantStats {
@@ -32,6 +34,7 @@ interface Season {
   id: string
   name: string
   year: number
+  status: string
 }
 
 export default function ParticipantsPage() {
@@ -84,9 +87,9 @@ export default function ParticipantsPage() {
     try {
       const { data: appsData, error: appsError } = await supabase
         .from('applications')
-        .select('id, user_id, status, photo_url, age, state, geo_zone')
+        .select('id, user_id, status, photo_url, age, state, geo_zone, is_eliminated')
         .eq('season_id', selectedSeasonId)
-        .in('status', ['approved', 'eliminated'])
+        .eq('status', 'approved')
 
       if (appsError) throw appsError
 
@@ -99,7 +102,7 @@ export default function ParticipantsPage() {
       const userIds = [...new Set(appsData.map(app => app.user_id))]
       const { data: usersData, error: usersError } = await supabase
         .from('users')
-        .select('id, full_name')
+        .select('id, full_name, preferred_name')
         .in('id', userIds)
 
       if (usersError) throw usersError
@@ -115,11 +118,13 @@ export default function ParticipantsPage() {
           id: app.id,
           user_id: app.user_id,
           full_name: user?.full_name || 'Unknown',
+          preferred_name: user?.preferred_name || null,
           photo_url: app.photo_url || null,
-          status: app.status === 'eliminated' ? 'eliminated' : 'active',
+          status: app.is_eliminated ? 'eliminated' : 'active',
           age: app.age,
           state: app.state,
           geo_zone: app.geo_zone || null,
+          is_eliminated: app.is_eliminated || false
         }
       })
 
@@ -140,9 +145,10 @@ export default function ParticipantsPage() {
     }
 
     if (searchTerm) {
-      filtered = filtered.filter(p =>
-        p.full_name.toLowerCase().includes(searchTerm.toLowerCase())
-      )
+      filtered = filtered.filter(p => {
+        const displayName = p.preferred_name || p.full_name
+        return displayName.toLowerCase().includes(searchTerm.toLowerCase())
+      })
     }
 
     setFilteredParticipants(filtered)
@@ -189,14 +195,14 @@ export default function ParticipantsPage() {
       const ranking = sortedScores.findIndex(([id]) => id === participant.id) + 1
 
       let eliminationDate = null
-      if (participant.status === 'eliminated') {
+      if (participant.is_eliminated) {
         const { data: appData } = await supabase
           .from('applications')
-          .select('reviewed_at')
+          .select('eliminated_at')
           .eq('id', participant.id)
           .single()
 
-        eliminationDate = appData?.reviewed_at || null
+        eliminationDate = appData?.eliminated_at || null
       }
 
       setParticipantStats({
@@ -228,22 +234,23 @@ export default function ParticipantsPage() {
     setParticipantStats(null)
   }
 
-  const activeCount = participants.filter(p => p.status === 'active').length
-  const eliminatedCount = participants.filter(p => p.status === 'eliminated').length
+  const getDisplayName = (participant: Participant) => {
+    return participant.preferred_name || participant.full_name
+  }
+
+  const activeCount = participants.filter(p => !p.is_eliminated).length
+  const eliminatedCount = participants.filter(p => p.is_eliminated).length
 
   return (
     <main className="min-h-screen bg-white overflow-x-hidden">
-      {/* Navbar */}
       <Navbar />
 
-      {/* Content */}
       {loading ? (
         <div className="flex items-center justify-center min-h-[calc(100vh-80px)]">
           <div className="animate-spin w-8 h-8 border-4 border-naija-green-200 border-t-naija-green-600 rounded-full"></div>
         </div>
       ) : (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
-          {/* Header */}
           <div className="mb-8">
             <Link href="/" className="inline-flex items-center gap-2 text-naija-green-600 hover:text-naija-green-700 mb-6 font-medium transition group">
               <ArrowLeft size={18} className="group-hover:-translate-x-1 transition-transform" />
@@ -256,7 +263,6 @@ export default function ParticipantsPage() {
             <p className="text-gray-600">Browse all competitors</p>
           </div>
 
-          {/* Season Selector */}
           {seasons.length > 1 && (
             <div className="mb-8 max-w-xs mx-auto">
               <label className="block text-sm font-semibold text-gray-700 mb-2">Select Season</label>
@@ -274,7 +280,6 @@ export default function ParticipantsPage() {
             </div>
           )}
 
-          {/* Stats */}
           <div className="grid grid-cols-3 gap-4 mb-8">
             <div className="p-4 bg-gray-50 rounded-lg border border-gray-200 text-center">
               <div className="text-2xl md:text-3xl font-bold text-gray-900">{participants.length}</div>
@@ -290,35 +295,35 @@ export default function ParticipantsPage() {
             </div>
           </div>
 
-          {/* Search */}
-          <div className="relative mb-8 max-w-md mx-auto">
-            <Search size={20} className="absolute left-3 top-2.5 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Search name..."
-              value={searchTerm}
-              onChange={e => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-naija-green-600"
-            />
+          {/* Search and Filters on Same Row */}
+          <div className="flex flex-col md:flex-row gap-4 mb-8 items-center justify-between">
+            <div className="relative flex-1 max-w-md w-full">
+              <Search size={20} className="absolute left-3 top-2.5 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Search name..."
+                value={searchTerm}
+                onChange={e => setSearchTerm(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-naija-green-600"
+              />
+            </div>
+
+            <div className="flex gap-2 flex-wrap justify-center md:justify-end">
+              {(['all', 'active', 'eliminated'] as const).map(status => (
+                <button
+                  key={status}
+                  onClick={() => setStatusFilter(status)}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition ${statusFilter === status
+                    ? status === 'active' ? 'bg-green-600 text-white' : status === 'eliminated' ? 'bg-red-600 text-white' : 'bg-naija-green-600 text-white'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
+                >
+                  {status.charAt(0).toUpperCase() + status.slice(1)}
+                </button>
+              ))}
+            </div>
           </div>
 
-          {/* Status Filter */}
-          <div className="flex gap-2 mb-8 justify-center flex-wrap">
-            {(['all', 'active', 'eliminated'] as const).map(status => (
-              <button
-                key={status}
-                onClick={() => setStatusFilter(status)}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition ${statusFilter === status
-                  ? status === 'active' ? 'bg-green-600 text-white' : status === 'eliminated' ? 'bg-red-600 text-white' : 'bg-naija-green-600 text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }`}
-              >
-                {status.charAt(0).toUpperCase() + status.slice(1)}
-              </button>
-            ))}
-          </div>
-
-          {/* Participants Grid */}
           {filteredParticipants.length === 0 ? (
             <div className="text-center py-12 bg-gray-50 rounded-lg border border-gray-200">
               <p className="text-gray-600 font-medium">No participants found</p>
@@ -338,7 +343,7 @@ export default function ParticipantsPage() {
                     {participant.photo_url ? (
                       <Image
                         src={participant.photo_url}
-                        alt={participant.full_name}
+                        alt={getDisplayName(participant)}
                         fill
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                       />
@@ -361,7 +366,7 @@ export default function ParticipantsPage() {
 
                     <div className="absolute bottom-0 left-0 right-0 p-4">
                       <p className="text-white font-bold text-base leading-tight line-clamp-2 mb-1">
-                        {participant.full_name}, {participant.age}
+                        {getDisplayName(participant)}, {participant.age}
                       </p>
                       <p className="text-white/90 text-xs leading-tight">
                         {participant.state}
@@ -376,7 +381,6 @@ export default function ParticipantsPage() {
         </div>
       )}
 
-      {/* Modal */}
       {selectedParticipant && (
         <div
           className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
@@ -396,7 +400,7 @@ export default function ParticipantsPage() {
                   {selectedParticipant.photo_url ? (
                     <Image
                       src={selectedParticipant.photo_url}
-                      alt={selectedParticipant.full_name}
+                      alt={getDisplayName(selectedParticipant)}
                       fill
                       className="object-cover"
                     />
@@ -426,7 +430,7 @@ export default function ParticipantsPage() {
 
                   <div className="absolute bottom-0 left-0 right-0 p-6">
                     <h2 className="text-3xl font-bold text-white mb-1">
-                      {selectedParticipant.full_name}
+                      {getDisplayName(selectedParticipant)}
                     </h2>
                     <p className="text-white/90 text-lg">
                       Age {selectedParticipant.age} • {selectedParticipant.state}
@@ -486,7 +490,7 @@ export default function ParticipantsPage() {
                     </div>
                   </div>
 
-                  {selectedParticipant.status === 'eliminated' && participantStats?.elimination_date && (
+                  {selectedParticipant.is_eliminated && participantStats?.elimination_date && (
                     <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
                       <h4 className="font-semibold text-red-900 text-sm mb-1">Elimination</h4>
                       <p className="text-xs text-red-700">
@@ -503,8 +507,8 @@ export default function ParticipantsPage() {
                     <h4 className="font-semibold text-gray-900 text-sm mb-2">Participant Details</h4>
                     <div className="space-y-1.5 text-sm">
                       <div className="flex justify-between">
-                        <span className="text-gray-600">Full Name:</span>
-                        <span className="font-medium text-gray-900">{selectedParticipant.full_name}</span>
+                        <span className="text-gray-600">Name:</span>
+                        <span className="font-medium text-gray-900">{getDisplayName(selectedParticipant)}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-gray-600">Age:</span>
@@ -545,5 +549,3 @@ export default function ParticipantsPage() {
     </main>
   )
 }
-
-import { X } from 'lucide-react'

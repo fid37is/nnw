@@ -39,8 +39,8 @@ export default function AllApplicationsTab({ applications, onRefresh }: AllAppli
   const [actioning, setActioning] = useState(false)
   const [showWorkflowBanner, setShowWorkflowBanner] = useState(true)
 
-  // Filter: Only show applications that are NOT participants yet
-  const nonParticipantApplications = applications.filter(app => !app.is_participant)
+  // Show ALL applications - no filtering
+  const allApplications = applications
 
   const toggleSelectApp = (appId: string) => {
     setSelectedApps(prev =>
@@ -51,10 +51,10 @@ export default function AllApplicationsTab({ applications, onRefresh }: AllAppli
   }
 
   const toggleSelectAll = () => {
-    if (selectedApps.length === nonParticipantApplications.length && nonParticipantApplications.length > 0) {
+    if (selectedApps.length === allApplications.length && allApplications.length > 0) {
       setSelectedApps([])
     } else {
-      setSelectedApps(nonParticipantApplications.map(app => app.id))
+      setSelectedApps(allApplications.map(app => app.id))
     }
   }
 
@@ -157,21 +157,22 @@ export default function AllApplicationsTab({ applications, onRefresh }: AllAppli
     }
   }
 
-  const isAllSelected = selectedApps.length === nonParticipantApplications.length && nonParticipantApplications.length > 0
+  const isAllSelected = selectedApps.length === allApplications.length && allApplications.length > 0
 
   const stats = {
-    total: nonParticipantApplications.length,
-    pending: nonParticipantApplications.filter(a => a.status === 'pending').length,
-    underReview: nonParticipantApplications.filter(a => a.status === 'under_review').length,
-    accepted: nonParticipantApplications.filter(a => a.is_accepted && a.status !== 'rejected').length,
-    rejected: nonParticipantApplications.filter(a => a.status === 'rejected').length,
-    awaitingPayment: nonParticipantApplications.filter(a => a.is_accepted && a.payment_status === 'unpaid').length,
+    total: allApplications.length,
+    pending: allApplications.filter(a => a.status === 'pending').length,
+    underReview: allApplications.filter(a => a.status === 'under_review').length,
+    accepted: allApplications.filter(a => a.is_accepted && a.status !== 'rejected').length,
+    rejected: allApplications.filter(a => a.status === 'rejected').length,
+    awaitingPayment: allApplications.filter(a => a.is_accepted && a.payment_status === 'unpaid').length,
+    participants: allApplications.filter(a => a.is_participant).length,
   }
 
   return (
     <div>
       {/* Stats Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-6 gap-3 md:gap-4 mb-6">
+      <div className="grid grid-cols-2 md:grid-cols-7 gap-3 md:gap-4 mb-6">
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
           <p className="text-xs text-gray-600 mb-1 font-semibold">Total</p>
           <p className="text-2xl font-bold text-naija-green-900">{stats.total}</p>
@@ -195,6 +196,10 @@ export default function AllApplicationsTab({ applications, onRefresh }: AllAppli
         <div className="bg-white rounded-lg shadow-sm border border-blue-200 p-4">
           <p className="text-xs text-gray-600 mb-1 font-semibold">Awaiting Payment</p>
           <p className="text-2xl font-bold text-blue-600">{stats.awaitingPayment}</p>
+        </div>
+        <div className="bg-white rounded-lg shadow-sm border border-purple-200 p-4">
+          <p className="text-xs text-gray-600 mb-1 font-semibold">Participants</p>
+          <p className="text-2xl font-bold text-purple-600">{stats.participants}</p>
         </div>
       </div>
 
@@ -226,7 +231,7 @@ export default function AllApplicationsTab({ applications, onRefresh }: AllAppli
       {/* Action Toolbar */}
       <div className="flex items-center justify-between flex-wrap gap-4 mb-4">
         <div className="flex items-center gap-4">
-          {nonParticipantApplications.length > 0 && (
+          {allApplications.length > 0 && (
             <div className="flex items-center gap-3">
               <div
                 onClick={toggleSelectAll}
@@ -293,21 +298,21 @@ export default function AllApplicationsTab({ applications, onRefresh }: AllAppli
       </div>
 
       {/* Applications List */}
-      {nonParticipantApplications.length === 0 ? (
+      {allApplications.length === 0 ? (
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8 text-center">
           <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-4">
             <User className="w-8 h-8 text-gray-400" />
           </div>
           <h3 className="text-lg font-semibold text-gray-900 mb-2">
-            No applications to review
+            No applications yet
           </h3>
           <p className="text-gray-600">
-            All applications have been processed and moved to participants
+            Applications will appear here once submitted
           </p>
         </div>
       ) : (
         <div className="space-y-2">
-          {nonParticipantApplications.map((app) => (
+          {allApplications.map((app) => (
             <ApplicationCard
               key={app.id}
               application={app}
@@ -333,6 +338,16 @@ function ApplicationCard({
   const [isHovering, setIsHovering] = useState(false)
 
   const getStatusBadge = () => {
+    // Show participant badge if applicable
+    if (application.is_participant) {
+      return (
+        <span className="px-2 py-1 rounded-full text-xs font-semibold bg-purple-100 text-purple-800 flex items-center gap-1 whitespace-nowrap">
+          <CheckCircle size={12} />
+          Participant
+        </span>
+      )
+    }
+
     // Show accepted status if applicable
     if (application.is_accepted && application.payment_status === 'unpaid') {
       return (
@@ -348,6 +363,15 @@ function ApplicationCard({
         <span className="px-2 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800 flex items-center gap-1 whitespace-nowrap">
           <Clock size={12} />
           Payment Submitted
+        </span>
+      )
+    }
+
+    if (application.is_accepted && application.payment_status === 'confirmed') {
+      return (
+        <span className="px-2 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800 flex items-center gap-1 whitespace-nowrap">
+          <CheckCircle size={12} />
+          Payment Confirmed
         </span>
       )
     }

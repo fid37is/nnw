@@ -19,7 +19,7 @@ export default function RootLayout({
 }: {
   children: React.ReactNode
 }) {
-  const logoUrl = "https://res.cloudinary.com/lordefid/image/upload/v1763343827/fine_zpc6p1.png"
+  const logoUrl = "https://res.cloudinary.com/lordefid/image/upload/v1765296838/NNW_hnchr8.png"
 
   return (
     <html lang="en">

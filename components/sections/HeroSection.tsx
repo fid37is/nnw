@@ -45,7 +45,8 @@ export default function HeroSection({ champion, season, isApplicationOpen }: Her
     return () => clearTimeout(revealTimer)
   }, [isRevealed])
   
-  const isChampion = champion && season?.status === 'completed'
+  // Check if there's a real champion (from champions table)
+  const isChampion = champion && champion.photo_url
   
   return (
     <section className="relative min-h-[90vh] overflow-hidden bg-gradient-to-br from-green-900 via-green-800 to-green-950">
@@ -96,18 +97,14 @@ export default function HeroSection({ champion, season, isApplicationOpen }: Her
 
           {/* Right Content - Champion with Curtain Blind */}
           <div className="relative flex items-center justify-center min-h-[600px]">
-            {/* Champion Image - Only visible when revealed */}
-            <div 
-              className={`absolute inset-0 flex items-center justify-center transition-opacity duration-500 ${
-                isRevealed ? 'opacity-100' : 'opacity-0'
-              }`}
-            >
+            {/* Champion Image - Always visible, behind the curtain */}
+            <div className="absolute inset-0 flex items-center justify-center">
               <div className="relative w-full max-w-md">
                 <div className="relative aspect-[3/4] overflow-hidden rounded-3xl shadow-2xl">
-                  {isChampion && champion.photo_url ? (
+                  {isChampion ? (
                     <>
                       <Image
-                        src={champion.photo_url}
+                        src={champion.photo_url!}
                         alt={champion.full_name}
                         fill
                         loading="eager"
