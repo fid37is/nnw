@@ -31,6 +31,11 @@ const navItems = [
     icon: Users,
   },
   {
+    label: 'Job Applicants',
+    href: '/admin/job-applications',
+    icon: Users,
+  },
+  {
     label: 'Champions',
     href: '/admin/champions',
     icon: Trophy,
