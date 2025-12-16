@@ -6,6 +6,7 @@ import Image from 'next/image'
 import { supabase } from '@/lib/supabase/client'
 import { Trophy, ArrowLeft, User, Crown } from 'lucide-react'
 import Navbar from '../navbar'
+import Footer from '../footer'
 
 interface LeaderboardEntry {
   rank: number
@@ -190,7 +191,7 @@ export default function LeaderboardPage() {
           <div className="animate-spin w-12 h-12 border-4 border-green-200 border-t-green-600 rounded-full"></div>
         </div>
       ) : (
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12 mt-14">
           {/* Header */}
           <div className="mb-10">
             <Link href="/" className="inline-flex items-center gap-2 text-green-600 hover:text-green-700 mb-6 font-medium transition group">
@@ -217,7 +218,7 @@ export default function LeaderboardPage() {
               </p>
               <Link 
                 href="/hall-of-fame"
-                className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-yellow-500 to-amber-500 text-white font-bold rounded-xl hover:from-yellow-600 hover:to-amber-600 transition shadow-lg hover:shadow-xl transform hover:scale-105"
+                className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-yellow-500 to-amber-500 text-white font-bold rounded-full hover:from-yellow-600 hover:to-amber-600 transition shadow-lg hover:shadow-xl transform hover:scale-105"
               >
                 <Trophy size={24} />
                 <span>View Hall of Fame</span>
@@ -308,6 +309,7 @@ export default function LeaderboardPage() {
           )}
         </div>
       )}
+      <Footer />
     </main>
   )
 }

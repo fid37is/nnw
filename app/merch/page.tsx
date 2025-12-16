@@ -6,6 +6,7 @@ import { Heart, ShoppingBag, ArrowLeft, Loader2, X, Mail } from 'lucide-react'
 import { toast } from 'sonner'
 import { supabase } from '@/lib/supabase/client'
 import Navbar from '../navbar'
+import Footer from '../footer'
 
 interface MerchItem {
   id: string
@@ -285,12 +286,12 @@ export default function MerchPage() {
       </div>
 
       {/* Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12 mt-14">
         {/* Header */}
         <div className="mb-8">
           <Link href="/" className="flex items-center gap-2 text-naija-green-600 hover:text-naija-green-700 mb-4 w-fit">
             <ArrowLeft size={18} />
-            <span className="text-sm font-medium">Back</span>
+            <span className="text-sm font-medium">Back to Home</span>
           </Link>
           <div className="flex items-center gap-4 mb-3">
             <ShoppingBag size={40} className="text-naija-green-600" />
@@ -306,8 +307,8 @@ export default function MerchPage() {
               key={cat}
               onClick={() => setFilterCategory(cat)}
               className={`px-4 py-2 rounded-lg font-medium text-sm whitespace-nowrap transition ${filterCategory === cat
-                  ? 'bg-naija-green-600 text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                ? 'bg-naija-green-600 text-white'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}
             >
               {cat.charAt(0).toUpperCase() + cat.slice(1)}
@@ -635,6 +636,7 @@ export default function MerchPage() {
           </div>
         </div>
       )}
+      <Footer />
     </main>
   )
 }

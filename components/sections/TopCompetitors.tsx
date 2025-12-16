@@ -94,7 +94,7 @@ export default function TopCompetitors({ champion, runners, seasonStatus = 'acti
           <div className="text-center">
             <Link
               href="/leaderboard"
-              className="inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-green-600 to-green-700 text-white font-bold rounded-xl hover:from-green-700 hover:to-green-800 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105"
+              className="inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-green-600 to-green-700 text-white font-bold rounded-full hover:from-green-700 hover:to-green-800 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105"
             >
               <Users size={22} />
               View Full Leaderboard
