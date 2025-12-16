@@ -103,7 +103,7 @@ export default function VideoHighlights({ videos, extractYouTubeId, youtubeChann
                 href={youtubeChannelUrl} 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 px-6 py-2.5 bg-white border-2 border-red-100 text-red-600 font-semibold rounded-lg hover:bg-red-50 hover:border-red-200 transition-all duration-200 shadow-sm hover:shadow-md"
+                className="inline-flex items-center gap-2 px-6 py-2.5 bg-white border-2 border-red-100 text-red-600 font-semibold rounded-full hover:bg-red-50 hover:border-red-200 transition-all duration-200 shadow-sm hover:shadow-md"
               >
                 <Youtube size={18} />
                 Subscribe on YouTube
@@ -123,7 +123,7 @@ export default function VideoHighlights({ videos, extractYouTubeId, youtubeChann
             href={youtubeChannelUrl} 
             target="_blank" 
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 mt-4 px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl transition-all duration-300"
+            className="inline-flex items-center gap-2 mt-4 px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-full transition-all duration-300"
           >
             <Youtube size={20} />
             Subscribe for Updates

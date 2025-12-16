@@ -34,7 +34,7 @@ export default function CTASection({ champion, isApplicationOpen }: CTASectionPr
               </p>
               <Link
                 href="/register"
-                className="inline-flex items-center justify-center gap-3 px-10 py-5 bg-white text-green-700 font-black text-lg rounded-xl hover:bg-green-50 transition-all duration-300 shadow-xl hover:shadow-2xl hover:scale-110"
+                className="inline-flex items-center justify-center gap-3 px-10 py-5 bg-white text-green-700 font-black text-lg rounded-xl hover:bg-green-50 transition-all duration-300 shadow-xl hover:shadow-2xl hover:scale-110 whitespace-nowrap"
               >
                 Apply Now
                 <ArrowRight size={24} />
@@ -47,7 +47,7 @@ export default function CTASection({ champion, isApplicationOpen }: CTASectionPr
               </p>
               <Link
                 href="/register"
-                className="inline-flex items-center justify-center gap-3 px-10 py-5 bg-white text-green-700 font-black text-lg rounded-xl hover:bg-green-50 transition-all duration-300 shadow-xl hover:shadow-2xl hover:scale-110"
+                className="inline-flex items-center justify-center gap-3 px-10 py-5 bg-white text-green-700 font-black text-lg rounded-full hover:bg-green-50 transition-all duration-300 shadow-xl hover:shadow-2xl hover:scale-110 whitespace-nowrap"
               >
                 Register for Updates
                 <ArrowRight size={24} />

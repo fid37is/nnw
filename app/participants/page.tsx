@@ -6,6 +6,7 @@ import Image from 'next/image'
 import { supabase } from '@/lib/supabase/client'
 import { Search, ArrowLeft, User, Users as UsersIcon, X } from 'lucide-react'
 import Navbar from '../navbar'
+import Footer from '../footer'
 
 interface Participant {
   id: string
@@ -250,7 +251,7 @@ export default function ParticipantsPage() {
           <div className="animate-spin w-8 h-8 border-4 border-naija-green-200 border-t-naija-green-600 rounded-full"></div>
         </div>
       ) : (
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12 mt-14">
           <div className="mb-8">
             <Link href="/" className="inline-flex items-center gap-2 text-naija-green-600 hover:text-naija-green-700 mb-6 font-medium transition group">
               <ArrowLeft size={18} className="group-hover:-translate-x-1 transition-transform" />
@@ -546,6 +547,7 @@ export default function ParticipantsPage() {
           </div>
         </div>
       )}
+      <Footer />
     </main>
   )
 }

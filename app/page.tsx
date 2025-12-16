@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase/client'
 import Navbar from './navbar'
+import Footer from './footer'
 import HeroSection from '../components/sections/HeroSection'
 import StatsSection from '../components/sections/StatsSection'
 import TopCompetitors from '../components/sections/TopCompetitors'
@@ -235,11 +236,7 @@ export default function Home() {
             isApplicationOpen={isApplicationOpen()} 
           />
 
-          <footer className="border-t border-gray-100 py-12 mt-16">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-gray-600 text-sm">
-              <p>© 2025 Naija Ninja Warrior. Challenge yourself. Become a legend.</p>
-            </div>
-          </footer>
+          <Footer />
         </>
       )}
     </main>

@@ -6,6 +6,7 @@ import Image from 'next/image'
 import { supabase } from '@/lib/supabase/client'
 import { Trophy, ArrowLeft, User, Crown, Medal, Award } from 'lucide-react'
 import Navbar from '../navbar'
+import Footer from '../footer'
 
 interface Champion {
   season_id: string
@@ -141,7 +142,7 @@ export default function HallOfFamePage() {
           <div className="animate-spin w-12 h-12 border-4 border-yellow-200 border-t-yellow-600 rounded-full"></div>
         </div>
       ) : (
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12 mt-14">
           {/* Header */}
           <div className="mb-12">
             <Link href="/" className="inline-flex items-center gap-2 text-yellow-700 hover:text-yellow-800 mb-6 font-medium transition group">
@@ -329,6 +330,7 @@ export default function HallOfFamePage() {
           )}
         </div>
       )}
+      <Footer />
     </main>
   )
 }

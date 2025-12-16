@@ -80,7 +80,7 @@ export default function HeroSection({ champion, season, isApplicationOpen }: Her
               {isApplicationOpen && (
                 <Link
                   href="/register"
-                  className="group px-8 py-4 bg-white text-green-900 font-bold rounded-xl hover:bg-green-50 transition-all duration-300 flex items-center justify-center gap-2 shadow-xl hover:shadow-2xl hover:scale-105"
+                  className="group px-8 py-4 bg-white text-green-900 font-bold rounded-full hover:bg-green-50 transition-all duration-300 flex items-center justify-center gap-2 shadow-xl hover:shadow-2xl hover:scale-105"
                 >
                   Apply Now
                   <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
@@ -88,7 +88,7 @@ export default function HeroSection({ champion, season, isApplicationOpen }: Her
               )}
               <Link
                 href="/leaderboard"
-                className="px-8 py-4 bg-green-500/10 backdrop-blur-sm border-2 border-green-400/30 text-white font-bold rounded-xl hover:bg-green-500/20 transition-all duration-300 text-center"
+                className="px-8 py-4 bg-green-500/10 backdrop-blur-sm border-2 border-green-400/30 text-white font-bold rounded-full hover:bg-green-500/20 transition-all duration-300 text-center"
               >
                 View Leaderboard
               </Link>
