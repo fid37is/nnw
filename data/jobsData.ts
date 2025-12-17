@@ -13,6 +13,7 @@ export interface Job {
   description: string
   requirements: string[]
   responsibilities: string[]
+  isActive: boolean
 }
 
 export interface JobCategory {
@@ -72,6 +73,7 @@ export const jobs: Job[] = [
     category: 'administrative',
     location: 'Multiple States (Nationwide)',
     type: 'Full-time',
+    isActive: false,
     salary: '₦150,000 - ₦250,000/month',
     description: 'Coordinate all NNW activities within your assigned state. Manage registrations, logistics, venue partnerships, and serve as the primary contact for contestants and stakeholders in your region.',
     requirements: [
@@ -97,6 +99,7 @@ export const jobs: Job[] = [
     category: 'administrative',
     location: 'Lagos/Abuja',
     type: 'Full-time',
+    isActive: false,
     salary: '₦80,000 - ₦120,000/month',
     description: 'Provide administrative support to the NNW team. Handle office operations, scheduling, correspondence, and assist with day-to-day administrative tasks.',
     requirements: [
@@ -122,6 +125,7 @@ export const jobs: Job[] = [
     category: 'administrative',
     location: 'Lagos',
     type: 'Full-time',
+    isActive: false,
     salary: '₦300,000 - ₦500,000/month',
     description: 'Provide legal guidance on contracts, liability issues, contestant agreements, sponsorship deals, and ensure compliance with Nigerian entertainment and broadcasting regulations.',
     requirements: [
@@ -147,6 +151,7 @@ export const jobs: Job[] = [
     category: 'administrative',
     location: 'Lagos/Abuja',
     type: 'Full-time',
+    isActive: false,
     salary: '₦250,000 - ₦400,000/month',
     description: 'Lead specific project initiatives within NNW. Coordinate cross-functional teams, manage timelines, budgets, and ensure successful project delivery.',
     requirements: [
@@ -172,6 +177,7 @@ export const jobs: Job[] = [
     category: 'administrative',
     location: 'Lagos',
     type: 'Full-time',
+    isActive: false,
     salary: '₦150,000 - ₦250,000/month',
     description: 'Manage internal and external communications. Handle media relations, prepare press releases, coordinate stakeholder communications, and maintain NNW\'s public image.',
     requirements: [
@@ -197,6 +203,7 @@ export const jobs: Job[] = [
     category: 'administrative',
     location: 'Multiple Locations',
     type: 'Full-time',
+    isActive: false,
     salary: '₦120,000 - ₦200,000/month',
     description: 'Oversee contestant registration process. Manage registration teams, verify applications, coordinate with IT for database management, and ensure smooth registration operations.',
     requirements: [
@@ -222,6 +229,7 @@ export const jobs: Job[] = [
     category: 'administrative',
     location: 'Lagos/Abuja',
     type: 'Full-time',
+    isActive: false,
     salary: '₦100,000 - ₦150,000/month',
     description: 'Manage contestant data, competition statistics, and maintain accurate databases. Generate reports and ensure data integrity across all systems.',
     requirements: [
@@ -251,6 +259,7 @@ export const jobs: Job[] = [
     category: 'media-production',
     location: 'Lagos',
     type: 'Full-time',
+    isActive: false,
     salary: '₦500,000 - ₦800,000/month',
     description: 'Lead the entire production of Nigeria\'s first ninja warrior competition series. Oversee creative vision, manage production teams, coordinate with sponsors, and ensure delivery of high-quality broadcast content.',
     requirements: [
@@ -276,6 +285,7 @@ export const jobs: Job[] = [
     category: 'media-production',
     location: 'Lagos/Abuja',
     type: 'Full-time',
+    isActive: false,
     salary: '₦350,000 - ₦500,000/month',
     description: 'Coordinate day-to-day production operations, manage crew schedules, handle logistics for regional competitions and filming across multiple Nigerian cities.',
     requirements: [
@@ -303,6 +313,7 @@ export const jobs: Job[] = [
     type: 'Contract',
     salary: '₦150,000 - ₦250,000/month',
     description: 'Capture high-energy competition footage, behind-the-scenes content, and contestant stories. Work with state-of-the-art camera equipment to deliver broadcast-quality content.',
+    isActive: false,
     requirements: [
       '3+ years camera operation experience',
       'Experience with sports or action filming',
@@ -326,6 +337,7 @@ export const jobs: Job[] = [
     category: 'media-production',
     location: 'Lagos (Hybrid)',
     type: 'Full-time',
+    isActive: false,
     salary: '₦250,000 - ₦400,000/month',
     description: 'Edit competition episodes, create promotional content, and assemble compelling narratives from raw footage. Transform hours of competition footage into engaging television.',
     requirements: [
@@ -351,6 +363,7 @@ export const jobs: Job[] = [
     category: 'media-production',
     location: 'Multiple Locations',
     type: 'Contract',
+    isActive: false,
     salary: '₦100,000 - ₦180,000/month',
     description: 'Capture aerial footage of competitions and venues. Provide unique perspectives that enhance production value and create stunning visuals.',
     requirements: [
@@ -378,6 +391,7 @@ export const jobs: Job[] = [
     type: 'Contract',
     salary: '₦120,000 - ₦200,000/month',
     description: 'Capture clean audio during competitions, manage sound mixing, and ensure broadcast-quality sound for all productions.',
+    isActive: false,
     requirements: [
       'Professional sound engineering experience',
       'Knowledge of broadcast audio equipment',
@@ -401,6 +415,7 @@ export const jobs: Job[] = [
     category: 'media-production',
     location: 'Lagos (Hybrid)',
     type: 'Full-time',
+    isActive: false,
     salary: '₦150,000 - ₦280,000/month',
     description: 'Design graphics for broadcast, social media, and marketing materials. Create visual identity elements that elevate the Naija Ninja Warrior brand.',
     requirements: [
@@ -426,6 +441,7 @@ export const jobs: Job[] = [
     category: 'media-production',
     location: 'Lagos (Hybrid)',
     type: 'Full-time',
+    isActive: false,
     salary: '₦180,000 - ₦300,000/month',
     description: 'Write compelling scripts, contestant narratives, and show commentary. Craft engaging stories that bring the competition to life.',
     requirements: [
@@ -451,6 +467,7 @@ export const jobs: Job[] = [
     category: 'media-production',
     location: 'Multiple Locations',
     type: 'Contract',
+    isActive: false,
     salary: '₦120,000 - ₦200,000/month',
     description: 'Manage live streaming operations for online audiences. Handle technical setup, monitor stream quality, and engage with online viewers.',
     requirements: [
@@ -476,6 +493,7 @@ export const jobs: Job[] = [
     category: 'media-production',
     location: 'Multiple Locations',
     type: 'Contract',
+    isActive: false,
     salary: '₦100,000 - ₦180,000/month',
     description: 'Capture high-quality still images of competitions, contestants, and events. Provide photography for marketing, social media, and documentation.',
     requirements: [
@@ -501,6 +519,7 @@ export const jobs: Job[] = [
     category: 'media-production',
     location: 'Lagos',
     type: 'Full-time',
+    isActive: false,
     salary: '₦200,000 - ₦350,000/month',
     description: 'Build and engage our online community across Instagram, TikTok, Twitter/X, and YouTube. Create viral content, manage contestant engagement, and drive viewership.',
     requirements: [
@@ -530,6 +549,7 @@ export const jobs: Job[] = [
     category: 'technical-operations',
     location: 'Multiple Locations',
     type: 'Contract',
+    isActive: false,
     salary: '₦300,000 - ₦500,000/project',
     description: 'Design, build, and test ninja warrior obstacle courses. Ensure safety while creating challenging and visually exciting obstacles for competitors.',
     requirements: [
@@ -555,6 +575,7 @@ export const jobs: Job[] = [
     category: 'technical-operations',
     location: 'Multiple Locations',
     type: 'Contract',
+    isActive: false,
     salary: '₦80,000 - ₦150,000/month',
     description: 'Build and maintain obstacle course structures. Work with designers to bring obstacle concepts to life with quality craftsmanship.',
     requirements: [
@@ -580,6 +601,7 @@ export const jobs: Job[] = [
     category: 'technical-operations',
     location: 'Multiple Locations',
     type: 'Full-time',
+    isActive: false,
     salary: '₦180,000 - ₦300,000/month',
     description: 'Ensure all safety protocols are followed during competitions. Conduct risk assessments, manage safety equipment, and coordinate with medical teams.',
     requirements: [
@@ -605,6 +627,7 @@ export const jobs: Job[] = [
     category: 'technical-operations',
     location: 'Multiple Locations',
     type: 'Contract',
+    isActive: false,
     salary: '₦100,000 - ₦180,000/month',
     description: 'Design and operate lighting setups for competitions. Create dramatic lighting effects that enhance the viewing experience and broadcast quality.',
     requirements: [
@@ -630,6 +653,7 @@ export const jobs: Job[] = [
     category: 'technical-operations',
     location: 'Multiple Locations',
     type: 'Contract',
+    isActive: false,
     salary: '₦90,000 - ₦160,000/month',
     description: 'Install and maintain rigging systems for obstacles and production equipment. Ensure structural safety and stability for all overhead elements.',
     requirements: [
@@ -655,6 +679,7 @@ export const jobs: Job[] = [
     category: 'technical-operations',
     location: 'Multiple Locations',
     type: 'Full-time',
+    isActive: false,
     salary: '₦150,000 - ₦250,000/month',
     description: 'Coordinate all on-stage activities during competitions. Manage crew, ensure smooth transitions, and oversee event flow.',
     requirements: [
@@ -680,6 +705,7 @@ export const jobs: Job[] = [
     category: 'technical-operations',
     location: 'Multiple Locations',
     type: 'Contract',
+    isActive: false,
     salary: '₦60,000 - ₦100,000/month',
     description: 'Manage, transport, and maintain production equipment. Ensure all equipment is properly handled, stored, and ready for use.',
     requirements: [
@@ -709,6 +735,7 @@ export const jobs: Job[] = [
     category: 'support-logistics',
     location: 'Multiple Locations',
     type: 'Contract',
+    isActive: false,
     salary: '₦80,000 - ₦120,000/month',
     description: 'Provide security services for competitions and events. Manage access control, crowd management, and ensure safety of contestants, crew, and audience.',
     requirements: [
@@ -734,6 +761,7 @@ export const jobs: Job[] = [
     category: 'support-logistics',
     location: 'Multiple Locations',
     type: 'Contract',
+    isActive: false,
     salary: '₦200,000 - ₦350,000/month',
     description: 'Provide on-site medical support during competitions. Handle injuries, conduct health screenings, and ensure contestant medical safety.',
     requirements: [
@@ -759,6 +787,7 @@ export const jobs: Job[] = [
     category: 'support-logistics',
     location: 'Multiple States',
     type: 'Contract',
+    isActive: false,
     salary: '₦100,000 - ₦180,000/month',
     description: 'Manage transportation logistics for crew, equipment, and contestants. Coordinate vehicle schedules and ensure timely arrivals at all locations.',
     requirements: [
@@ -784,6 +813,7 @@ export const jobs: Job[] = [
     category: 'support-logistics',
     location: 'Multiple Locations',
     type: 'Part-time',
+    isActive: false,
     salary: '₦80,000 - ₦150,000/month',
     description: 'Recruit, train, and manage event volunteers. Coordinate volunteer activities and ensure effective support for competitions.',
     requirements: [
@@ -809,6 +839,7 @@ export const jobs: Job[] = [
     category: 'support-logistics',
     location: 'Multiple Locations',
     type: 'Contract',
+    isActive: false,
     salary: '₦70,000 - ₦100,000/month',
     description: 'Provide hospitality services for contestants, guests, and VIPs. Manage catering, refreshments, and ensure positive experiences.',
     requirements: [
@@ -834,6 +865,7 @@ export const jobs: Job[] = [
     category: 'support-logistics',
     location: 'Multiple Locations',
     type: 'Contract',
+    isActive: false,
     salary: '₦70,000 - ₦100,000/month',
     description: 'Maintain venue cleanliness and functionality. Perform setup, breakdown, and ongoing maintenance during events.',
     requirements: [
@@ -859,6 +891,7 @@ export const jobs: Job[] = [
     category: 'support-logistics',
     location: 'Lagos/Abuja',
     type: 'Full-time',
+    isActive: false,
     salary: '₦180,000 - ₦300,000/month',
     description: 'Manage all contestant relations from application to competition day. Handle registrations, communications, on-site support, and ensure positive contestant experiences.',
     requirements: [
@@ -888,6 +921,7 @@ export const jobs: Job[] = [
     category: 'marketing-sponsorship',
     location: 'Lagos',
     type: 'Full-time',
+    isActive: false,
     salary: '₦400,000 - ₦700,000/month + Commission',
     description: 'Secure corporate sponsorships and brand partnerships. Build relationships with Nigerian brands and deliver value through innovative partnership activations.',
     requirements: [
@@ -913,6 +947,7 @@ export const jobs: Job[] = [
     category: 'marketing-sponsorship',
     location: 'Lagos/Abuja',
     type: 'Full-time',
+    isActive: false,
     salary: '₦120,000 - ₦250,000/month + Commission',
     description: 'Drive ticket sales, merchandise sales, and generate revenue through various channels. Build partnerships with distributors and retailers.',
     requirements: [
@@ -938,6 +973,7 @@ export const jobs: Job[] = [
     category: 'marketing-sponsorship',
     location: 'Lagos/Abuja',
     type: 'Full-time',
+    isActive: false,
     salary: '₦150,000 - ₦250,000/month',
     description: 'Maintain brand consistency across all NNW touchpoints. Coordinate marketing materials, merchandise, and ensure brand guidelines are followed.',
     requirements: [
@@ -963,6 +999,7 @@ export const jobs: Job[] = [
     category: 'marketing-sponsorship',
     location: 'Lagos',
     type: 'Full-time',
+    isActive: false,
     salary: '₦180,000 - ₦300,000/month',
     description: 'Manage public relations and media outreach. Build relationships with journalists, coordinate press events, and maximize positive media coverage.',
     requirements: [
@@ -988,6 +1025,7 @@ export const jobs: Job[] = [
     category: 'marketing-sponsorship',
     location: 'Lagos/Abuja',
     type: 'Full-time',
+    isActive: false,
     salary: '₦150,000 - ₦280,000/month',
     description: 'Manage day-to-day relationships with brand partners and sponsors. Ensure sponsor deliverables are met and partnerships run smoothly.',
     requirements: [
@@ -1010,7 +1048,7 @@ export const jobs: Job[] = [
 
 // Helper functions
 export const getJobsByCategory = (categoryId: string): Job[] => {
-  return jobs.filter(job => job.category === categoryId)
+  return jobs.filter(job => job.category === categoryId && job.isActive)
 }
 
 export const getJobById = (jobId: string): Job | undefined => {
@@ -1018,9 +1056,13 @@ export const getJobById = (jobId: string): Job | undefined => {
 }
 
 export const getTotalJobCount = (): number => {
-  return jobs.length
+  return jobs.filter(job => job.isActive).length
 }
 
 export const getCategoryJobCount = (categoryId: string): number => {
   return getJobsByCategory(categoryId).length
+}
+
+export const getAllActiveJobs = (): Job[] => {
+  return jobs.filter(job => job.isActive)
 }
