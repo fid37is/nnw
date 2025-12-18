@@ -2,6 +2,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { ArrowRight, User } from 'lucide-react'
 import { useState, useEffect } from 'react'
+import { useLogoConfig } from '../context/LogoContext'
 
 interface Champion {
   id: string
@@ -29,6 +30,7 @@ interface HeroSectionProps {
 
 export default function HeroSection({ champion, season, isApplicationOpen }: HeroSectionProps) {
   const [isRevealed, setIsRevealed] = useState(false)
+  const { logoUrl } = useLogoConfig()
   
   useEffect(() => {
     const revealTimer = setTimeout(() => {
@@ -183,19 +185,23 @@ export default function HeroSection({ champion, season, isApplicationOpen }: Her
                   ))}
                 </div>
                 
-                {/* Text on curtain - scales down when pulled up */}
+                {/* Logo on curtain - scales down when pulled up */}
                 <div 
-                  className="relative z-10 transition-all duration-[2000ms]"
+                  className="relative z-10 transition-all duration-[2000ms] flex items-center justify-center"
                   style={{
                     transform: isRevealed ? 'scale(0.15)' : 'scale(1)',
                     opacity: isRevealed ? 0.6 : 1,
                   }}
                 >
-                  <h2 className="text-7xl md:text-9xl font-black text-white leading-[0.9] text-center px-4">
-                    <div>NAIJA</div>
-                    <div className="text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-green-200">NINJA</div>
-                    <div>WARRIOR</div>
-                  </h2>
+                  <div className="relative w-96 h-[28rem] md:w-[32rem] md:h-[40rem]">
+                    <Image
+                      src={logoUrl}
+                      alt="Naija Ninja Warrior Logo"
+                      fill
+                      className="object-contain drop-shadow-2xl"
+                      priority
+                    />
+                  </div>
                 </div>
               </div>
             </div>
