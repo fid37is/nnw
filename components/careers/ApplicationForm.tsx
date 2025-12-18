@@ -1,13 +1,30 @@
-
 // ==========================================
 // FILE: components/careers/ApplicationForm.tsx
+// Updated to use Job type from database
 // ==========================================
 
 import { useState } from 'react'
 import { X, Upload } from 'lucide-react'
 import { supabase } from '@/lib/supabase/client'
 import { toast } from 'sonner'
-import type { Job } from '@/data/jobsData'
+
+interface Job {
+  id: string
+  position_id: string
+  title: string
+  department: string
+  category: string
+  location: string
+  job_type: string
+  salary: string
+  description: string
+  requirements: string[]
+  responsibilities: string[]
+  is_active: boolean
+  applications_count: number
+  created_at: string
+  updated_at: string
+}
 
 interface ApplicationFormProps {
   job: Job
@@ -58,6 +75,7 @@ export default function ApplicationForm({ job, onClose }: ApplicationFormProps) 
 
     setSubmitting(true)
     try {
+      // Upload resume to Supabase Storage
       const fileName = `${Date.now()}-${resumeFile.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from('job-applications')
@@ -65,24 +83,27 @@ export default function ApplicationForm({ job, onClose }: ApplicationFormProps) 
 
       if (uploadError) throw uploadError
 
+      // Get public URL for the uploaded file
       const { data: { publicUrl } } = supabase.storage
         .from('job-applications')
         .getPublicUrl(fileName)
 
+      // Insert application into database
       const { error: insertError } = await supabase
         .from('job_applications')
         .insert([
           {
+            job_id: job.id,
             position: job.title,
-            position_id: job.id,
+            position_id: job.position_id,
             department: job.department,
             full_name: formData.full_name,
             email: formData.email,
             phone: formData.phone,
             location: formData.location,
             cover_letter: formData.cover_letter,
-            linkedin_url: formData.linkedin_url,
-            portfolio_url: formData.portfolio_url,
+            linkedin_url: formData.linkedin_url || null,
+            portfolio_url: formData.portfolio_url || null,
             years_experience: formData.years_experience || null,
             resume_url: publicUrl,
             status: 'pending',
@@ -93,6 +114,7 @@ export default function ApplicationForm({ job, onClose }: ApplicationFormProps) 
 
       toast.success('Application submitted successfully! We\'ll review your application and get back to you soon.')
       
+      // Reset form
       setFormData({
         full_name: '',
         email: '',
@@ -116,23 +138,25 @@ export default function ApplicationForm({ job, onClose }: ApplicationFormProps) 
 
   return (
     <div id="application-form" className="mb-16">
-      <div className="bg-gradient-to-br from-naija-green-50 to-green-100 rounded-xl p-8 border-2 border-naija-green-200">
-        <div className="flex items-start justify-between mb-6">
-          <div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">Apply for {job.title}</h2>
-            <p className="text-gray-600">Fill in your details and upload your resume to apply</p>
+      <div className="bg-gradient-to-br from-naija-green-50 to-green-100 rounded-xl p-4 sm:p-6 md:p-8 border-2 border-naija-green-200">
+        <div className="flex items-start justify-between mb-4 sm:mb-6 gap-3">
+          <div className="flex-1 min-w-0">
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2 break-words">Apply for {job.title}</h2>
+            <p className="text-sm sm:text-base text-gray-600">Fill in your details and upload your resume to apply</p>
           </div>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-white/50 rounded-lg transition"
+            className="p-2 hover:bg-white/50 rounded-lg transition flex-shrink-0"
+            aria-label="Close form"
           >
             <X size={20} />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="bg-white rounded-lg p-6">
-          <div className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <form onSubmit={handleSubmit} className="bg-white rounded-lg p-4 sm:p-6">
+          <div className="space-y-4 sm:space-y-6">
+            {/* Full Name & Email */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
                   Full Name *
@@ -141,7 +165,7 @@ export default function ApplicationForm({ job, onClose }: ApplicationFormProps) 
                   type="text"
                   value={formData.full_name}
                   onChange={(e) => setFormData({...formData, full_name: e.target.value})}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-naija-green-500"
+                  className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-naija-green-500"
                   placeholder="John Doe"
                   required
                 />
@@ -154,14 +178,15 @@ export default function ApplicationForm({ job, onClose }: ApplicationFormProps) 
                   type="email"
                   value={formData.email}
                   onChange={(e) => setFormData({...formData, email: e.target.value})}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-naija-green-500"
+                  className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-naija-green-500"
                   placeholder="john@example.com"
                   required
                 />
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Phone & Location */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
                   Phone Number *
@@ -170,7 +195,7 @@ export default function ApplicationForm({ job, onClose }: ApplicationFormProps) 
                   type="tel"
                   value={formData.phone}
                   onChange={(e) => setFormData({...formData, phone: e.target.value})}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-naija-green-500"
+                  className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-naija-green-500"
                   placeholder="+234 800 000 0000"
                   required
                 />
@@ -183,14 +208,15 @@ export default function ApplicationForm({ job, onClose }: ApplicationFormProps) 
                   type="text"
                   value={formData.location}
                   onChange={(e) => setFormData({...formData, location: e.target.value})}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-naija-green-500"
+                  className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-naija-green-500"
                   placeholder="Lagos, Nigeria"
                   required
                 />
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Experience & LinkedIn */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
                   Years of Experience
@@ -199,7 +225,7 @@ export default function ApplicationForm({ job, onClose }: ApplicationFormProps) 
                   type="text"
                   value={formData.years_experience}
                   onChange={(e) => setFormData({...formData, years_experience: e.target.value})}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-naija-green-500"
+                  className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-naija-green-500"
                   placeholder="e.g., 5 years"
                 />
               </div>
@@ -211,12 +237,13 @@ export default function ApplicationForm({ job, onClose }: ApplicationFormProps) 
                   type="url"
                   value={formData.linkedin_url}
                   onChange={(e) => setFormData({...formData, linkedin_url: e.target.value})}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-naija-green-500"
+                  className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-naija-green-500"
                   placeholder="https://linkedin.com/in/yourprofile"
                 />
               </div>
             </div>
 
+            {/* Portfolio */}
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">
                 Portfolio/Website (Optional)
@@ -225,11 +252,12 @@ export default function ApplicationForm({ job, onClose }: ApplicationFormProps) 
                 type="url"
                 value={formData.portfolio_url}
                 onChange={(e) => setFormData({...formData, portfolio_url: e.target.value})}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-naija-green-500"
+                className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-naija-green-500"
                 placeholder="https://yourportfolio.com"
               />
             </div>
 
+            {/* Cover Letter */}
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">
                 Cover Letter *
@@ -238,20 +266,21 @@ export default function ApplicationForm({ job, onClose }: ApplicationFormProps) 
                 value={formData.cover_letter}
                 onChange={(e) => setFormData({...formData, cover_letter: e.target.value})}
                 rows={5}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-naija-green-500"
+                className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-naija-green-500"
                 placeholder="Tell us why you're perfect for this role..."
                 required
               />
             </div>
 
+            {/* Resume Upload */}
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">
                 Resume/CV * (PDF or Word, max 5MB)
               </label>
               <div className="mt-2">
-                <label className="flex items-center justify-center w-full px-4 py-6 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-naija-green-500 transition">
+                <label className="flex items-center justify-center w-full px-4 py-4 sm:py-6 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-naija-green-500 transition">
                   <div className="text-center">
-                    <Upload className="mx-auto mb-2 text-gray-400" size={32} />
+                    <Upload className="mx-auto mb-2 text-gray-400" size={28} />
                     <p className="text-sm font-medium text-gray-600">
                       {resumeFile ? resumeFile.name : 'Click to upload your resume'}
                     </p>
@@ -267,11 +296,11 @@ export default function ApplicationForm({ job, onClose }: ApplicationFormProps) 
                 </label>
                 {resumeFile && (
                   <div className="mt-2 flex items-center justify-between bg-green-50 p-3 rounded-lg">
-                    <span className="text-sm text-gray-700">{resumeFile.name}</span>
+                    <span className="text-sm text-gray-700 break-all">{resumeFile.name}</span>
                     <button
                       type="button"
                       onClick={() => setResumeFile(null)}
-                      className="text-red-600 hover:text-red-700"
+                      className="text-red-600 hover:text-red-700 ml-2 flex-shrink-0"
                     >
                       <X size={18} />
                     </button>
@@ -280,10 +309,11 @@ export default function ApplicationForm({ job, onClose }: ApplicationFormProps) 
               </div>
             </div>
 
+            {/* Submit Button */}
             <button
               type="submit"
               disabled={submitting}
-              className="w-full px-8 py-4 bg-naija-green-600 text-white font-bold rounded-lg hover:bg-naija-green-700 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="w-full px-6 sm:px-8 py-3 sm:py-4 bg-naija-green-600 text-white font-bold rounded-lg hover:bg-naija-green-700 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm sm:text-base"
             >
               {submitting ? (
                 <>
