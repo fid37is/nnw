@@ -1,9 +1,27 @@
 // ==========================================
 // FILE: components/careers/JobCard.tsx
+// Updated to use Job type from database
 // ==========================================
 
 import { useState } from 'react'
-import type { Job } from '@/data/jobsData'
+
+interface Job {
+  id: string
+  position_id: string
+  title: string
+  department: string
+  category: string
+  location: string
+  job_type: string
+  salary: string
+  description: string
+  requirements: string[]
+  responsibilities: string[]
+  is_active: boolean
+  applications_count: number
+  created_at: string
+  updated_at: string
+}
 
 interface JobCardProps {
   job: Job
@@ -33,7 +51,7 @@ export default function JobCard({ job, onApply }: JobCardProps) {
               {job.location}
             </span>
             <span className="text-xs bg-purple-100 text-purple-700 px-2.5 sm:px-3 py-1 rounded-full font-medium truncate text-center">
-              {job.type}
+              {job.job_type}
             </span>
             <span className="text-xs bg-orange-100 text-orange-700 px-2.5 sm:px-3 py-1 rounded-full font-medium truncate text-center">
               {job.salary}
