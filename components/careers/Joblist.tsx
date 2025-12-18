@@ -297,6 +297,7 @@ export default function JobsList() {
   return (
     <>
       {/* Categories Section */}
+      {/* Categories Section */}
       <div className="mb-16" ref={categoriesRef}>
         <h2 className="text-3xl font-bold text-gray-900 mb-2">Browse by Category</h2>
         <p className="text-gray-600 mb-8">
@@ -304,18 +305,20 @@ export default function JobsList() {
         </p>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {categories.map((category) => {
-            const jobCount = getJobsByCategory(category.id).length
-            return (
-              <CategoryCard
-                key={category.id}
-                category={category}
-                jobCount={jobCount}
-                isSelected={selectedCategory === category.id}
-                onClick={() => handleCategoryClick(category.id)}
-              />
-            )
-          })}
+          {categories
+            .filter(category => getJobsByCategory(category.id).length > 0)
+            .map((category) => {
+              const jobCount = getJobsByCategory(category.id).length
+              return (
+                <CategoryCard
+                  key={category.id}
+                  category={category}
+                  jobCount={jobCount}
+                  isSelected={selectedCategory === category.id}
+                  onClick={() => handleCategoryClick(category.id)}
+                />
+              )
+            })}
         </div>
       </div>
 

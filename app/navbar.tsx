@@ -36,8 +36,8 @@ export default function Navbar({ isApplicationOpen = false }: NavbarProps) {
                 <Image
                   src={logoUrl}
                   alt="Naija Ninja Logo"
-                  width={50}
-                  height={50}
+                  width={80}
+                  height={80}
                   className="rounded-lg"
                   loading="eager"
                   priority

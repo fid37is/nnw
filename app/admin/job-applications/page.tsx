@@ -6,7 +6,7 @@ import { supabase } from '@/lib/supabase/client'
 import AdminSidebar from '@/components/admin/AdminSidebar'
 import JobsManagement from '@/components/admin/JobsManagement'
 import ApplicationsManagement from '@/components/admin/ApplicationsManagement'
-import { Briefcase, Inbox, RefreshCw } from 'lucide-react'
+import { Briefcase, Inbox, RefreshCw, Plus, Download } from 'lucide-react'
 
 interface JobApplication {
   id: string
@@ -133,54 +133,58 @@ export default function AdminJobApplicationsPage() {
       <AdminSidebar />
 
       <main className="flex-1 lg:ml-64 min-h-screen bg-gradient-to-br from-white via-naija-green-50 to-white">
-        <div className="max-w-7xl mx-auto px-4 py-8 lg:p-8">
+        <div className="max-w-7xl mx-auto px-4 py-6 lg:p-8">
           {/* Header */}
-          <div className="mb-8">
-            <div className="flex items-center justify-between">
+          <div className="mb-6">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div>
-                <h1 className="text-3xl font-bold text-naija-green-900 flex items-center gap-3">
-                  <Briefcase size={32} />
+                <h1 className="text-2xl sm:text-3xl font-bold text-naija-green-900 flex items-center gap-2 sm:gap-3">
+                  <Briefcase size={28} className="sm:w-8 sm:h-8" />
                   Careers & Applications
                 </h1>
-                <p className="text-gray-600 mt-1">Manage job postings and review applications</p>
+                <p className="text-sm sm:text-base text-gray-600 mt-1">Manage job postings and review applications</p>
               </div>
-              <button
-                onClick={handleRefresh}
-                disabled={refreshing}
-                className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-900 font-semibold rounded-lg transition disabled:opacity-50"
-              >
-                <RefreshCw size={18} className={refreshing ? 'animate-spin' : ''} />
-                {refreshing ? 'Refreshing...' : 'Refresh'}
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={handleRefresh}
+                  disabled={refreshing}
+                  className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-900 font-semibold rounded-lg transition disabled:opacity-50 text-sm sm:text-base"
+                >
+                  <RefreshCw size={18} className={refreshing ? 'animate-spin' : ''} />
+                  <span className="hidden sm:inline">{refreshing ? 'Refreshing...' : 'Refresh'}</span>
+                </button>
+              </div>
             </div>
           </div>
 
           {/* Tabs */}
-          <div className="flex gap-4 mb-8 border-b border-gray-200 overflow-x-auto">
+          <div className="flex gap-2 sm:gap-4 mb-6 sm:mb-8 border-b border-gray-200 overflow-x-auto">
             <button
               onClick={() => setActiveTab('applications')}
-              className={`px-6 py-3 font-semibold border-b-2 transition whitespace-nowrap ${
+              className={`px-4 sm:px-6 py-3 font-semibold border-b-2 transition whitespace-nowrap text-sm sm:text-base ${
                 activeTab === 'applications'
                   ? 'text-naija-green-600 border-naija-green-600'
                   : 'text-gray-600 border-transparent hover:text-gray-900'
               }`}
             >
               <div className="flex items-center gap-2">
-                <Inbox size={20} />
-                Applications ({applications.length})
+                <Inbox size={18} className="sm:w-5 sm:h-5" />
+                <span className="hidden sm:inline">Applications</span>
+                <span className="sm:hidden">Apps</span>
+                ({applications.length})
               </div>
             </button>
             <button
               onClick={() => setActiveTab('jobs')}
-              className={`px-6 py-3 font-semibold border-b-2 transition whitespace-nowrap ${
+              className={`px-4 sm:px-6 py-3 font-semibold border-b-2 transition whitespace-nowrap text-sm sm:text-base ${
                 activeTab === 'jobs'
                   ? 'text-naija-green-600 border-naija-green-600'
                   : 'text-gray-600 border-transparent hover:text-gray-900'
               }`}
             >
               <div className="flex items-center gap-2">
-                <Briefcase size={20} />
-                Jobs Management ({jobs.length})
+                <Briefcase size={18} className="sm:w-5 sm:h-5" />
+                Jobs ({jobs.length})
               </div>
             </button>
           </div>
