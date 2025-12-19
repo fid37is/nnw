@@ -6,9 +6,10 @@ import Navbar from './navbar'
 import Footer from './footer'
 import HeroSection from '../components/sections/HeroSection'
 import StatsSection from '../components/sections/StatsSection'
+import CompetitionProcessSection from '../components/sections/CompetionProcessSection'
+import VideoHighlights from '../components/sections/VideoHighlights'
 import TopCompetitors from '../components/sections/TopCompetitors'
 import SponsorsSection from '../components/sections/SponsorsSection'
-import VideoHighlights from '../components/sections/VideoHighlights'
 import FAQSection from '../components/sections/FAQSection'
 import InquirySection from '../components/sections/InquirySection'
 import SocialMediaSection from '../components/sections/SocialMediaSection'
@@ -211,26 +212,38 @@ export default function Home() {
             </div>
           )}
 
+          {/* 1. HERO - Grab attention with champion */}
           <HeroSection 
             champion={champion} 
             season={season} 
             isApplicationOpen={isApplicationOpen()} 
           />
           
+          {/* 2. STATS - Quick credibility with numbers */}
           <StatsSection stats={stats} />
           
-          <TopCompetitors champion={champion} runners={runners} />
+          {/* 3. COMPETITION PROCESS - Show HOW to participate (moved up for new visitors) */}
+          <CompetitionProcessSection />
           
-          <SponsorsSection sponsors={sponsors} />
-          
+          {/* 4. VIDEO HIGHLIGHTS - Show the excitement visually */}
           <VideoHighlights videos={videos} extractYouTubeId={extractYouTubeId} />
           
+          {/* 5. TOP COMPETITORS - Social proof with past winners */}
+          <TopCompetitors champion={champion} runners={runners} />
+          
+          {/* 6. SPONSORS - Build trust with brand partnerships */}
+          <SponsorsSection sponsors={sponsors} />
+          
+          {/* 7. FAQ - Answer common questions */}
           <FAQSection />
           
+          {/* 8. INQUIRY - Enable contact */}
           <InquirySection />
           
+          {/* 9. SOCIAL MEDIA - Build community */}
           <SocialMediaSection />
           
+          {/* 10. FINAL CTA - Convert with clear action */}
           <CTASection 
             champion={champion} 
             isApplicationOpen={isApplicationOpen()} 
