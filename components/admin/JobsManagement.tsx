@@ -1,3 +1,6 @@
+// COMPLETE FILE - Copy this entire file
+// Path: components/admin/JobsManagement.tsx
+
 'use client'
 
 import { useState } from 'react'
@@ -69,6 +72,13 @@ export default function JobsManagement({ jobs, onJobsChange }: JobsManagementPro
                          (statusFilter === 'inactive' && !job.is_active)
     return matchesSearch && matchesCategory && matchesStatus
   })
+
+  const stats = {
+    total: jobs.length,
+    active: jobs.filter(j => j.is_active).length,
+    inactive: jobs.filter(j => !j.is_active).length,
+    totalApplications: jobs.reduce((sum, j) => sum + j.applications_count, 0)
+  }
 
   const handleOpenModal = (job?: Job) => {
     if (job) {
@@ -219,6 +229,108 @@ export default function JobsManagement({ jobs, onJobsChange }: JobsManagementPro
     }
   }
 
+  const toggleAllJobs = async (activate: boolean) => {
+    const jobsToUpdate = jobs.filter(j => j.is_active !== activate)
+    
+    if (jobsToUpdate.length === 0) {
+      toast.info(`All jobs are already ${activate ? 'active' : 'inactive'}`)
+      return
+    }
+
+    setBulkAction(activate ? 'activate' : 'deactivate')
+    setShowBulkDialog(true)
+  }
+
+  const toggleCategoryJobs = async (categoryId: string, activate: boolean) => {
+    const categoryJobs = jobs.filter(j => j.category === categoryId && j.is_active !== activate)
+    
+    if (categoryJobs.length === 0) {
+      const categoryName = categories.find(c => c.id === categoryId)?.name
+      toast.info(`All ${categoryName} jobs are already ${activate ? 'active' : 'inactive'}`)
+      return
+    }
+
+    try {
+      const updatePromises = categoryJobs.map(job =>
+        supabase
+          .from('jobs')
+          .update({ is_active: activate })
+          .eq('id', job.id)
+      )
+
+      const results = await Promise.all(updatePromises)
+      const hasError = results.some(r => r.error)
+
+      if (hasError) throw new Error('Some jobs failed to update')
+
+      const categoryName = categories.find(c => c.id === categoryId)?.name
+      toast.success(`Successfully ${activate ? 'activated' : 'deactivated'} ${categoryJobs.length} ${categoryName} job(s)`)
+      onJobsChange()
+    } catch (err) {
+      console.error('Error toggling category jobs:', err)
+      toast.error(`Failed to ${activate ? 'activate' : 'deactivate'} category jobs`)
+    }
+  }
+
+  const toggleFilteredJobs = async (activate: boolean) => {
+    const jobsToUpdate = filteredJobs.filter(j => j.is_active !== activate)
+    
+    if (jobsToUpdate.length === 0) {
+      toast.info(`All filtered jobs are already ${activate ? 'active' : 'inactive'}`)
+      return
+    }
+
+    try {
+      const updatePromises = jobsToUpdate.map(job =>
+        supabase
+          .from('jobs')
+          .update({ is_active: activate })
+          .eq('id', job.id)
+      )
+
+      const results = await Promise.all(updatePromises)
+      const hasError = results.some(r => r.error)
+
+      if (hasError) throw new Error('Some jobs failed to update')
+
+      toast.success(`Successfully ${activate ? 'activated' : 'deactivated'} ${jobsToUpdate.length} filtered job(s)`)
+      onJobsChange()
+    } catch (err) {
+      console.error('Error toggling filtered jobs:', err)
+      toast.error(`Failed to ${activate ? 'activate' : 'deactivate'} filtered jobs`)
+    }
+  }
+
+  const confirmBulkAction = async () => {
+    if (!bulkAction) return
+
+    const activate = bulkAction === 'activate'
+    const jobsToUpdate = jobs.filter(j => j.is_active !== activate)
+
+    try {
+      const updatePromises = jobsToUpdate.map(job =>
+        supabase
+          .from('jobs')
+          .update({ is_active: activate })
+          .eq('id', job.id)
+      )
+
+      const results = await Promise.all(updatePromises)
+      const hasError = results.some(r => r.error)
+
+      if (hasError) throw new Error('Some jobs failed to update')
+
+      toast.success(`Successfully ${activate ? 'activated' : 'deactivated'} ${jobsToUpdate.length} job(s)`)
+      onJobsChange()
+    } catch (err) {
+      console.error('Error toggling all jobs:', err)
+      toast.error(`Failed to ${activate ? 'activate' : 'deactivate'} all jobs`)
+    } finally {
+      setShowBulkDialog(false)
+      setBulkAction(null)
+    }
+  }
+
   const addArrayItem = (field: 'requirements' | 'responsibilities') => {
     setFormData({
       ...formData,
@@ -243,58 +355,6 @@ export default function JobsManagement({ jobs, onJobsChange }: JobsManagementPro
     })
   }
 
-  const stats = {
-    total: jobs.length,
-    active: jobs.filter(j => j.is_active).length,
-    inactive: jobs.filter(j => !j.is_active).length,
-    totalApplications: jobs.reduce((sum, j) => sum + j.applications_count, 0)
-  }
-
-  const toggleAllJobs = async (activate: boolean) => {
-    const action = activate ? 'activate' : 'deactivate'
-    const jobsToUpdate = jobs.filter(j => j.is_active !== activate)
-    
-    if (jobsToUpdate.length === 0) {
-      toast.info(`All jobs are already ${activate ? 'active' : 'inactive'}`)
-      return
-    }
-
-    setBulkAction(activate ? 'activate' : 'deactivate')
-    setShowBulkDialog(true)
-  }
-
-  const confirmBulkAction = async () => {
-    if (!bulkAction) return
-
-    const activate = bulkAction === 'activate'
-    const jobsToUpdate = jobs.filter(j => j.is_active !== activate)
-
-    try {
-      const updatePromises = jobsToUpdate.map(job =>
-        supabase
-          .from('jobs')
-          .update({ is_active: activate })
-          .eq('id', job.id)
-      )
-
-      const results = await Promise.all(updatePromises)
-      const hasError = results.some(r => r.error)
-
-      if (hasError) {
-        throw new Error('Some jobs failed to update')
-      }
-
-      toast.success(`Successfully ${activate ? 'activated' : 'deactivated'} ${jobsToUpdate.length} job(s)`)
-      onJobsChange()
-    } catch (err) {
-      console.error('Error toggling all jobs:', err)
-      toast.error(`Failed to ${activate ? 'activate' : 'deactivate'} all jobs`)
-    } finally {
-      setShowBulkDialog(false)
-      setBulkAction(null)
-    }
-  }
-
   return (
     <div>
       {/* Stats */}
@@ -317,88 +377,95 @@ export default function JobsManagement({ jobs, onJobsChange }: JobsManagementPro
         </div>
       </div>
 
-      {/* Add Job Button (Top Right) + Filters */}
+      {/* Filters + Actions */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 mb-6">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-4">
           <h2 className="text-lg sm:text-xl font-bold text-gray-900">Job Listings</h2>
           <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-            {/* Bulk Actions Dropdown */}
             <div className="relative group">
-              <button
-                className="w-full sm:w-auto px-4 py-2.5 bg-gray-100 text-gray-700 font-semibold rounded-lg hover:bg-gray-200 transition flex items-center justify-center gap-2 text-sm"
-              >
+              <button className="w-full sm:w-auto px-4 py-2.5 bg-gray-100 text-gray-700 font-semibold rounded-lg hover:bg-gray-200 transition flex items-center justify-center gap-2 text-sm">
                 Bulk Actions
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                 </svg>
               </button>
-              <div className="hidden group-hover:block absolute right-0 mt-1 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-10">
-                <button
-                  onClick={() => toggleAllJobs(true)}
-                  className="w-full text-left px-4 py-2.5 text-sm hover:bg-green-50 text-green-700 font-semibold rounded-t-lg transition flex items-center gap-2"
-                >
-                  <Eye size={16} />
-                  Activate All Jobs
-                </button>
-                <button
-                  onClick={() => toggleAllJobs(false)}
-                  className="w-full text-left px-4 py-2.5 text-sm hover:bg-gray-100 text-gray-700 font-semibold rounded-b-lg transition flex items-center gap-2"
-                >
-                  <EyeOff size={16} />
-                  Deactivate All Jobs
-                </button>
+              <div className="hidden group-hover:block absolute right-0 mt-1 w-64 bg-white rounded-lg shadow-xl border border-gray-200 z-10 max-h-96 overflow-y-auto">
+                <div className="py-1">
+                  <p className="px-4 py-2 text-xs font-semibold text-gray-500 uppercase">All Jobs</p>
+                  <button onClick={() => toggleAllJobs(true)} className="w-full text-left px-4 py-2 text-sm hover:bg-green-50 text-green-700 font-semibold transition flex items-center gap-2">
+                    <Eye size={16} />Activate All Jobs
+                  </button>
+                  <button onClick={() => toggleAllJobs(false)} className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 text-gray-700 font-semibold transition flex items-center gap-2">
+                    <EyeOff size={16} />Deactivate All Jobs
+                  </button>
+                  <div className="border-t border-gray-200 my-1"></div>
+                  <p className="px-4 py-2 text-xs font-semibold text-gray-500 uppercase">By Category</p>
+                  {categories.map(cat => {
+                    const categoryJobs = jobs.filter(j => j.category === cat.id)
+                    const activeCount = categoryJobs.filter(j => j.is_active).length
+                    const inactiveCount = categoryJobs.length - activeCount
+                    return (
+                      <div key={cat.id} className="px-2 mb-2">
+                        <div className="px-2 py-1.5 text-xs font-medium text-gray-600 flex items-center justify-between">
+                          <span>{cat.name}</span>
+                          <span className="text-xs text-gray-400">({categoryJobs.length})</span>
+                        </div>
+                        <div className="flex gap-1">
+                          {inactiveCount > 0 && (
+                            <button onClick={() => toggleCategoryJobs(cat.id, true)} className="flex-1 text-xs px-2 py-1.5 bg-green-50 text-green-700 rounded hover:bg-green-100 transition font-medium">
+                              <Eye size={12} className="inline mr-1" />On ({inactiveCount})
+                            </button>
+                          )}
+                          {activeCount > 0 && (
+                            <button onClick={() => toggleCategoryJobs(cat.id, false)} className="flex-1 text-xs px-2 py-1.5 bg-gray-50 text-gray-700 rounded hover:bg-gray-100 transition font-medium">
+                              <EyeOff size={12} className="inline mr-1" />Off ({activeCount})
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    )
+                  })}
+                  {(categoryFilter !== 'all' || statusFilter !== 'all') && filteredJobs.length > 0 && (
+                    <>
+                      <div className="border-t border-gray-200 my-1"></div>
+                      <p className="px-4 py-2 text-xs font-semibold text-gray-500 uppercase">Current Filter</p>
+                      <button onClick={() => toggleFilteredJobs(true)} className="w-full text-left px-4 py-2 text-sm hover:bg-green-50 text-green-700 font-semibold transition flex items-center gap-2">
+                        <Eye size={16} />Activate Filtered ({filteredJobs.filter(j => !j.is_active).length})
+                      </button>
+                      <button onClick={() => toggleFilteredJobs(false)} className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 text-gray-700 font-semibold transition flex items-center gap-2">
+                        <EyeOff size={16} />Deactivate Filtered ({filteredJobs.filter(j => j.is_active).length})
+                      </button>
+                    </>
+                  )}
+                </div>
               </div>
             </div>
-            <button
-              onClick={() => handleOpenModal()}
-              className="w-full sm:w-auto px-4 sm:px-6 py-2.5 bg-naija-green-600 text-white font-semibold rounded-lg hover:bg-naija-green-700 transition flex items-center justify-center gap-2 text-sm"
-            >
-              <Plus size={20} />
-              Add New Job
+            <button onClick={() => handleOpenModal()} className="w-full sm:w-auto px-4 sm:px-6 py-2.5 bg-naija-green-600 text-white font-semibold rounded-lg hover:bg-naija-green-700 transition flex items-center justify-center gap-2 text-sm">
+              <Plus size={20} />Add New Job
             </button>
           </div>
         </div>
-        
         <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
           <div className="flex-1">
             <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-2">
-              <Search size={14} className="inline mr-1" />
-              Search Jobs
+              <Search size={14} className="inline mr-1" />Search Jobs
             </label>
-            <input
-              type="text"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Search by title or department..."
-              className="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:outline-none focus:border-naija-green-600"
-            />
+            <input type="text" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} placeholder="Search by title or department..." className="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:outline-none focus:border-naija-green-600" />
           </div>
           <div className="flex-1">
             <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-2">
-              <Filter size={14} className="inline mr-1" />
-              Category
+              <Filter size={14} className="inline mr-1" />Category
             </label>
-            <select
-              value={categoryFilter}
-              onChange={(e) => setCategoryFilter(e.target.value)}
-              className="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:outline-none focus:border-naija-green-600"
-            >
+            <select value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)} className="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:outline-none focus:border-naija-green-600">
               <option value="all">All Categories</option>
-              {categories.map(cat => (
-                <option key={cat.id} value={cat.id}>{cat.name}</option>
-              ))}
+              {categories.map(cat => (<option key={cat.id} value={cat.id}>{cat.name}</option>))}
             </select>
           </div>
           <div className="flex-1">
             <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-2">
-              <Filter size={14} className="inline mr-1" />
-              Status
+              <Filter size={14} className="inline mr-1" />Status
             </label>
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:outline-none focus:border-naija-green-600"
-            >
+            <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:outline-none focus:border-naija-green-600">
               <option value="all">All Status</option>
               <option value="active">Active</option>
               <option value="inactive">Inactive</option>
@@ -407,7 +474,7 @@ export default function JobsManagement({ jobs, onJobsChange }: JobsManagementPro
         </div>
       </div>
 
-      {/* Jobs List */}
+      {/* Jobs List - (continuing in next message due to length) */}
       <div className="space-y-4">
         {filteredJobs.length === 0 ? (
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8 sm:p-12 text-center">
@@ -416,65 +483,33 @@ export default function JobsManagement({ jobs, onJobsChange }: JobsManagementPro
         ) : (
           filteredJobs.map(job => (
             <div key={job.id} className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
-              <div className="flex items-start justify-between gap-3 mb-3">
+              <div className="flex items-start justify-between gap-3">
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 sm:gap-3 mb-2 flex-wrap">
-                    <h3 className="text-base sm:text-xl font-bold text-gray-900 break-words">{job.title}</h3>
-                    <span className={`px-2 sm:px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap ${
-                      job.is_active 
-                        ? 'bg-green-100 text-green-800' 
-                        : 'bg-gray-100 text-gray-800'
-                    }`}>
+                  <div className="flex items-center gap-2 mb-2 flex-wrap">
+                    <h3 className="text-base sm:text-xl font-bold text-gray-900">{job.title}</h3>
+                    <span className={`px-2 sm:px-3 py-1 rounded-full text-xs font-semibold ${job.is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
                       {job.is_active ? 'Active' : 'Inactive'}
                     </span>
                   </div>
                   <div className="flex flex-wrap gap-2 mb-3">
-                    <span className="text-xs bg-blue-100 text-blue-700 px-2 sm:px-3 py-1 rounded-full font-medium">
-                      {job.department}
-                    </span>
-                    <span className="text-xs bg-purple-100 text-purple-700 px-2 sm:px-3 py-1 rounded-full font-medium">
-                      {job.location}
-                    </span>
-                    <span className="text-xs bg-orange-100 text-orange-700 px-2 sm:px-3 py-1 rounded-full font-medium">
-                      {job.job_type}
-                    </span>
-                    <span className="text-xs bg-green-100 text-green-700 px-2 sm:px-3 py-1 rounded-full font-medium">
-                      {job.salary}
-                    </span>
+                    <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full font-medium">{job.department}</span>
+                    <span className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded-full font-medium">{job.location}</span>
+                    <span className="text-xs bg-orange-100 text-orange-700 px-2 py-1 rounded-full font-medium">{job.job_type}</span>
+                    <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full font-medium">{job.salary}</span>
                   </div>
-                  <p className="text-xs sm:text-sm text-gray-600 mb-2 sm:mb-3 line-clamp-2">{job.description}</p>
+                  <p className="text-xs sm:text-sm text-gray-600 line-clamp-2">{job.description}</p>
                   {job.applications_count > 0 && (
-                    <p className="text-xs sm:text-sm text-blue-600 font-semibold">
-                      {job.applications_count} application{job.applications_count !== 1 ? 's' : ''}
-                    </p>
+                    <p className="text-xs sm:text-sm text-blue-600 font-semibold mt-2">{job.applications_count} application{job.applications_count !== 1 ? 's' : ''}</p>
                   )}
                 </div>
-                
-                {/* Action Icons - Top Right */}
                 <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
-                  <button
-                    onClick={() => toggleJobStatus(job)}
-                    className={`p-2 rounded-lg font-semibold transition ${
-                      job.is_active
-                        ? 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                        : 'bg-green-100 text-green-700 hover:bg-green-200'
-                    }`}
-                    title={job.is_active ? 'Deactivate' : 'Activate'}
-                  >
+                  <button onClick={() => toggleJobStatus(job)} className={`p-2 rounded-lg transition ${job.is_active ? 'bg-gray-100 text-gray-700 hover:bg-gray-200' : 'bg-green-100 text-green-700 hover:bg-green-200'}`} title={job.is_active ? 'Deactivate' : 'Activate'}>
                     {job.is_active ? <EyeOff size={18} /> : <Eye size={18} />}
                   </button>
-                  <button
-                    onClick={() => handleOpenModal(job)}
-                    className="p-2 bg-blue-100 text-blue-700 rounded-lg font-semibold hover:bg-blue-200 transition"
-                    title="Edit"
-                  >
+                  <button onClick={() => handleOpenModal(job)} className="p-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition" title="Edit">
                     <Edit2 size={18} />
                   </button>
-                  <button
-                    onClick={() => deleteJob(job)}
-                    className="p-2 bg-red-100 text-red-700 rounded-lg font-semibold hover:bg-red-200 transition"
-                    title="Delete"
-                  >
+                  <button onClick={() => deleteJob(job)} className="p-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition" title="Delete">
                     <Trash2 size={18} />
                   </button>
                 </div>

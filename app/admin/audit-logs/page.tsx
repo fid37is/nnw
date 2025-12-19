@@ -65,16 +65,16 @@ export default function AuditLogsPage() {
       const { data, error } = await supabase
         .from('audit_logs')
         .select(`
-          id,
-          admin_id,
-          application_id,
-          action,
-          details,
-          created_at,
-          users (
-            email
-          )
-        `)
+        id,
+        admin_id,
+        application_id,
+        action,
+        details,
+        created_at,
+        admin:users!audit_logs_admin_id_fkey (
+          email
+        )
+      `)
         .order('created_at', { ascending: false })
 
       if (error) throw error
@@ -86,7 +86,7 @@ export default function AuditLogsPage() {
         action: log.action,
         details: log.details,
         created_at: log.created_at,
-        admin_email: log.users?.email || 'Unknown',
+        admin_email: log.admin?.email || 'Unknown',
       }))
 
       setLogs(formatted)

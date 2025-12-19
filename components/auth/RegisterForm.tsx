@@ -18,22 +18,22 @@ const NIGERIAN_STATES = [
 const validateNigerianPhone = (phone: string): { isValid: boolean; message: string } => {
   // Remove all spaces, dashes, and parentheses
   const cleaned = phone.replace(/[\s\-\(\)]/g, '')
-  
+
   // Check for valid Nigerian formats:
   // +2347012345678, +2348012345678, 07012345678, 08012345678, 2347012345678, 2348012345678
   const nigerianPhoneRegex = /^(\+?234|0)?([7-9][0-1])\d{8}$/
-  
+
   if (!cleaned) {
     return { isValid: false, message: 'Phone number is required' }
   }
-  
+
   if (!nigerianPhoneRegex.test(cleaned)) {
-    return { 
-      isValid: false, 
-      message: 'Enter a valid Nigerian phone number (e.g., 08012345678 or +2348012345678)' 
+    return {
+      isValid: false,
+      message: 'Enter a valid Nigerian phone number (e.g., 08012345678 or +2348012345678)'
     }
   }
-  
+
   return { isValid: true, message: '' }
 }
 
@@ -139,7 +139,7 @@ export default function RegisterForm() {
         setPhoneError(phoneValidation.message)
         return false
       }
-      
+
       if (!formData.state) {
         toast.error('State is required')
         return false
@@ -160,7 +160,7 @@ export default function RegisterForm() {
         toast.error('Emergency contact name is required')
         return false
       }
-      
+
       // Validate emergency phone and mark as touched
       setEmergencyPhoneTouched(true)
       const emergencyPhoneValidation = validateNigerianPhone(formData.emergencyPhone)
@@ -168,7 +168,7 @@ export default function RegisterForm() {
         setEmergencyPhoneError(emergencyPhoneValidation.message)
         return false
       }
-      
+
       if (!formData.waiver) {
         toast.error('You must accept the waiver to proceed')
         return false
@@ -195,6 +195,9 @@ export default function RegisterForm() {
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth-callback`,
+        }
       })
 
       if (authError) {
@@ -266,9 +269,8 @@ export default function RegisterForm() {
         {[1, 2, 3].map(num => (
           <div
             key={num}
-            className={`flex-1 h-2 rounded-full transition ${
-              step >= num ? 'bg-naija-green-600' : 'bg-gray-300'
-            }`}
+            className={`flex-1 h-2 rounded-full transition ${step >= num ? 'bg-naija-green-600' : 'bg-gray-300'
+              }`}
           />
         ))}
       </div>
@@ -362,9 +364,8 @@ export default function RegisterForm() {
               onChange={handleChange}
               onBlur={() => setPhoneTouched(true)}
               placeholder="08012345678"
-              className={`w-full px-4 py-3 rounded-lg border ${
-                phoneTouched && phoneError ? 'border-red-500 focus:border-red-500 focus:ring-red-100' : 'border-gray-300 focus:border-naija-green-600 focus:ring-naija-green-100'
-              } focus:outline-none focus:ring-2`}
+              className={`w-full px-4 py-3 rounded-lg border ${phoneTouched && phoneError ? 'border-red-500 focus:border-red-500 focus:ring-red-100' : 'border-gray-300 focus:border-naija-green-600 focus:ring-naija-green-100'
+                } focus:outline-none focus:ring-2`}
             />
             {phoneTouched && phoneError ? (
               <p className="text-xs text-red-600 mt-1.5">{phoneError}</p>
@@ -455,9 +456,8 @@ export default function RegisterForm() {
               onChange={handleChange}
               onBlur={() => setEmergencyPhoneTouched(true)}
               placeholder="08012345678"
-              className={`w-full px-4 py-3 rounded-lg border ${
-                emergencyPhoneTouched && emergencyPhoneError ? 'border-red-500 focus:border-red-500 focus:ring-red-100' : 'border-gray-300 focus:border-naija-green-600 focus:ring-naija-green-100'
-              } focus:outline-none focus:ring-2`}
+              className={`w-full px-4 py-3 rounded-lg border ${emergencyPhoneTouched && emergencyPhoneError ? 'border-red-500 focus:border-red-500 focus:ring-red-100' : 'border-gray-300 focus:border-naija-green-600 focus:ring-naija-green-100'
+                } focus:outline-none focus:ring-2`}
             />
             {emergencyPhoneTouched && emergencyPhoneError && (
               <p className="text-xs text-red-600 mt-1.5">{emergencyPhoneError}</p>
