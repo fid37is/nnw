@@ -1,95 +1,128 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { toast } from 'sonner'
+import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase/client'
 
 export default function AuthCallbackPage() {
-  const [processing, setProcessing] = useState(true)
+  const router = useRouter()
+  const [status, setStatus] = useState<'verifying' | 'verified' | 'error'>('verifying')
 
   useEffect(() => {
-    const handleAuthCallback = async () => {
+    const handleCallback = async () => {
       try {
-        // Supabase automatically handles the hash fragment
-        // Extract type from URL hash
+        // Give Supabase a moment to process the session
+        await new Promise(resolve => setTimeout(resolve, 500))
+
+        // Get the session that Supabase set from URL hash
+        const { data: { session }, error } = await supabase.auth.getSession()
+
+        if (error || !session) {
+          setStatus('error')
+          setTimeout(() => router.push('/login?error=verification_failed'), 2000)
+          return
+        }
+
+        // Check if this is password recovery
         const hash = window.location.hash
         const params = new URLSearchParams(hash.substring(1))
-        const type = params.get('type')
-
-        // Get the current session (Supabase sets it from the URL)
-        const { data: { session }, error: sessionError } = await supabase.auth.getSession()
-
-        if (sessionError || !session) {
-          toast.error('Authentication failed')
-          setTimeout(() => {
-            window.location.href = '/login'
-          }, 2000)
+        if (params.get('type') === 'recovery') {
+          setStatus('verified')
+          setTimeout(() => router.push('/auth/reset-password'), 2000)
           return
         }
 
-        // Handle password recovery
-        if (type === 'recovery') {
-          toast.success('Email verified! Redirecting to password reset...')
-          setTimeout(() => {
-            window.location.href = '/auth/reset-password'
-          }, 1500)
-          return
-        }
-
-        // Handle email confirmation (signup)
         // Get user role
-        const { data: userData, error: userError } = await supabase
+        const { data: user } = await supabase
           .from('users')
           .select('role')
           .eq('id', session.user.id)
           .single()
 
-        if (userError) {
-          console.error('Failed to get user data:', userError)
-          toast.error('Failed to load user data')
-          setTimeout(() => {
-            window.location.href = '/login'
-          }, 2000)
-          return
-        }
+        // Show verified status
+        setStatus('verified')
 
-        toast.success('Email confirmed! Logging you in...')
+        // Redirect to dashboard after showing success
+        const dashboard = user?.role === 'admin' ? '/admin/dashboard' : '/user/dashboard'
+        setTimeout(() => router.push(dashboard), 2000)
 
-        // Redirect based on role
-        setTimeout(() => {
-          const redirectPath = userData?.role === 'admin' ? '/admin/dashboard' : '/user/dashboard'
-          window.location.href = redirectPath
-        }, 1500)
       } catch (err) {
-        console.error('Auth callback error:', err)
-        toast.error('Something went wrong')
-        setTimeout(() => {
-          window.location.href = '/login'
-        }, 2000)
-      } finally {
-        setProcessing(false)
+        console.error('Callback error:', err)
+        setStatus('error')
+        setTimeout(() => router.push('/login?error=callback_failed'), 2000)
       }
     }
 
-    // Small delay to ensure Supabase has processed the session
-    const timer = setTimeout(() => {
-      handleAuthCallback()
-    }, 500)
-
-    return () => clearTimeout(timer)
-  }, [])
+    handleCallback()
+  }, [router])
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-white via-naija-green-50 to-white flex items-center justify-center">
-      <div className="text-center">
-        <div className="inline-block w-16 h-16 bg-naija-green-100 rounded-full items-center justify-center mb-4 animate-pulse">
-          <span className="text-2xl">✓</span>
-        </div>
-        <h1 className="text-2xl font-bold text-naija-green-900 mb-2">
-          {processing ? 'Confirming your email...' : 'Redirecting...'}
-        </h1>
-        <p className="text-gray-600">Please wait while we process your request</p>
+    <div className="min-h-screen bg-gradient-to-br from-white via-naija-green-50 to-white flex items-center justify-center p-4">
+      <div className="text-center max-w-md">
+        {status === 'verifying' && (
+          <>
+            <div className="w-20 h-20 border-4 border-naija-green-500 border-t-transparent rounded-full animate-spin mx-auto mb-6" />
+            <h1 className="text-2xl font-bold text-naija-green-900 mb-2">
+              Verifying Your Email
+            </h1>
+            <p className="text-gray-600">
+              Please wait while we confirm your email address...
+            </p>
+          </>
+        )}
+
+        {status === 'verified' && (
+          <>
+            <div className="w-20 h-20 bg-naija-green-500 rounded-full flex items-center justify-center mx-auto mb-6 animate-scale-in">
+              <svg className="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <h1 className="text-2xl font-bold text-naija-green-900 mb-2">
+              Email Verified! ✓
+            </h1>
+            <p className="text-gray-600 mb-4">
+              Your email has been successfully verified.
+            </p>
+            <div className="flex items-center justify-center gap-2 text-naija-green-600">
+              <div className="w-2 h-2 bg-naija-green-600 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+              <div className="w-2 h-2 bg-naija-green-600 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+              <div className="w-2 h-2 bg-naija-green-600 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+              <span className="ml-2 font-medium">Redirecting to your dashboard</span>
+            </div>
+          </>
+        )}
+
+        {status === 'error' && (
+          <>
+            <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
+              <svg className="w-12 h-12 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </div>
+            <h1 className="text-2xl font-bold text-red-900 mb-2">
+              Verification Failed
+            </h1>
+            <p className="text-gray-600">
+              Something went wrong. Redirecting you to login...
+            </p>
+          </>
+        )}
       </div>
-    </main>
+
+      <style jsx>{`
+        @keyframes scale-in {
+          from {
+            transform: scale(0);
+          }
+          to {
+            transform: scale(1);
+          }
+        }
+        .animate-scale-in {
+          animation: scale-in 0.3s ease-out;
+        }
+      `}</style>
+    </div>
   )
 }
