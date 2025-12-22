@@ -22,7 +22,7 @@ interface Runner {
 interface TopCompetitorsProps {
   champion: Champion | null
   runners: Runner[]
-  seasonStatus?: 'active' | 'ended' | 'upcoming' // Add this prop
+  seasonStatus?: 'active' | 'ended' | 'upcoming'
 }
 
 export default function TopCompetitors({ champion, runners, seasonStatus = 'active' }: TopCompetitorsProps) {
@@ -43,73 +43,81 @@ export default function TopCompetitors({ champion, runners, seasonStatus = 'acti
     : "The leaders in this season's competition"
 
   return (
-    <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 border-t border-gray-100">
-      <div className="mb-16 text-center">
-        <div className="flex items-center justify-center gap-3 mb-4">
-          {seasonStatus === 'ended' ? (
-            <Crown size={40} className="text-yellow-500" />
-          ) : (
-            <Trophy size={40} className="text-naija-green-600" />
+    <section className="relative min-h-screen overflow-hidden bg-gradient-to-br from-naija-green-900 via-naija-green-800 to-naija-green-900 py-20">
+      {/* Animated background elements */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute top-20 right-10 w-96 h-96 bg-naija-green-600/20 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-20 left-10 w-80 h-80 bg-naija-green-400/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '700ms' }}></div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div className="mb-16 text-center">
+          <div className="flex items-center justify-center gap-3 mb-4">
+            {seasonStatus === 'ended' ? (
+              <Crown size={40} className="text-yellow-500" />
+            ) : (
+              <Trophy size={40} className="text-naija-green-600" />
+            )}
+            <h2 className="text-4xl md:text-5xl font-black text-white">
+              {sectionTitle}
+            </h2>
+          </div>
+          <p className="text-naija-green-100 text-lg">{sectionDescription}</p>
+          {seasonStatus === 'ended' && (
+            <div className="mt-3">
+              <span className="inline-flex items-center gap-2 px-4 py-2 bg-yellow-100 text-yellow-800 rounded-full text-sm font-bold border-2 border-yellow-300">
+                <Crown size={18} />
+                Season Concluded
+              </span>
+            </div>
           )}
-          <h2 className="text-4xl md:text-5xl font-black text-naija-green-900">
-            {sectionTitle}
-          </h2>
         </div>
-        <p className="text-gray-600 text-lg">{sectionDescription}</p>
-        {seasonStatus === 'ended' && (
-          <div className="mt-3">
-            <span className="inline-flex items-center gap-2 px-4 py-2 bg-yellow-100 text-yellow-800 rounded-full text-sm font-bold border-2 border-yellow-300">
-              <Crown size={18} />
-              Season Concluded
-            </span>
+
+        {champion || runners.length > 0 ? (
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+              {champion && (
+                <CompetitorCard
+                  competitor={champion}
+                  medal={medals[0]}
+                  gradient={gradients[0]}
+                  index={0}
+                  isSeasonEnded={seasonStatus === 'ended'}
+                />
+              )}
+
+              {runners.map((runner, idx) => (
+                <CompetitorCard
+                  key={runner.id}
+                  competitor={runner}
+                  medal={medals[idx + 1]}
+                  gradient={gradients[idx + 1]}
+                  index={idx + 1}
+                  isSeasonEnded={seasonStatus === 'ended'}
+                />
+              ))}
+            </div>
+
+            <div className="text-center">
+              <Link
+                href="/leaderboard"
+                className="inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-naija-green-600 to-naija-green-700 text-white font-bold rounded-full hover:from-naija-green-700 hover:to-naija-green-800 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105"
+              >
+                <Users size={22} />
+                View Full Leaderboard
+              </Link>
+            </div>
+          </>
+        ) : (
+          <div className="bg-white/10 backdrop-blur-sm rounded-2xl border-2 border-white/20 p-16 text-center shadow-soft">
+            <div className="inline-block p-6 bg-white/20 rounded-full shadow-lg mb-6">
+              <Trophy size={64} className="text-white" />
+            </div>
+            <p className="text-2xl text-white font-bold mb-3">Competition in progress</p>
+            <p className="text-naija-green-100 text-lg">Top competitors will appear here as the season progresses</p>
           </div>
         )}
       </div>
-
-      {champion || runners.length > 0 ? (
-        <>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
-            {champion && (
-              <CompetitorCard
-                competitor={champion}
-                medal={medals[0]}
-                gradient={gradients[0]}
-                index={0}
-                isSeasonEnded={seasonStatus === 'ended'}
-              />
-            )}
-
-            {runners.map((runner, idx) => (
-              <CompetitorCard
-                key={runner.id}
-                competitor={runner}
-                medal={medals[idx + 1]}
-                gradient={gradients[idx + 1]}
-                index={idx + 1}
-                isSeasonEnded={seasonStatus === 'ended'}
-              />
-            ))}
-          </div>
-
-          <div className="text-center">
-            <Link
-              href="/leaderboard"
-              className="inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-green-600 to-green-700 text-white font-bold rounded-full hover:from-green-700 hover:to-green-800 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105"
-            >
-              <Users size={22} />
-              View Full Leaderboard
-            </Link>
-          </div>
-        </>
-      ) : (
-        <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl border border-gray-200 p-16 text-center">
-          <div className="inline-block p-6 bg-white rounded-full shadow-lg mb-6">
-            <Trophy size={64} className="text-gray-300" />
-          </div>
-          <p className="text-2xl text-gray-900 font-bold mb-3">Competition in progress</p>
-          <p className="text-gray-600 text-lg">Top competitors will appear here as the season progresses</p>
-        </div>
-      )}
     </section>
   )
 }
@@ -125,7 +133,7 @@ interface CompetitorCardProps {
 function CompetitorCard({ competitor, medal, gradient, index, isSeasonEnded }: CompetitorCardProps) {
   return (
     <div 
-      className="group relative overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-105 cursor-pointer"
+      className="group relative overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-105 cursor-pointer bg-white"
       style={{ animationDelay: `${index * 100}ms` }}
     >
       <div className="relative aspect-[3/4] overflow-hidden bg-gradient-to-br from-gray-200 to-gray-300">
