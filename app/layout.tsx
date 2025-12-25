@@ -8,7 +8,7 @@ const inter = Inter({ subsets: ['latin'] })
 
 // Base configuration
 const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://naijaninja.net";
-const logoUrl = "https://res.cloudinary.com/lordefid/image/upload/v1765999106/nnw_eu2pmf.png";
+const logoUrl = "https://res.cloudinary.com/lordefid/image/upload/v1766425179/1-logo_su7fir.png";
 const ogImage = process.env.NEXT_PUBLIC_OG_IMAGE || logoUrl;
 
 export const metadata: Metadata = {
