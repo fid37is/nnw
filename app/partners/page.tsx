@@ -281,7 +281,7 @@ export default function PartnersPage() {
             <div className="pt-8 border-t border-white/20">
               <p className="text-sm text-primary-100 mb-2">Partnership Inquiries</p>
               <p className="font-semibold">Fidelis Agba</p>
-              <p className="text-primary-100">phyd3lis@gmail.com | +234 808 595 2266</p>
+              <p className="text-primary-100">phyd3lis@gmail.com | Mobile: +234 703 826 4911 | WhatsApp: +234 703 826 4911</p>
             </div>
           </div>
         </div>

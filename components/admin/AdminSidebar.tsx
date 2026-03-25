@@ -72,6 +72,11 @@ const navItems = [
     icon: MessageSquare,
   },
   {
+    label: 'Investors',
+    href: '/admin/investors',
+    icon: TrendingUp,
+  },
+  {
     label: 'Audit Logs',
     href: '/admin/audit-logs',
     icon: ClipboardList,

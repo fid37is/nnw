@@ -21,7 +21,7 @@ export default function PrivacyPage() {
             <Shield size={40} className="text-naija-green-600" />
             <h1 className="text-4xl md:text-5xl font-bold text-gray-900">Privacy Policy</h1>
           </div>
-          <p className="text-gray-600">Last Updated: December 15, 2024</p>
+          <p className="text-gray-600">Last Updated: March 2026</p>
         </div>
 
         {/* Content */}
@@ -137,7 +137,7 @@ export default function PrivacyPage() {
               <li><strong>Object:</strong> Object to certain types of processing</li>
             </ul>
             <p className="text-gray-700 leading-relaxed mt-4">
-              To exercise these rights, contact us at: <a href="mailto:phyd3lid@gmail.com" className="text-naija-green-600 hover:text-naija-green-700 font-medium">phyd3lid@gmail.com</a>
+              To exercise these rights, contact us at: <a href="mailto:phyd3lis@gmail.com" className="text-naija-green-600 hover:text-naija-green-700 font-medium">phyd3lis@gmail.com</a>
             </p>
           </section>
 
@@ -191,8 +191,8 @@ export default function PrivacyPage() {
             </p>
             <div className="bg-gray-50 rounded-lg p-6 border border-gray-200">
               <p className="font-semibold text-gray-900 mb-2">Naija Ninja Warrior</p>
-              <p className="text-gray-700 mb-1">Email: <a href="mailto:phyd3lid@gmail.com" className="text-naija-green-600 hover:text-naija-green-700">phyd3lid@gmail.com</a></p>
-              <p className="text-gray-700 mb-1">Phone: <a href="tel:+2348085952266" className="text-naija-green-600 hover:text-naija-green-700">+234 808 595 2266</a></p>
+              <p className="text-gray-700 mb-1">Email: <a href="mailto:phyd3lis@gmail.com" className="text-naija-green-600 hover:text-naija-green-700">phyd3lis@gmail.com</a></p>
+              <p className="text-gray-700 mb-1">Phone: <a href="tel:+2347038264911" className="text-naija-green-600 hover:text-naija-green-700">+234 703 826 4911</a></p>
               <p className="text-gray-700">Location: Calabar & Abuja, Nigeria</p>
             </div>
           </section>

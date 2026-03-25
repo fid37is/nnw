@@ -253,8 +253,8 @@ export default function TermsPage() {
             </p>
             <div className="bg-gray-50 rounded-lg p-6 border border-gray-200">
               <p className="font-semibold text-gray-900 mb-2">Naija Ninja Warrior</p>
-              <p className="text-gray-700 mb-1">Email: <a href="mailto:phyd3lid@gmail.com" className="text-naija-green-600 hover:text-naija-green-700">phyd3lid@gmail.com</a></p>
-              <p className="text-gray-700 mb-1">Phone: <a href="tel:+2348085952266" className="text-naija-green-600 hover:text-naija-green-700">+234 808 595 2266</a></p>
+              <p className="text-gray-700 mb-1">Email: <a href="mailto:phyd3lis@gmail.com" className="text-naija-green-600 hover:text-naija-green-700">phyd3lis@gmail.com</a></p>
+              <p className="text-gray-700 mb-1">Phone: <a href="tel:+2347038264911" className="text-naija-green-600 hover:text-naija-green-700">+234 703 826 4911</a></p>
               <p className="text-gray-700">Location: Calabar & Abuja, Nigeria</p>
             </div>
           </section>

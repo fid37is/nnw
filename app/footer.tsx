@@ -112,20 +112,20 @@ export default function Footer() {
               <li><Link href="/faq" className="hover:text-naija-green-400 transition">FAQ</Link></li>
             </ul>
             <div className="space-y-2 text-sm">
-              <a href="mailto:phyd3lid@gmail.com" className="flex items-center gap-2 hover:text-naija-green-400 transition">
+              <a href="mailto:phyd3lis@gmail.com" className="flex items-center gap-2 hover:text-naija-green-400 transition">
                 <Mail size={16} />
-                <span>phyd3lid@gmail.com</span>
+                <span>phyd3lis@gmail.com</span>
               </a>
-              <a href="tel:+2348085952266" className="flex items-center gap-2 hover:text-naija-green-400 transition">
+              <a href="tel:+2347038264911" className="flex items-center gap-2 hover:text-naija-green-400 transition">
                 <Phone size={16} />
-                <span>+234 808 595 2266</span>
+                <span>+234 703 826 4911</span>
               </a>
             </div>
           </div>
         </div>
 
         <div className="border-t border-gray-800 pt-8 text-center text-sm text-gray-500">
-          <p>© 2025 Naija Ninja Warrior. All rights reserved. Challenge yourself. Become a legend.</p>
+          <p>© 2026 Naija Ninja Warrior. All rights reserved.</p>
         </div>
       </div>
     </footer>
