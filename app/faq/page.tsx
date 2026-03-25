@@ -263,7 +263,7 @@ export default function FAQPage() {
               <Link href="/contact" className="inline-block px-8 py-3 bg-white text-naija-green-600 font-bold rounded-full hover:bg-green-50 transition">
                 Contact Us
               </Link>
-              <a href="mailto:phyd3lid@gmail.com" className="inline-block px-8 py-3 bg-naija-green-500 text-white font-bold rounded-full hover:bg-naija-green-400 border-2 border-white transition">
+              <a href="mailto:phyd3lis@gmail.com" className="inline-block px-8 py-3 bg-naija-green-500 text-white font-bold rounded-full hover:bg-naija-green-400 border-2 border-white transition">
                 Email Support
               </a>
             </div>

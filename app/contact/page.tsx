@@ -91,8 +91,8 @@ export default function ContactPage() {
               <Phone size={24} />
             </div>
             <h3 className="font-bold text-lg mb-2">Call Us</h3>
-            <a href="tel:+2348085952266" className="text-green-50 hover:text-white transition">
-              +234 808 595 2266
+            <a href="tel:+2347038264911" className="text-green-50 hover:text-white transition">
+              +234 703 826 4911
             </a>
           </div>
 
@@ -251,7 +251,7 @@ export default function ContactPage() {
               <p className="text-sm text-gray-600 mb-3">
                 For press, media partnerships, and broadcasting opportunities:
               </p>
-              <a href="mailto:phyd3lid@gmail.com?subject=Media Inquiry" 
+              <a href="mailto:phyd3lis@gmail.com?subject=Media Inquiry" 
                  className="text-naija-green-600 hover:text-naija-green-700 font-semibold text-sm">
                 Contact Media Relations →
               </a>
@@ -264,12 +264,12 @@ export default function ContactPage() {
           <h2 className="text-3xl font-bold text-gray-900 mb-8">Department Contacts</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[
-              { dept: 'Competitor Relations', email: 'phyd3lid@gmail.com', desc: 'Registration, eligibility, and competition questions' },
-              { dept: 'Partnerships & Sponsorship', email: 'phyd3lid@gmail.com', desc: 'Corporate partnerships and brand collaborations' },
-              { dept: 'Media & Broadcasting', email: 'phyd3lid@gmail.com', desc: 'Press inquiries and media partnerships' },
-              { dept: 'Training Centers', email: 'phyd3lid@gmail.com', desc: 'Certified training facility information' },
-              { dept: 'Human Resources', email: 'phyd3lid@gmail.com', desc: 'Career opportunities and employment' },
-              { dept: 'General Inquiries', email: 'phyd3lid@gmail.com', desc: 'All other questions and feedback' },
+              { dept: 'Competitor Relations', email: 'phyd3lis@gmail.com', desc: 'Registration, eligibility, and competition questions' },
+              { dept: 'Partnerships & Sponsorship', email: 'phyd3lis@gmail.com', desc: 'Corporate partnerships and brand collaborations' },
+              { dept: 'Media & Broadcasting', email: 'phyd3lis@gmail.com', desc: 'Press inquiries and media partnerships' },
+              { dept: 'Training Centers', email: 'phyd3lis@gmail.com', desc: 'Certified training facility information' },
+              { dept: 'Human Resources', email: 'phyd3lis@gmail.com', desc: 'Career opportunities and employment' },
+              { dept: 'General Inquiries', email: 'phyd3lis@gmail.com', desc: 'All other questions and feedback' },
             ].map((contact, i) => (
               <div key={i} className="bg-gray-50 rounded-lg p-6 border border-gray-200">
                 <h3 className="font-bold text-gray-900 mb-2">{contact.dept}</h3>
