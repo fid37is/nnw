@@ -90,7 +90,7 @@ export default function MerchSponsorsVideosPage() {
     try {
       const { data: { session } } = await supabase.auth.getSession()
       if (!session) {
-        window.location.href = '/login'
+        window.location.href = '/admin/login'
         return
       }
 
@@ -391,7 +391,7 @@ export default function MerchSponsorsVideosPage() {
       <AdminSidebar />
 
       <main className="flex-1 lg:ml-64 min-h-screen bg-gradient-to-br from-white via-naija-green-50 to-white">
-        <div className="max-w-7xl mx-auto px-4 py-8 lg:p-8">
+        <div className="mx-auto px-4 py-8 lg:p-8">
           <div className="mb-8">
             <h1 className="text-3xl font-bold text-naija-green-900">Merch, Sponsors & Videos</h1>
             <p className="text-gray-600">Manage shop items, sponsors, and YouTube content</p>

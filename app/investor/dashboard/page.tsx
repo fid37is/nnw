@@ -121,7 +121,7 @@ export default function InvestorDashboard() {
     try {
       // 1. Auth check
       const { data: { session } } = await supabase.auth.getSession()
-      if (!session) { window.location.href = '/login'; return }
+      if (!session) { window.location.href = '/investor/login'; return }
 
       // 2. Role check — must be 'investor'
       const { data: userData, error: userError } = await supabase
@@ -249,7 +249,7 @@ export default function InvestorDashboard() {
       <InvestorSidebar />
 
       <main className="flex-1 lg:ml-64 min-h-screen bg-gradient-to-br from-white via-naija-green-50 to-white">
-        <div className="max-w-7xl mx-auto px-4 py-8 lg:p-8">
+        <div className="mx-auto px-4 py-8 lg:p-8">
 
           {/* ── Header ── */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">

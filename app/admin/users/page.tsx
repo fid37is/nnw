@@ -26,6 +26,16 @@ export default function UsersPage() {
   const [searchTerm, setSearchTerm] = useState('')
   const [roleFilter, setRoleFilter] = useState<'all' | 'user' | 'admin'>('all')
 
+    useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) { window.location.href = '/admin/login'; return }
+      const { data: u } = await supabase.from('users').select('role').eq('id', session.user.id).single()
+      if (u?.role !== 'admin') { window.location.href = '/user/dashboard'; return }
+    }
+    checkAuth()
+  }, [])
+
   useEffect(() => {
     loadUsers()
   }, [])
@@ -148,7 +158,7 @@ export default function UsersPage() {
       <AdminSidebar />
 
       <main className="flex-1 lg:ml-64 min-h-screen bg-gradient-to-br from-white via-naija-green-50 to-white">
-        <div className="max-w-7xl mx-auto px-4 py-8 lg:p-8">
+        <div className="mx-auto px-4 py-8 lg:p-8">
           {/* Header */}
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
             <div>
