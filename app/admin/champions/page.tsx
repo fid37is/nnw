@@ -34,6 +34,16 @@ export default function AdminChampionsPage() {
   const [seasonsWithChampions, setSeasonsWithChampions] = useState<SeasonWithChampion[]>([])
   const [loading, setLoading] = useState(true)
 
+    useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) { window.location.href = '/admin/login'; return }
+      const { data: u } = await supabase.from('users').select('role').eq('id', session.user.id).single()
+      if (u?.role !== 'admin') { window.location.href = '/user/dashboard'; return }
+    }
+    checkAuth()
+  }, [])
+
   useEffect(() => {
     loadAllChampions()
   }, [])
@@ -99,7 +109,7 @@ export default function AdminChampionsPage() {
       <AdminSidebar />
 
       <main className="flex-1 lg:ml-64 min-h-screen bg-gradient-to-br from-white via-naija-green-50 to-white">
-        <div className="max-w-7xl mx-auto px-4 py-8 lg:p-8">
+        <div className="mx-auto px-4 py-8 lg:p-8">
           {/* Header */}
           <div className="mb-8">
             <h1 className="text-3xl font-bold text-naija-green-900 flex items-center gap-2">

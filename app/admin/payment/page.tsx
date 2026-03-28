@@ -59,7 +59,7 @@ export default function AdminPaymentManagementPage() {
       const { data: { session } } = await supabase.auth.getSession()
 
       if (!session) {
-        window.location.href = '/login'
+        window.location.href = '/admin/login'
         return
       }
 
@@ -298,7 +298,7 @@ NAIJA Star Challenge Team`
       <AdminSidebar />
 
       <main className="flex-1 lg:ml-64 min-h-screen bg-gradient-to-br from-white via-naija-green-50 to-white">
-        <div className="max-w-7xl mx-auto px-4 py-6 md:py-12">
+        <div className="mx-auto px-4 py-6 md:py-12">
           {/* Header */}
           <div className="mb-8">
             <h1 className="text-3xl font-bold text-naija-green-900 mb-2">Payment Management</h1>

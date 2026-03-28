@@ -62,7 +62,7 @@ export default function AdminJobApplicationsPage() {
     try {
       const { data: { session } } = await supabase.auth.getSession()
       if (!session) {
-        window.location.href = '/login'
+        window.location.href = '/admin/login'
         return
       }
 
@@ -133,7 +133,7 @@ export default function AdminJobApplicationsPage() {
       <AdminSidebar />
 
       <main className="flex-1 lg:ml-64 min-h-screen bg-gradient-to-br from-white via-naija-green-50 to-white">
-        <div className="max-w-7xl mx-auto px-4 py-6 lg:p-8">
+        <div className="mx-auto px-4 py-6 lg:p-8">
           {/* Header */}
           <div className="mb-6">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">

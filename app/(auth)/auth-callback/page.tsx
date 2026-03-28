@@ -35,15 +35,21 @@ export default function AuthCallbackPage() {
         // Get user role
         const { data: user } = await supabase
           .from('users')
-          .select('role')
+          .select('role, must_change_password')
           .eq('id', session.user.id)
           .single()
 
         // Show verified status
         setStatus('verified')
 
-        // Redirect to dashboard after showing success
-        const dashboard = user?.role === 'admin' ? '/admin/dashboard' : '/user/dashboard'
+        // Redirect based on role
+        let dashboard = '/user/dashboard'
+        if (user?.role === 'admin')    dashboard = '/admin/dashboard'
+        if (user?.role === 'investor') {
+          dashboard = user.must_change_password
+            ? '/investor/change-password'
+            : '/investor/dashboard'
+        }
         setTimeout(() => router.push(dashboard), 2000)
 
       } catch (err) {

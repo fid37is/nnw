@@ -37,7 +37,7 @@ export default function InvestorDocumentsPage() {
   const loadDocuments = async () => {
     try {
       const { data: { session } } = await supabase.auth.getSession()
-      if (!session) { window.location.href = '/login'; return }
+      if (!session) { window.location.href = '/investor/login'; return }
 
       const { data: userData } = await supabase
         .from('users').select('role').eq('id', session.user.id).single()
@@ -76,7 +76,7 @@ export default function InvestorDocumentsPage() {
     <div className="flex">
       <InvestorSidebar />
       <main className="flex-1 lg:ml-64 min-h-screen bg-gradient-to-br from-white via-naija-green-50 to-white">
-        <div className="max-w-5xl mx-auto px-4 py-8 lg:p-8">
+        <div className="mx-auto px-4 py-8 lg:p-8">
 
           {/* Header */}
           <div className="mb-8">

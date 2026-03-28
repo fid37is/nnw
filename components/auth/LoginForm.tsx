@@ -62,7 +62,7 @@ export default function LoginForm() {
       // Get user role from users table
       const { data: userData, error: userError } = await supabase
         .from('users')
-        .select('role')
+        .select('role, must_change_password')
         .eq('id', data.user.id)
         .single()
 
@@ -72,12 +72,33 @@ export default function LoginForm() {
         return
       }
 
-      // Show success message
-      toast.success('Login successful! Redirecting...')
+      // Block admins and investors from the public login page
+      // Do this BEFORE showing any success message — sign out immediately
+      // and redirect to their correct portal with a neutral message
+      const isProd = !window.location.hostname.includes('localhost')
+      const encodedEmail = encodeURIComponent(formData.email)
 
-      // Redirect based on role
-      const redirectPath = userData.role === 'admin' ? '/admin/dashboard' : '/user/dashboard'
-      window.location.href = redirectPath
+      if (userData.role === 'admin') {
+        await supabase.auth.signOut()
+        toast.info(isProd ? 'Admin portal: admin.naijaninja.net' : 'Admin portal: /admin/login')
+        window.location.href = isProd
+          ? `https://admin.naijaninja.net/login?email=${encodedEmail}`
+          : `/admin/login?email=${encodedEmail}`
+        return
+      }
+
+      if (userData.role === 'investor') {
+        await supabase.auth.signOut()
+        toast.info(isProd ? 'Investor portal: investor.naijaninja.net' : 'Investor portal: /investor/login')
+        window.location.href = isProd
+          ? `https://investor.naijaninja.net/login?email=${encodedEmail}`
+          : `/investor/login?email=${encodedEmail}`
+        return
+      }
+
+      // Regular users only
+      toast.success('Login successful! Redirecting...')
+      window.location.href = '/user/dashboard'
     } catch (err) {
       toast.error('Something went wrong. Please try again.')
       setLoading(false)

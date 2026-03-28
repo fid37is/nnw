@@ -47,12 +47,9 @@ export default function Navbar({ isApplicationOpen = false }: NavbarProps) {
                   <span className="text-white font-black text-lg">NNW</span>
                 </div>
               )}
-              {/* Trademark symbol */}
-              <span className="absolute -top-1 -right-2 text-white text-base font-black">™</span>
             </div>
-            <span className="font-black text-xl text-white hidden sm:inline">
+            <span className="font-black text-xl text-white hidden sm:inline leading-none">
               Naija Ninja
-              <sup className="text-sm font-black ml-1">™</sup>
             </span>
           </Link>
 
@@ -117,8 +114,8 @@ export default function Navbar({ isApplicationOpen = false }: NavbarProps) {
               </Link>
             ))}
             <hr className="my-4 border-gray-700" />
-            <Link 
-              href="/login" 
+            <Link
+              href="/login"
               className="block px-4 py-3 text-gray-300 hover:bg-gray-700 hover:text-white rounded-xl font-semibold transition"
               onClick={() => setMobileMenuOpen(false)}
             >
