@@ -1,212 +1,196 @@
+'use client'
+
 import Link from 'next/link'
 import Image from 'next/image'
-import { ArrowRight, User } from 'lucide-react'
+import { ArrowRight, MapPin, Clock, Trophy } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { useLogoConfig } from '../context/LogoContext'
 
-interface Champion {
-  id: string
-  user_id: string
-  season_id: string
-  full_name: string
-  position: number
-  photo_url: string | null
-}
+interface Champion { id:string; user_id:string; season_id:string; full_name:string; position:number; photo_url:string|null }
+interface Season { id:string; name:string; year:number; application_start_date:string; application_end_date:string; status:string }
+interface HeroSectionProps { champion:Champion|null; season:Season|null; isApplicationOpen:boolean }
 
-interface Season {
-  id: string
-  name: string
-  year: number
-  application_start_date: string
-  application_end_date: string
-  status: string
-}
+const ZONES = ['South-South','South-West','South-East','North-Central','North-East','North-West']
 
-interface HeroSectionProps {
-  champion: Champion | null
-  season: Season | null
-  isApplicationOpen: boolean
-}
-
-export default function HeroSection({ champion, season, isApplicationOpen }: HeroSectionProps) {
-  const [isRevealed, setIsRevealed] = useState(false)
-  const { logoUrl } = useLogoConfig()
-  
-  useEffect(() => {
-    const revealTimer = setTimeout(() => {
-      setIsRevealed(true)
-      
-      // After 12 seconds, fold back down
-      const hideTimer = setTimeout(() => {
-        setIsRevealed(false)
-      }, 12000)
-      
-      return () => clearTimeout(hideTimer)
-    }, 5000)
-    
-    return () => clearTimeout(revealTimer)
-  }, [isRevealed])
-  
-  // Check if there's a real champion (from champions table)
-  const isChampion = champion && champion.photo_url
-  
+function Countdown({ deadline }: { deadline:string }) {
+  const [t,setT] = useState({d:0,h:0,m:0,s:0})
+  useEffect(()=>{
+    const tick=()=>{
+      const diff=new Date(deadline).getTime()-Date.now()
+      if(diff<=0){setT({d:0,h:0,m:0,s:0});return}
+      setT({d:Math.floor(diff/86400000),h:Math.floor((diff%86400000)/3600000),m:Math.floor((diff%3600000)/60000),s:Math.floor((diff%60000)/1000)})
+    }
+    tick(); const id=setInterval(tick,1000); return()=>clearInterval(id)
+  },[deadline])
   return (
-    <section className="relative min-h-[90vh] overflow-hidden bg-gradient-to-br from-naija-green-900 via-naija-green-800 to-naija-green-900">
-      {/* Animated background elements */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute top-20 right-10 w-96 h-96 bg-naija-green-600/20 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-20 left-10 w-80 h-80 bg-naija-green-400/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '700ms' }}></div>
+    <div className="flex items-center gap-3">
+      <Clock size={13} className="text-naija-green-400 flex-shrink-0"/>
+      <div className="flex items-center gap-1.5">
+        {([['d',t.d],['h',t.h],['m',t.m],['s',t.s]] as [string,number][]).map(([l,v])=>(
+          <div key={l} className="text-center">
+            <div className="bg-white/10 backdrop-blur border border-white/20 rounded-lg px-2.5 py-1 min-w-[2.4rem]">
+              <span className="text-white font-black text-base tabular-nums">{String(v).padStart(2,'0')}</span>
+            </div>
+            <span className="text-naija-green-400 text-[9px] font-bold uppercase tracking-wider mt-0.5 block">{l}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function ZoneTicker() {
+  const [idx,setIdx]=useState(0)
+  useEffect(()=>{ const id=setInterval(()=>setIdx(i=>(i+1)%ZONES.length),2000); return()=>clearInterval(id) },[])
+  return (
+    <div className="flex items-center gap-2">
+      <MapPin size={12} className="text-naija-green-400 flex-shrink-0"/>
+      <span className="text-naija-green-300 text-xs font-medium">Competing in:</span>
+      <span key={idx} className="text-white text-xs font-black tracking-wide animate-fade-in">{ZONES[idx]}</span>
+    </div>
+  )
+}
+
+export default function HeroSection({champion,season,isApplicationOpen}:HeroSectionProps) {
+  const [revealed,setRevealed]=useState(false)
+  const {logoUrl}=useLogoConfig()
+  const hasChampion=champion?.photo_url
+
+  useEffect(()=>{
+    const t1=setTimeout(()=>setRevealed(true),4000)
+    const t2=setTimeout(()=>setRevealed(false),16000)
+    return()=>{clearTimeout(t1);clearTimeout(t2)}
+  },[])
+
+  return (
+    <section className="relative min-h-[95vh] overflow-hidden bg-gray-950 flex items-center">
+      {/* Background layers */}
+      <div className="absolute inset-0 bg-gradient-to-br from-gray-950 via-naija-green-950/30 to-gray-950"/>
+      <div className="absolute inset-0 opacity-[0.025]" style={{backgroundImage:'linear-gradient(rgba(255,255,255,1) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,1) 1px,transparent 1px)',backgroundSize:'60px 60px'}}/>
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-naija-green-600/8 rounded-full blur-3xl"/>
+      <div className="absolute bottom-0 right-0 w-[500px] h-[350px] bg-naija-green-800/10 rounded-full blur-3xl"/>
+      {/* Floating dots */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        {Array.from({length:25}).map((_,i)=>(
+          <div key={i} className="absolute rounded-full bg-naija-green-400/20"
+            style={{width:`${Math.random()*4+1}px`,height:`${Math.random()*4+1}px`,left:`${Math.random()*100}%`,top:`${Math.random()*100}%`,animation:`pulse ${Math.random()*4+3}s ease-in-out ${Math.random()*3}s infinite`}}/>
+        ))}
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24 relative z-10">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-          {/* Left Content */}
-          <div className="text-white space-y-8">
-            <div className="inline-block px-4 py-2 bg-primary/20 backdrop-blur-sm border border-primary-400/30 text-naija-green-200 text-sm font-bold rounded-full">
-              SEASON {season?.year}
-            </div>
-            
-            <h1 className="text-5xl md:text-7xl font-black leading-tight">
-              Test Your
-              <br />
-              <span className="text-gradient-primary">
-                Limits
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 w-full">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+
+          {/* Left content */}
+          <div className="text-white space-y-7">
+            <div className="flex items-center gap-3 flex-wrap">
+              <span className="inline-flex items-center gap-2 px-3 py-1.5 bg-naija-green-600/20 border border-naija-green-500/30 text-naija-green-300 text-xs font-black rounded-full tracking-widest uppercase">
+                <span className="w-1.5 h-1.5 bg-naija-green-400 rounded-full animate-pulse"/>
+                {season?`Season ${season.year}`:'Coming Soon'}
               </span>
-            </h1>
-            
-            <p className="text-lg md:text-xl text-naija-green-100 leading-relaxed max-w-xl">
-              Nigeria's premier physical competition. Compete against the best, push your boundaries, and claim your place in history.
+              <ZoneTicker/>
+            </div>
+
+            <div>
+              <h1 className="text-5xl md:text-7xl font-black leading-[0.92] tracking-tight">
+                <span className="block text-white">Nigeria's</span>
+                <span className="block text-white">Ultimate</span>
+                <span className="block bg-gradient-to-r from-naija-green-400 to-naija-green-300 bg-clip-text text-transparent pb-1">Warrior</span>
+                <span className="block text-white">Challenge</span>
+              </h1>
+            </div>
+
+            <p className="text-gray-400 text-lg leading-relaxed max-w-md">
+              Six zones. One nation. Only the strongest survive. Prove yourself on Africa's most demanding obstacle course.
             </p>
-            
-            <div className="flex flex-col sm:flex-row gap-4">
-              {isApplicationOpen && (
-                <Link
-                  href="/register"
-                  className="btn-primary group flex items-center justify-center gap-2 text-lg px-8 py-4 shadow-xl hover:shadow-2xl hover:scale-105"
-                >
-                  Apply Now
-                  <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
-                </Link>
-              )}
-              <Link
-                href="/leaderboard"
-                className="btn-outline text-lg px-8 py-4"
-              >
+
+            {isApplicationOpen && season?.application_end_date && (
+              <div className="inline-flex flex-col gap-2 bg-white/5 border border-white/10 rounded-2xl px-5 py-4">
+                <span className="text-naija-green-400 text-xs font-black uppercase tracking-widest">Applications close in</span>
+                <Countdown deadline={season.application_end_date}/>
+              </div>
+            )}
+
+            <div className="flex flex-col sm:flex-row gap-4 pt-1">
+              <Link href="/register"
+                className="group inline-flex items-center justify-center gap-2 px-8 py-4 bg-naija-green-600 hover:bg-naija-green-500 text-white font-black text-base rounded-full transition-all duration-300 shadow-lg shadow-naija-green-900/40 hover:scale-105">
+                {isApplicationOpen?'Apply Now':'Register Interest'}
+                <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform"/>
+              </Link>
+              <Link href="/leaderboard"
+                className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white/5 hover:bg-white/10 border border-white/20 text-white font-bold text-base rounded-full transition-all duration-300">
                 View Leaderboard
               </Link>
             </div>
+
+            <div className="flex flex-wrap gap-2">
+              {ZONES.map(z=>(
+                <span key={z} className="text-xs text-naija-green-400/60 border border-naija-green-800/50 rounded-full px-3 py-1 font-medium">{z}</span>
+              ))}
+            </div>
           </div>
 
-          {/* Right Content - Champion with Curtain Blind */}
-          <div className="relative flex items-center justify-center min-h-[600px]">
-            {/* Champion Image - Always visible, behind the curtain */}
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="relative w-full max-w-md">
-                <div className="relative aspect-[3/4] overflow-hidden rounded-3xl shadow-2xl">
-                  {isChampion ? (
-                    <>
-                      <Image
-                        src={champion.photo_url!}
-                        alt={champion.full_name}
-                        fill
-                        loading="eager"
-                        priority
-                        className="object-cover object-center"
-                      />
-                      
-                      {/* Trophy badge */}
-                      <div className="absolute top-6 left-6 w-16 h-16 rounded-full bg-gradient-to-br from-naija-gold via-yellow-400 to-yellow-600 flex items-center justify-center text-4xl shadow-xl border-4 border-white/20 animate-bounce">
-                        🏆
-                      </div>
-                      
-                      {/* Overlay gradient */}
-                      <div className="absolute bottom-0 left-0 right-0 h-2/3 bg-gradient-to-t from-black/90 via-black/50 to-transparent"></div>
-                      
-                      {/* Champion info */}
-                      <div className="absolute bottom-0 left-0 right-0 p-8">
-                        <p className="text-xs font-bold text-naija-gold mb-3 tracking-widest">REIGNING CHAMPION</p>
-                        <p className="text-white font-black text-3xl leading-tight">
-                          {champion.full_name}
-                        </p>
-                      </div>
-                    </>
-                  ) : (
-                    <>
-                      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-800 via-gray-900 to-black">
-                        <div className="text-[200px] text-white/5 font-black">?</div>
-                      </div>
-                      
-                      {/* Animated particles */}
-                      <div className="absolute top-1/4 left-1/4 w-2 h-2 bg-primary rounded-full animate-ping"></div>
-                      <div className="absolute top-1/3 right-1/3 w-2 h-2 bg-primary rounded-full animate-ping" style={{ animationDelay: '300ms' }}></div>
-                      <div className="absolute bottom-1/3 left-1/3 w-2 h-2 bg-primary rounded-full animate-ping" style={{ animationDelay: '700ms' }}></div>
-                      
-                      {/* Overlay gradient */}
-                      <div className="absolute bottom-0 left-0 right-0 h-2/3 bg-gradient-to-t from-black/90 via-black/50 to-transparent"></div>
-                      
-                      {/* Next champion info */}
-                      <div className="absolute bottom-0 left-0 right-0 p-8">
-                        <p className="text-xs font-bold text-primary mb-3 tracking-widest">NEXT CHAMPION</p>
-                        <p className="text-white font-black text-3xl leading-tight mb-3">
-                          Could Be You
-                        </p>
-                        {isApplicationOpen && (
-                          <p className="text-sm text-naija-green-300 font-medium">Apply now and make history</p>
-                        )}
-                      </div>
-                    </>
-                  )}
-                </div>
-              </div>
-            </div>
+          {/* Right: champion card */}
+          <div className="relative">
+            <div className="absolute -inset-6 bg-naija-green-600/15 rounded-3xl blur-3xl"/>
+            <div className="relative aspect-[3/4] rounded-3xl overflow-hidden border border-white/10 shadow-2xl">
+              {hasChampion ? (
+                <>
+                  <Image src={champion.photo_url!} alt={champion.full_name} fill priority className="object-cover"/>
+                  <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent"/>
+                  <div className="absolute top-5 left-5 flex items-center gap-1.5 bg-yellow-500/90 text-white text-xs font-black px-3 py-1.5 rounded-full">
+                    <Trophy size={12}/> CHAMPION
+                  </div>
+                  <div className="absolute bottom-0 left-0 right-0 p-7">
+                    <p className="text-naija-green-400 text-xs font-black tracking-widest uppercase mb-2">Can you beat them?</p>
+                    <p className="text-white font-black text-3xl leading-tight">{champion.full_name}</p>
+                  </div>
+                </>
+              ) : (
+                <>
+                  {/* Base layer: revealed after curtain pulls away */}
+                  <div className="w-full h-full bg-gradient-to-br from-gray-900 to-black flex items-center justify-center">
+                    <div className="text-[160px] font-black text-white/5 select-none">?</div>
+                  </div>
+                  <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent"/>
+                  <div className="absolute bottom-0 left-0 right-0 p-7">
+                    <p className="text-naija-green-400 text-xs font-black tracking-widest uppercase mb-2">Next Champion</p>
+                    <p className="text-white font-black text-3xl leading-tight">Could Be You</p>
+                    {isApplicationOpen && <p className="text-naija-green-300 text-sm mt-2">Apply now and make history</p>}
+                  </div>
 
-            {/* Curtain Blind - Pulls up and bunches/shrinks at top */}
-            <div 
-              className="absolute inset-0 flex flex-col overflow-visible transition-all duration-[2000ms] ease-in-out"
-              style={{
-                transform: isRevealed ? 'translateY(-100%)' : 'translateY(0)',
-                height: isRevealed ? '15%' : '100%',
-                transformOrigin: 'top',
-              }}
-            >
-              <div className="relative w-full h-full flex items-center justify-center bg-gradient-to-br from-naija-green-800/95 via-naija-green-900/95 to-black/95 backdrop-blur-sm rounded-3xl shadow-2xl">
-                {/* Horizontal slats for realistic blind texture */}
-                <div className="absolute inset-0 flex flex-col rounded-3xl overflow-hidden">
-                  {[...Array(20)].map((_, i) => (
-                    <div 
-                      key={i}
-                      className="flex-1 border-b border-naija-green-700/20"
-                      style={{
-                        background: i % 2 === 0 
-                          ? 'linear-gradient(to bottom, rgba(16, 192, 132, 0.3), rgba(0, 122, 94, 0.4))' 
-                          : 'linear-gradient(to bottom, rgba(0, 122, 94, 0.4), rgba(16, 192, 132, 0.3))',
-                      }}
-                    />
-                  ))}
-                </div>
-                
-                {/* Logo on curtain - scales down when pulled up */}
-                <div 
-                  className="relative z-10 transition-all duration-[2000ms] flex items-center justify-center"
-                  style={{
-                    transform: isRevealed ? 'scale(0.15)' : 'scale(1)',
-                    opacity: isRevealed ? 0.6 : 1,
-                  }}
-                >
-                  <div className="relative w-96 h-[28rem] md:w-[32rem] md:h-[40rem]">
+                  {/* The logo IS the curtain — covers card initially, rolls up to reveal */}
+                  <div
+                    className="absolute inset-0 z-20 flex items-center justify-center origin-top transition-all duration-[2500ms] ease-in-out"
+                    style={{
+                      transform: revealed ? 'scaleY(0)' : 'scaleY(1)',
+                      background: 'linear-gradient(to bottom right, #052e16, #111827, #000)',
+                    }}
+                  >
+                    {/* Decorative horizontal lines on curtain */}
+                    {Array.from({length:16}).map((_,i)=>(
+                      <div key={i} className="absolute left-0 right-0 border-b border-naija-green-800/30" style={{top:`${(i/16)*100}%`}}/>
+                    ))}
+                    {/* Logo displayed on the curtain face */}
                     <Image
                       src={logoUrl}
-                      alt="Naija Ninja Warrior Logo"
-                      fill
-                      className="object-contain drop-shadow-2xl"
-                      priority
+                      alt="NNW"
+                      width={200}
+                      height={200}
+                      className="object-contain drop-shadow-2xl relative z-10"
                     />
                   </div>
-                </div>
-              </div>
+                </>
+              )}
             </div>
           </div>
+
         </div>
+      </div>
+
+      {/* Scroll indicator */}
+      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 animate-bounce opacity-50">
+        <div className="w-px h-8 bg-gradient-to-b from-transparent to-naija-green-400"/>
+        <div className="w-1 h-1 bg-naija-green-400 rounded-full"/>
       </div>
     </section>
   )

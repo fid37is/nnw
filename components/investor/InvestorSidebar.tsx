@@ -1,32 +1,44 @@
+// components/investor/InvestorSidebar.tsx
 'use client'
 
 import Link from 'next/link'
 import Image from 'next/image'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import {
   LayoutDashboard, FileText, LogOut, Menu, X,
-  TrendingUp, Mail
+  TrendingUp, Mail, KeyRound,
 } from 'lucide-react'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase/client'
 import { toast } from 'sonner'
-import { useAuthConfig } from '@/components/context/AuthContext'
+import { useLogoConfig } from '@/components/context/LogoContext'
 
 const navItems = [
-  { label: 'Dashboard',  href: '/investor/dashboard',  icon: LayoutDashboard },
-  { label: 'Documents',  href: '/investor/documents',  icon: FileText },
-  { label: 'Contact',    href: '/contact',              icon: Mail },
+  { label: 'Dashboard',       href: '/investor/dashboard',       icon: LayoutDashboard },
+  { label: 'Documents',       href: '/investor/documents',       icon: FileText },
+  { label: 'Change Password', href: '/investor/update-password', icon: KeyRound },
+  { label: 'Contact',         href: '/contact',                  icon: Mail },
 ]
 
 export default function InvestorSidebar() {
   const pathname = usePathname()
+  const router   = useRouter()
   const [open, setOpen] = useState(false)
-  const { logoUrl } = useAuthConfig()
+  const { logoUrl } = useLogoConfig()
+
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        if (!session) router.replace('/investor/login')
+      }
+    )
+    return () => subscription.unsubscribe()
+  }, [router])
 
   const handleLogout = async () => {
     await supabase.auth.signOut()
     toast.success('Logged out')
-    window.location.href = '/'
+    router.replace('/investor/login')
   }
 
   return (
@@ -40,12 +52,19 @@ export default function InvestorSidebar() {
       </button>
 
       {/* Sidebar */}
-      <aside className={`fixed left-0 top-0 h-screen w-64 bg-naija-green-900 text-white p-6 overflow-y-auto transition-transform duration-300 z-40 flex flex-col ${open ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
-
+      <aside
+        className={`fixed left-0 top-0 h-screen w-64 bg-naija-green-900 text-white p-6 overflow-y-auto transition-transform duration-300 z-40 flex flex-col ${
+          open ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+        }`}
+      >
         {/* Logo */}
         <Link href="/investor/dashboard" className="flex items-center gap-3 mb-2">
-          {logoUrl && (
+          {logoUrl ? (
             <Image src={logoUrl} alt="NNW Logo" width={48} height={48} className="rounded-lg" priority />
+          ) : (
+            <div className="w-12 h-12 bg-naija-green-600 rounded-lg flex items-center justify-center flex-shrink-0">
+              <span className="text-white font-black text-sm">NNW</span>
+            </div>
           )}
           <div>
             <p className="font-bold text-sm leading-tight">Investor Portal</p>
@@ -53,14 +72,13 @@ export default function InvestorSidebar() {
           </div>
         </Link>
 
-        {/* Divider */}
         <div className="border-t border-naija-green-700 mb-6 mt-2" />
 
         {/* Nav */}
         <nav className="space-y-1 flex-1">
           {navItems.map(item => {
             const Icon = item.icon
-            const isActive = pathname === item.href || pathname.startsWith(item.href + '/')
+            const isActive = pathname === item.href
             return (
               <Link
                 key={item.href}
@@ -79,7 +97,7 @@ export default function InvestorSidebar() {
           })}
         </nav>
 
-        {/* Bottom: investor note */}
+        {/* Investor note */}
         <div className="mb-4 p-3 bg-naija-green-800 rounded-lg border border-naija-green-700">
           <div className="flex items-center gap-2 mb-1">
             <TrendingUp size={14} className="text-naija-green-400" />
@@ -102,7 +120,10 @@ export default function InvestorSidebar() {
 
       {/* Mobile overlay */}
       {open && (
-        <div className="fixed inset-0 bg-black/50 z-30 lg:hidden" onClick={() => setOpen(false)} />
+        <div
+          className="fixed inset-0 bg-black/50 z-30 lg:hidden"
+          onClick={() => setOpen(false)}
+        />
       )}
     </>
   )

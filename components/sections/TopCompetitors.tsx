@@ -26,11 +26,10 @@ interface TopCompetitorsProps {
 }
 
 export default function TopCompetitors({ champion, runners, seasonStatus = 'active' }: TopCompetitorsProps) {
-  const medals = ['🥇', '🥈', '🥉']
-  const gradients = [
-    'from-yellow-400 to-yellow-500',
-    'from-gray-300 to-gray-400',
-    'from-orange-400 to-orange-500'
+  const positions = [
+    { label:'1st', bg:'bg-yellow-500',  ring:'ring-yellow-400' },
+    { label:'2nd', bg:'bg-gray-400',    ring:'ring-gray-300' },
+    { label:'3rd', bg:'bg-orange-500',  ring:'ring-orange-400' },
   ]
 
   // Dynamic text based on season status
@@ -79,8 +78,7 @@ export default function TopCompetitors({ champion, runners, seasonStatus = 'acti
               {champion && (
                 <CompetitorCard
                   competitor={champion}
-                  medal={medals[0]}
-                  gradient={gradients[0]}
+                  position={positions[0]}
                   index={0}
                   isSeasonEnded={seasonStatus === 'ended'}
                 />
@@ -90,8 +88,7 @@ export default function TopCompetitors({ champion, runners, seasonStatus = 'acti
                 <CompetitorCard
                   key={runner.id}
                   competitor={runner}
-                  medal={medals[idx + 1]}
-                  gradient={gradients[idx + 1]}
+                  position={positions[idx + 1]}
                   index={idx + 1}
                   isSeasonEnded={seasonStatus === 'ended'}
                 />
@@ -124,13 +121,12 @@ export default function TopCompetitors({ champion, runners, seasonStatus = 'acti
 
 interface CompetitorCardProps {
   competitor: { full_name: string; photo_url: string | null }
-  medal: string
-  gradient: string
+  position: { label: string; bg: string; ring: string }
   index: number
   isSeasonEnded: boolean
 }
 
-function CompetitorCard({ competitor, medal, gradient, index, isSeasonEnded }: CompetitorCardProps) {
+function CompetitorCard({ competitor, position, index, isSeasonEnded }: CompetitorCardProps) {
   return (
     <div 
       className="group relative overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-105 cursor-pointer bg-white"
@@ -150,8 +146,8 @@ function CompetitorCard({ competitor, medal, gradient, index, isSeasonEnded }: C
           </div>
         )}
         
-        <div className={`absolute top-4 left-4 w-16 h-16 rounded-full bg-gradient-to-br ${gradient} flex items-center justify-center text-4xl shadow-xl border-4 border-white/20 transform group-hover:rotate-12 transition-transform duration-300`}>
-          {medal}
+        <div className={`absolute top-4 left-4 w-14 h-14 rounded-full ${position.bg} flex items-center justify-center shadow-xl border-4 border-white/20 ring-2 ${position.ring} transform group-hover:rotate-12 transition-transform duration-300`}>
+          <span className="text-white font-black text-sm">{position.label}</span>
         </div>
 
         {/* Show crown on 1st place if season has ended */}

@@ -1,63 +1,71 @@
+'use client'
+
 import Link from 'next/link'
+import { Handshake } from 'lucide-react'
+import { useScrollReveal } from '@/lib/hooks'
 
-interface Sponsor {
-    id: string
-    name: string
-    logo_url: string
-    website_url: string
-}
-
-interface SponsorsSectionProps {
-    sponsors: Sponsor[]
-}
+interface Sponsor { id:string; name:string; logo_url:string; website_url:string }
+interface SponsorsSectionProps { sponsors: Sponsor[] }
 
 export default function SponsorsSection({ sponsors }: SponsorsSectionProps) {
-    return (
-        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-            <h2 className="text-4xl md:text-5xl font-black text-foreground mb-16 text-center">
-                Supported By
-            </h2>
+  const { ref, visible } = useScrollReveal(0.1)
 
-            {sponsors.length > 0 ? (
-                <div className={`grid ${sponsors.length === 1 ? 'justify-center' : 'grid-cols-2 md:grid-cols-4'} gap-6`}>
-                    {sponsors.map((sponsor) => (
-                        <a
-                            key={sponsor.id}
-                            href={sponsor.website_url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className={`group py-6 px-8 bg-card rounded-xl border-2 border-border hover:border-primary transition-all duration-300 flex items-center justify-center gap-3 shadow-soft hover:shadow-medium hover:scale-105 ${sponsors.length === 1 ? 'max-w-sm' : ''}`}
-                        >
-                            {sponsor.logo_url && (
-                                <img
-                                    src={sponsor.logo_url}
-                                    alt={sponsor.name}
-                                    className="max-w-full max-h-16 object-contain flex-shrink-0 grayscale group-hover:grayscale-0 transition-all duration-300"
-                                />
-                            )}
-                            <p className="font-bold text-card-foreground text-center">{sponsor.name}</p>
-                        </a>
-                    ))}
-                </div>
-            ) : (
-                <div className="bg-muted rounded-2xl border-2 border-border p-16 text-center">
-                    <div className="inline-block p-6 bg-card rounded-full shadow-soft mb-6">
-                        <svg className="w-16 h-16 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                        </svg>
-                    </div>
-                    <h3 className="text-2xl font-black text-foreground mb-3">Become a Sponsor</h3>
-                    <p className="text-muted-foreground mb-8 text-lg max-w-2xl mx-auto">
-                        Partner with Naija Ninja Warrior and reach millions of passionate viewers across Nigeria and Africa
-                    </p>
-                    <Link
-                        href="/partners"
-                        className="btn-primary rounded-full inline-flex items-center justify-center px-8 py-4 transition-transform hover:scale-105"
-                    >
-                        View Partnership Opportunities
-                    </Link>
-                </div>
-            )}
-        </section>
-    )
+  return (
+    <section ref={ref as any} className="py-20 bg-white border-t border-gray-100 overflow-hidden">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center mb-14"
+          style={{opacity:visible?1:0, transform:visible?'translateY(0)':'translateY(24px)', transition:'all 0.6s ease'}}>
+          <p className="text-gray-400 text-xs font-black tracking-widest uppercase mb-3">Powered By</p>
+          <h2 className="text-3xl md:text-4xl font-black text-gray-900">Our Partners & Sponsors</h2>
+        </div>
+
+        {sponsors.length > 0 ? (
+          /* Marquee ticker */
+          <div className="relative"
+            style={{opacity:visible?1:0, transition:'all 0.7s ease 100ms'}}>
+            {/* Left / right fade masks */}
+            <div className="absolute left-0 top-0 bottom-0 w-24 bg-gradient-to-r from-white to-transparent z-10 pointer-events-none"/>
+            <div className="absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-white to-transparent z-10 pointer-events-none"/>
+
+            <div className="flex gap-8 overflow-hidden">
+              {/* Double the list for seamless loop */}
+              {[...sponsors, ...sponsors].map((sponsor, i) => (
+                <a key={`${sponsor.id}-${i}`}
+                  href={sponsor.website_url} target="_blank" rel="noopener noreferrer"
+                  className="group flex-shrink-0 flex items-center justify-center gap-3 px-8 py-5 bg-gray-50 hover:bg-naija-green-50 border-2 border-gray-100 hover:border-naija-green-300 rounded-2xl transition-all duration-300 min-w-[180px]"
+                  style={{animation:`marquee-scroll ${sponsors.length * 4}s linear infinite`}}>
+                  {sponsor.logo_url && (
+                    <img src={sponsor.logo_url} alt={sponsor.name}
+                      className="max-h-10 max-w-[100px] object-contain grayscale group-hover:grayscale-0 transition-all duration-300"/>
+                  )}
+                  <span className="font-bold text-gray-600 group-hover:text-naija-green-700 text-sm whitespace-nowrap">{sponsor.name}</span>
+                </a>
+              ))}
+            </div>
+
+            <style jsx>{`
+              @keyframes marquee-scroll {
+                from { transform: translateX(0); }
+                to   { transform: translateX(-50%); }
+              }
+            `}</style>
+          </div>
+        ) : (
+          <div className="text-center py-16 border-2 border-dashed border-gray-200 rounded-3xl"
+            style={{opacity:visible?1:0, transition:'all 0.6s ease 100ms'}}>
+            <div className="flex items-center justify-center w-14 h-14 bg-naija-green-100 rounded-2xl mb-4 mx-auto"><Handshake size={28} className="text-naija-green-600"/></div>
+            <h3 className="text-2xl font-black text-gray-900 mb-2">Become a Founding Sponsor</h3>
+            <p className="text-gray-500 max-w-md mx-auto mb-8 text-sm leading-relaxed">
+              Partner with Naija Ninja Warrior and reach millions of passionate viewers across Nigeria and Africa.
+              First-mover sponsorship packages available now.
+            </p>
+            <Link href="/partners"
+              className="inline-flex items-center px-8 py-3.5 bg-naija-green-600 text-white font-bold rounded-full hover:bg-naija-green-700 transition-all duration-300 hover:scale-105">
+              View Partnership Opportunities
+            </Link>
+          </div>
+        )}
+      </div>
+    </section>
+  )
 }

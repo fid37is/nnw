@@ -1,191 +1,89 @@
-import { useState, useEffect } from 'react'
+'use client'
 
-export default function CompetitionProcessSection({ isApplicationOpen = false }) {
+import { useState, useEffect } from 'react'
+import { useScrollReveal } from '@/lib/hooks'
+import { Search, UserPlus, ClipboardList, Clock, CheckCircle, CreditCard, Dumbbell, Zap, Trophy } from 'lucide-react'
+
+export default function CompetitionProcessSection({ isApplicationOpen = false }: { isApplicationOpen?: boolean }) {
+  const { ref, visible } = useScrollReveal(0.05)
   const [currentStep, setCurrentStep] = useState(0)
 
   const steps = [
-    {
-      id: 1,
-      title: 'Show Interest',
-      description: 'Discover and decide to take on the challenge',
-      bullets: ['Explore competition highlights', 'Understand requirements', 'Get inspired by champions']
-    },
-    {
-      id: 2,
-      title: 'Sign Up',
-      description: 'Create your warrior account',
-      bullets: ['Provide your information', 'Verify your email', 'Complete warrior profile']
-    },
-    {
-      id: 3,
-      title: 'Sign In',
-      description: 'Access your dashboard',
-      bullets: ['Log in to account', 'View application status', 'Update profile anytime']
-    },
-    {
-      id: 4,
-      title: 'Apply',
-      description: 'Submit your formal application',
-      bullets: ['Fill application form', 'Share fitness background', 'Upload required documents']
-    },
-    {
-      id: 5,
-      title: 'Review',
-      description: 'We evaluate your application',
-      bullets: ['Admin reviews submission', 'Verification process (3-5 days)', 'Assessment of qualifications']
-    },
-    {
-      id: 6,
-      title: 'Acceptance',
-      description: "You've been selected!",
-      bullets: ['Receive acceptance notification', 'Access payment instructions', 'View competition schedule']
-    },
-    {
-      id: 7,
-      title: 'Pay Fee',
-      description: 'Complete your payment',
-      bullets: ['Pay participation fee', 'Upload payment proof', 'Secure competition slot']
-    },
-    {
-      id: 8,
-      title: 'Approval',
-      description: 'Payment confirmed!',
-      bullets: ['Receive official confirmation', 'Get competition number', 'Access participant materials']
-    },
-    {
-      id: 9,
-      title: 'Compete',
-      description: "You're ready! Time to shine",
-      bullets: ['🏆 Champion - 1st place', '🥈 Runner-Up - 2nd/3rd', '⭐ Warrior - Experience gained']
-    }
+    { id:1, Icon:Search,       title:'Discover',  desc:'Explore the competition, understand the format, get inspired.' },
+    { id:2, Icon:UserPlus,     title:'Register',  desc:'Create your warrior account with your details.' },
+    { id:3, Icon:ClipboardList,title:'Apply',     desc:'Submit your formal application with fitness background.' },
+    { id:4, Icon:Clock,        title:'Review',    desc:'Our team evaluates your application within 3-5 days.' },
+    { id:5, Icon:CheckCircle,  title:'Selected',  desc:'Receive your acceptance notification and schedule.' },
+    { id:6, Icon:CreditCard,   title:'Pay',       desc:'Complete your participation fee to secure your slot.' },
+    { id:7, Icon:Dumbbell,     title:'Train',     desc:'Prepare with certified training gyms nationwide.' },
+    { id:8, Icon:Zap,          title:'Compete',   desc:'Show up, give everything, and fight for the title.' },
+    { id:9, Icon:Trophy,       title:'Champion',  desc:'Win your zone, advance to Abuja, become a legend.' },
   ]
 
-  // Border animation - cycles through steps every 3 seconds
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentStep((prev) => (prev + 1) % steps.length)
-    }, 3000)
-    
-    return () => clearInterval(timer)
-  }, [])
-
-  const StepCard = ({ step, index }: { step: typeof steps[0], index: number }) => {
-    const isCurrent = currentStep === index
-    const isStep9 = step.id === 9
-
-    return (
-      <div className="relative">
-        {/* Drawing border animation - only on current step */}
-        {isCurrent && (
-          <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ zIndex: 10 }}>
-            <rect
-              x="2"
-              y="2"
-              width="calc(100% - 4px)"
-              height="calc(100% - 4px)"
-              fill="none"
-              strokeWidth="4"
-              strokeDasharray="1000"
-              strokeDashoffset="1000"
-              rx="12"
-              className={`animate-draw-border ${isStep9 ? 'stroke-secondary' : 'stroke-primary'}`}
-            />
-          </svg>
-        )}
-
-        {/* Content card */}
-        <div className="bg-white rounded-xl p-6 h-full">
-          {/* Step Number Badge */}
-          <div className={`inline-flex items-center justify-center w-10 h-10 rounded-full mb-4 font-bold ${isStep9 ? 'bg-secondary text-secondary-foreground' : 'bg-primary text-primary-foreground'}`}>
-            {step.id}
-          </div>
-
-          {/* Title */}
-          <h3 className={`font-bold text-gray-900 mb-2 ${isStep9 ? 'text-2xl' : 'text-xl'}`}>
-            {step.title}
-          </h3>
-
-          {/* Description */}
-          <p className="text-sm text-gray-600 mb-3">
-            {step.description}
-          </p>
-
-          {/* Bullets */}
-          <ul className="space-y-2">
-            {step.bullets.map((bullet, idx) => (
-              <li key={idx} className="text-sm text-gray-700 flex items-start gap-2">
-                <span className="text-primary mt-1">•</span>
-                <span>{bullet}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </div>
-    )
-  }
+  useEffect(()=>{
+    const id=setInterval(()=>setCurrentStep(p=>(p+1)%steps.length), 2800)
+    return()=>clearInterval(id)
+  },[])
 
   return (
-    <section className="py-16 sm:py-20 md:py-24 bg-gray-50 min-h-screen">
+    <section ref={ref as any} className="py-24 bg-white overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+        <div className="text-center mb-16"
+          style={{opacity:visible?1:0,transform:visible?'translateY(0)':'translateY(24px)',transition:'all 0.6s ease'}}>
+          <span className="inline-block text-naija-green-600 text-xs font-black tracking-widest uppercase mb-4 px-4 py-2 border border-naija-green-200 rounded-full bg-naija-green-50">
+            The Journey
+          </span>
+          <h2 className="text-4xl md:text-6xl font-black text-gray-900 leading-tight mt-3">
             9 Steps to Glory
           </h2>
-          <p className="text-lg text-gray-600">
-            Your journey from interest to champion
-          </p>
+          <p className="text-gray-500 text-lg mt-4">From interest to champion — your path is clear.</p>
         </div>
 
-        {/* Whiteboard - Grid Layout */}
-        <div className="bg-white rounded-2xl shadow-sm p-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {/* Steps 1-8 in 2 rows, 4 columns */}
-            {steps.slice(0, 8).map((step, idx) => (
-              <StepCard key={step.id} step={step} index={idx} />
-            ))}
-          </div>
-            
-          {/* Step 9 and Action Button in same row */}
-          <div className="mt-8 pt-8 border-t-2 border-gray-200">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-center">
-              {/* Step 9 - Final Round */}
-              <StepCard step={steps[8]} index={8} />
-              
-              {/* Action Button Area */}
-              <div className="flex flex-col items-center justify-center text-center p-6 rounded-xl border-2 border-primary-100">
-                {isApplicationOpen ? (
-                  <>
-                    <h3 className="text-2xl font-bold text-gray-900 mb-4">Ready to Begin?</h3>
-                    <a
-                      href="/register"
-                      className="btn-primary rounded-full group flex items-center justify-center gap-2 text-lg px-8 py-4 shadow-xl hover:shadow-2xl hover:scale-105"
-                    >
-                      Apply Now
-                    </a>
-                  </>
-                ) : (
-                  <>
-                    <h3 className="text-2xl font-bold text-gray-900 mb-3">Applications Currently Closed</h3>
-                    <p className="text-gray-600 mb-4 max-w-md">
-                      Don't miss the next season! Register now to get updates and be first to know when applications open.
-                    </p>
-                    <a
-                      href="/register"
-                      className="btn-primary rounded-full group flex items-center justify-center gap-2 text-lg px-8 py-3 shadow-xl hover:shadow-2xl hover:scale-105 mb-3"
-                    >
-                      Register
-                    </a>
-                    <p className="text-sm text-gray-500">
-                      Follow us on social media for the latest news and warrior stories
-                    </p>
-                  </>
-                )}
-              </div>
-            </div>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+          {steps.slice(0,8).map((step, i) => (
+            <StepCard key={step.id} step={step} index={i} active={currentStep===i} visible={visible}/>
+          ))}
+          {/* Step 9 spans full on mobile, larger on desktop */}
+          <div className="col-span-2 sm:col-span-3 lg:col-span-4 xl:col-span-1">
+            <StepCard step={steps[8]} index={8} active={currentStep===8} visible={visible} featured/>
           </div>
         </div>
+
+        {/* Progress bar */}
+        <div className="mt-10 flex gap-1.5 justify-center"
+          style={{opacity:visible?1:0,transition:'all 0.6s ease 800ms'}}>
+          {steps.map((_,i)=>(
+            <div key={i}
+              className={`h-1 rounded-full transition-all duration-500 ${i===currentStep?'w-8 bg-naija-green-600':'w-2 bg-gray-200'}`}/>
+          ))}
+        </div>
+
+        {isApplicationOpen && (
+          <div className="text-center mt-12"
+            style={{opacity:visible?1:0,transition:'all 0.6s ease 900ms'}}>
+            <a href="/register"
+              className="inline-flex items-center gap-2 px-10 py-4 bg-naija-green-600 hover:bg-naija-green-700 text-white font-black rounded-full transition-all duration-300 hover:scale-105 shadow-lg">
+              Begin Your Journey
+            </a>
+          </div>
+        )}
       </div>
     </section>
+  )
+}
+
+function StepCard({step,index,active,visible,featured=false}:{step:{id:number;Icon:any;title:string;desc:string};index:number;active:boolean;visible:boolean;featured?:boolean}) {
+  return (
+    <div
+      className={`relative rounded-2xl border-2 p-6 transition-all duration-500 ${active?'border-naija-green-400 bg-naija-green-50 shadow-lg shadow-naija-green-100':'border-gray-100 bg-white hover:border-gray-200'} ${featured?'flex flex-col justify-center':''}` }
+      style={{opacity:visible?1:0,transform:visible?'translateY(0)':'translateY(32px)',transition:`all 0.6s ease ${index*60}ms`}}>
+      {active && <div className="absolute inset-0 rounded-2xl ring-2 ring-naija-green-400 ring-offset-2 pointer-events-none"/>}
+      <div className={`mb-3 ${active?'text-naija-green-600':'text-gray-400'}`}><step.Icon size={22}/></div>
+      <div className={`inline-flex items-center justify-center w-7 h-7 rounded-full text-xs font-black mb-3 ${active?'bg-naija-green-600 text-white':'bg-gray-100 text-gray-500'}`}>
+        {step.id}
+      </div>
+      <h3 className={`font-black text-base mb-1.5 ${active?'text-naija-green-800':'text-gray-900'} ${featured?'text-xl':''}`}>{step.title}</h3>
+      <p className="text-gray-500 text-xs leading-relaxed">{step.desc}</p>
+    </div>
   )
 }
