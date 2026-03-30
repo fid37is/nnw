@@ -8,10 +8,10 @@ import { toast } from 'sonner'
 import { Eye, EyeOff, Lock, Mail, TrendingUp } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
-
-const logoUrl = 'https://res.cloudinary.com/lordefid/image/upload/v1765296838/NNW_hnchr8.png'
+import { useLogoConfig } from '@/components/context/LogoContext'
 
 export default function InvestorLoginForm() {
+  const { logoUrl } = useLogoConfig()
   const searchParams = useSearchParams()
   const [form, setForm]       = useState({ email: '', password: '' })
   const [showPw, setShowPw]   = useState(false)
@@ -96,7 +96,13 @@ export default function InvestorLoginForm() {
 
           {/* Header */}
           <div className="bg-gradient-to-br from-naija-green-700 to-naija-green-800 px-8 py-10 text-center">
-            <Image src={logoUrl} alt="NNW" width={64} height={64} className="rounded-xl mx-auto mb-4 shadow-lg" />
+            {logoUrl ? (
+              <Image src={logoUrl} alt="NNW" width={64} height={64} className="rounded-xl mx-auto mb-4 shadow-lg" />
+            ) : (
+              <div className="w-16 h-16 bg-naija-green-600 rounded-xl flex items-center justify-center mx-auto mb-4">
+                <span className="text-white font-black text-xl">NNW</span>
+              </div>
+            )}
             <h1 className="text-2xl font-bold text-white mb-1">Investor Portal</h1>
             <p className="text-naija-green-200 text-sm">Naija Ninja Warrior</p>
           </div>
