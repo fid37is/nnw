@@ -270,146 +270,148 @@ export default function AdminMessagingPage() {
       <AdminSidebar />
 
       <main className="flex-1 lg:ml-64 min-h-screen bg-gray-50">
-        <div className="px-6 py-8">
+        <div className="px-4 sm:px-6 py-6 sm:py-8">
 
           {/* ── Page Header ── */}
-          <div className="flex items-center justify-between mb-6">
+          <div className="flex items-start justify-between gap-3 mb-5">
             <div>
-              <h1 className="text-xl font-bold text-gray-900 tracking-tight">Messaging Center</h1>
-              <p className="text-sm text-gray-500 mt-0.5">Broadcast announcements, respond to inquiries, manage templates</p>
+              <h1 className="text-lg sm:text-xl font-bold text-gray-900 tracking-tight">Messaging Center</h1>
+              <p className="text-xs sm:text-sm text-gray-500 mt-0.5">Broadcast announcements, respond to inquiries, manage templates</p>
             </div>
             <button
               onClick={handleRefresh}
               disabled={refreshing}
-              className="flex items-center gap-2 px-3 py-1.5 text-sm text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition disabled:opacity-40"
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs sm:text-sm text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition disabled:opacity-40 shrink-0"
             >
-              <RefreshCw size={14} className={refreshing ? 'animate-spin' : ''} />
-              {refreshing ? 'Refreshing…' : 'Refresh'}
+              <RefreshCw size={13} className={refreshing ? 'animate-spin' : ''} />
+              <span className="hidden sm:inline">{refreshing ? 'Refreshing…' : 'Refresh'}</span>
             </button>
           </div>
 
-          {/* ── Tabs ── */}
-          <div className="flex gap-1 p-1 bg-white border border-gray-200 rounded-xl w-fit mb-6 shadow-sm">
-            {([
-              { key: 'messages',  label: 'Broadcast',  icon: Mail,         badge: null },
-              { key: 'inquiries', label: 'Inquiries',  icon: Inbox,        badge: newInquiriesCount || null },
-              { key: 'templates', label: 'Templates',  icon: MessageSquare, badge: templates.length || null },
-            ] as const).map(({ key, label, icon: Icon, badge }) => (
-              <button
-                key={key}
-                onClick={() => setActiveTab(key)}
-                className={`relative flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-all ${
-                  activeTab === key
-                    ? 'bg-naija-green-600 text-white shadow-sm'
-                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-                }`}
-              >
-                <Icon size={15} />
-                {label}
-                {badge !== null && (
-                  <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
-                    activeTab === key ? 'bg-white/20 text-white' : 'bg-naija-green-100 text-naija-green-700'
-                  }`}>
-                    {badge}
-                  </span>
-                )}
-              </button>
-            ))}
+          {/* ── Tabs — scrollable on mobile ── */}
+          <div className="mb-5 overflow-x-auto">
+            <div className="flex gap-1 p-1 bg-white border border-gray-200 rounded-xl w-fit shadow-sm min-w-max">
+              {([
+                { key: 'messages',  label: 'Broadcast',  icon: Mail,          badge: null },
+                { key: 'inquiries', label: 'Inquiries',  icon: Inbox,         badge: newInquiriesCount || null },
+                { key: 'templates', label: 'Templates',  icon: MessageSquare, badge: templates.length || null },
+              ] as const).map(({ key, label, icon: Icon, badge }) => (
+                <button
+                  key={key}
+                  onClick={() => setActiveTab(key)}
+                  className={`relative flex items-center gap-1.5 px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium rounded-lg transition-all whitespace-nowrap ${
+                    activeTab === key
+                      ? 'bg-naija-green-600 text-white shadow-sm'
+                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                  }`}
+                >
+                  <Icon size={14} />
+                  {label}
+                  {badge !== null && (
+                    <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
+                      activeTab === key ? 'bg-white/20 text-white' : 'bg-naija-green-100 text-naija-green-700'
+                    }`}>
+                      {badge}
+                    </span>
+                  )}
+                </button>
+              ))}
+            </div>
           </div>
 
           {/* ── Broadcast Tab ── */}
           {activeTab === 'messages' && (
-            <div className="grid grid-cols-1 xl:grid-cols-[1fr_560px] gap-6 items-start">
+            <div className="grid grid-cols-1 xl:grid-cols-[1fr_420px] gap-6 items-start">
 
               {/* Email Composer */}
               <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
 
                 {/* Composer toolbar */}
-                <div className="flex items-center justify-between px-5 py-3 border-b border-gray-100 bg-gray-50">
+                <div className="flex items-center justify-between px-4 sm:px-5 py-3 border-b border-gray-100 bg-gray-50">
                   <span className="text-sm font-semibold text-gray-700">New Broadcast</span>
-                  <div className="flex items-center gap-2">
-                    <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full ${PRIORITY_STYLES[formData.priority]}`}>
-                      {formData.priority.toUpperCase()}
-                    </span>
-                  </div>
+                  <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full ${PRIORITY_STYLES[formData.priority]}`}>
+                    {formData.priority.toUpperCase()}
+                  </span>
                 </div>
 
                 <form onSubmit={handleSendMessage}>
 
                   {/* FROM row */}
-                  <div className="flex items-center gap-3 px-5 py-3 border-b border-gray-100">
-                    <span className="text-xs font-semibold text-gray-400 w-14 shrink-0">FROM</span>
-                    <div className="flex items-center gap-2">
-                      <div className="w-7 h-7 rounded-full bg-naija-green-600 flex items-center justify-center">
-                        <span className="text-white text-[10px] font-bold">NNW</span>
+                  <div className="flex items-start sm:items-center gap-3 px-4 sm:px-5 py-3 border-b border-gray-100">
+                    <span className="text-xs font-semibold text-gray-400 w-14 shrink-0 pt-0.5 sm:pt-0">FROM</span>
+                    <div className="flex flex-wrap items-center gap-x-2 gap-y-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <div className="w-6 h-6 rounded-full bg-naija-green-600 flex items-center justify-center shrink-0">
+                          <span className="text-white text-[9px] font-bold">NNW</span>
+                        </div>
+                        <span className="text-sm text-gray-700 font-medium whitespace-nowrap">Naija Ninja Warrior</span>
                       </div>
-                      <span className="text-sm text-gray-700 font-medium">Naija Ninja Warrior</span>
-                      <span className="text-xs text-gray-400">&lt;noreply@naijaninja.net&gt;</span>
+                      <span className="text-xs text-gray-400 truncate">&lt;noreply@naijaninja.net&gt;</span>
                     </div>
                   </div>
 
                   {/* TO row */}
-                  <div className="flex items-center gap-3 px-5 py-3 border-b border-gray-100">
+                  <div className="flex items-center gap-3 px-4 sm:px-5 py-3 border-b border-gray-100">
                     <span className="text-xs font-semibold text-gray-400 w-14 shrink-0">TO</span>
-                    <div className="relative flex-1">
+                    <div className="relative flex-1 min-w-0">
                       <select
                         value={formData.recipient_type}
                         onChange={e => setFormData({ ...formData, recipient_type: e.target.value as any })}
-                        className="w-full appearance-none bg-transparent text-sm text-gray-800 font-medium focus:outline-none cursor-pointer pr-6"
+                        className="w-full appearance-none bg-transparent text-sm text-gray-800 font-medium focus:outline-none cursor-pointer pr-6 truncate"
                       >
                         <option value="all_users">All Users</option>
-                        <option value="accepted_applicants">Accepted Applicants (awaiting payment)</option>
+                        <option value="accepted_applicants">Accepted (awaiting payment)</option>
                         <option value="participants">Participants (payment confirmed)</option>
                         <option value="approved_applicants">Approved Applicants</option>
                         <option value="rejected_applicants">Rejected Applicants</option>
                       </select>
                       <ChevronDown size={13} className="absolute right-0 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
                     </div>
-                    <div className="flex items-center gap-1.5 text-gray-500 ml-auto">
-                      <Users size={13} />
-                    </div>
+                    <Users size={13} className="text-gray-400 shrink-0" />
                   </div>
 
-                  {/* TYPE + PRIORITY row */}
-                  <div className="flex items-center gap-3 px-5 py-3 border-b border-gray-100">
-                    <span className="text-xs font-semibold text-gray-400 w-14 shrink-0">TYPE</span>
-                    <div className="relative flex-1">
-                      <select
-                        value={formData.message_type}
-                        onChange={e => setFormData({ ...formData, message_type: e.target.value as any })}
-                        className="w-full appearance-none bg-transparent text-sm text-gray-800 focus:outline-none cursor-pointer pr-6"
-                      >
-                        <option value="announcement">Announcement</option>
-                        <option value="event_update">Event Update</option>
-                        <option value="season_alert">Season Alert</option>
-                        <option value="direct">Direct Message</option>
-                      </select>
-                      <ChevronDown size={13} className="absolute right-0 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                  {/* TYPE + PRIORITY — stacked on mobile, inline on sm+ */}
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-0 border-b border-gray-100">
+                    <div className="flex items-center gap-3 px-4 sm:px-5 py-3 sm:flex-1 border-b sm:border-b-0 sm:border-r border-gray-100">
+                      <span className="text-xs font-semibold text-gray-400 w-14 shrink-0">TYPE</span>
+                      <div className="relative flex-1 min-w-0">
+                        <select
+                          value={formData.message_type}
+                          onChange={e => setFormData({ ...formData, message_type: e.target.value as any })}
+                          className="w-full appearance-none bg-transparent text-sm text-gray-800 focus:outline-none cursor-pointer pr-6"
+                        >
+                          <option value="announcement">Announcement</option>
+                          <option value="event_update">Event Update</option>
+                          <option value="season_alert">Season Alert</option>
+                          <option value="direct">Direct Message</option>
+                        </select>
+                        <ChevronDown size={13} className="absolute right-0 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                      </div>
                     </div>
 
-                    <div className="w-px h-4 bg-gray-200 mx-1" />
-
-                    <span className="text-xs font-semibold text-gray-400 shrink-0">PRIORITY</span>
-                    <div className="relative">
-                      <select
-                        value={formData.priority}
-                        onChange={e => setFormData({ ...formData, priority: e.target.value as any })}
-                        className="appearance-none bg-transparent text-sm text-gray-800 focus:outline-none cursor-pointer pr-5"
-                      >
-                        <option value="low">Low</option>
-                        <option value="normal">Normal</option>
-                        <option value="high">High</option>
-                        <option value="urgent">Urgent</option>
-                      </select>
-                      <ChevronDown size={13} className="absolute right-0 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                    <div className="flex items-center gap-3 px-4 sm:px-5 py-3 sm:w-auto">
+                      <span className="text-xs font-semibold text-gray-400 w-14 sm:w-auto shrink-0">PRIORITY</span>
+                      <div className="relative">
+                        <select
+                          value={formData.priority}
+                          onChange={e => setFormData({ ...formData, priority: e.target.value as any })}
+                          className="appearance-none bg-transparent text-sm text-gray-800 focus:outline-none cursor-pointer pr-5"
+                        >
+                          <option value="low">Low</option>
+                          <option value="normal">Normal</option>
+                          <option value="high">High</option>
+                          <option value="urgent">Urgent</option>
+                        </select>
+                        <ChevronDown size={13} className="absolute right-0 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                      </div>
                     </div>
                   </div>
 
                   {/* SEASON row (conditional) */}
                   {formData.message_type === 'season_alert' && (
-                    <div className="flex items-center gap-3 px-5 py-3 border-b border-gray-100 bg-amber-50">
+                    <div className="flex items-center gap-3 px-4 sm:px-5 py-3 border-b border-gray-100 bg-amber-50">
                       <span className="text-xs font-semibold text-amber-600 w-14 shrink-0">SEASON</span>
-                      <div className="relative flex-1">
+                      <div className="relative flex-1 min-w-0">
                         <select
                           value={formData.season_id}
                           onChange={e => setFormData({ ...formData, season_id: e.target.value })}
@@ -427,34 +429,35 @@ export default function AdminMessagingPage() {
                   )}
 
                   {/* SUBJECT row */}
-                  <div className="flex items-center gap-3 px-5 py-3 border-b border-gray-100">
+                  <div className="flex items-center gap-3 px-4 sm:px-5 py-3 border-b border-gray-100">
                     <span className="text-xs font-semibold text-gray-400 w-14 shrink-0">SUBJECT</span>
                     <input
                       type="text"
                       value={formData.title}
                       onChange={e => setFormData({ ...formData, title: e.target.value })}
                       placeholder="e.g., Season 2024 Registration is Now Open"
-                      className="flex-1 text-sm font-medium text-gray-900 placeholder:text-gray-400 bg-transparent focus:outline-none"
+                      className="flex-1 min-w-0 text-sm font-medium text-gray-900 placeholder:text-gray-400 bg-transparent focus:outline-none"
                     />
                   </div>
 
                   {/* Body */}
-                  <div className="px-5 py-4">
+                  <div className="px-4 sm:px-5 py-4">
                     <textarea
                       value={formData.content}
                       onChange={e => setFormData({ ...formData, content: e.target.value })}
                       placeholder="Write your message here…&#10;&#10;Recipients will receive this via email and optionally as an in-app notification."
-                      rows={10}
+                      rows={8}
                       className="w-full text-sm text-gray-700 placeholder:text-gray-400 bg-transparent focus:outline-none resize-none leading-relaxed"
                     />
                   </div>
 
-                  {/* Composer Footer / Action Bar */}
-                  <div className="flex items-center justify-between px-5 py-3 border-t border-gray-100 bg-gray-50">
-                    {/* Left: options */}
+                  {/* Footer */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-4 sm:px-5 py-3 border-t border-gray-100 bg-gray-50">
                     <label className="flex items-center gap-2 cursor-pointer group">
-                      <div className={`w-8 h-4 rounded-full transition-colors relative ${formData.send_in_app ? 'bg-naija-green-500' : 'bg-gray-300'}`}
-                        onClick={() => setFormData(prev => ({ ...prev, send_in_app: !prev.send_in_app }))}>
+                      <div
+                        className={`w-8 h-4 rounded-full transition-colors relative shrink-0 ${formData.send_in_app ? 'bg-naija-green-500' : 'bg-gray-300'}`}
+                        onClick={() => setFormData(prev => ({ ...prev, send_in_app: !prev.send_in_app }))}
+                      >
                         <div className={`absolute top-0.5 w-3 h-3 bg-white rounded-full shadow transition-transform ${formData.send_in_app ? 'translate-x-4' : 'translate-x-0.5'}`} />
                       </div>
                       <span className="text-xs text-gray-500 group-hover:text-gray-700 transition-colors select-none">
@@ -462,11 +465,10 @@ export default function AdminMessagingPage() {
                       </span>
                     </label>
 
-                    {/* Right: Send button */}
                     <button
                       type="submit"
                       disabled={sending}
-                      className="flex items-center gap-2.5 px-5 py-2.5 bg-naija-green-600 hover:bg-naija-green-700 text-white text-sm font-semibold rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm hover:shadow-md active:scale-[0.98]"
+                      className="flex items-center justify-center gap-2 w-full sm:w-auto px-5 py-2.5 bg-naija-green-600 hover:bg-naija-green-700 text-white text-sm font-semibold rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm hover:shadow-md active:scale-[0.98]"
                     >
                       {sending
                         ? <><Loader2 size={15} className="animate-spin" /> Sending…</>
@@ -477,9 +479,9 @@ export default function AdminMessagingPage() {
                 </form>
               </div>
 
-              {/* ── Sent Messages Sidebar ── */}
+              {/* ── Sent Messages — below composer on mobile, sidebar on xl ── */}
               <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-                <div className="flex items-center justify-between px-5 py-3.5 border-b border-gray-100">
+                <div className="flex items-center justify-between px-4 sm:px-5 py-3.5 border-b border-gray-100">
                   <div className="flex items-center gap-2">
                     <Clock size={14} className="text-gray-400" />
                     <span className="text-sm font-semibold text-gray-700">Sent</span>
@@ -488,7 +490,7 @@ export default function AdminMessagingPage() {
                 </div>
 
                 {messages.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center py-16 text-center px-6">
+                  <div className="flex flex-col items-center justify-center py-12 text-center px-6">
                     <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center mb-3">
                       <Send size={20} className="text-gray-400" />
                     </div>
@@ -496,20 +498,18 @@ export default function AdminMessagingPage() {
                     <p className="text-xs text-gray-400 mt-1">Sent broadcasts will appear here</p>
                   </div>
                 ) : (
-                  <div className="divide-y divide-gray-50 max-h-[620px] overflow-y-auto">
+                  <div className="divide-y divide-gray-50 max-h-[500px] xl:max-h-[620px] overflow-y-auto">
                     {messages.map(msg => (
-                      <div key={msg.id} className="px-5 py-3.5 hover:bg-gray-50 transition-colors cursor-default">
+                      <div key={msg.id} className="px-4 sm:px-5 py-3.5 hover:bg-gray-50 transition-colors cursor-default">
                         <div className="flex items-start justify-between gap-2 mb-1">
                           <p className="text-sm font-semibold text-gray-800 line-clamp-1 leading-snug flex-1">{msg.title}</p>
                           <span className={`shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded-full uppercase ${PRIORITY_STYLES[msg.priority]}`}>
                             {msg.priority}
                           </span>
                         </div>
-
                         <p className="text-xs text-gray-500 line-clamp-2 leading-relaxed mb-2.5">{msg.content}</p>
-
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-1">
+                        <div className="flex flex-wrap items-center justify-between gap-1.5">
+                          <div className="flex flex-wrap items-center gap-1">
                             <span className="text-[10px] text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full capitalize">
                               {TYPE_LABELS[msg.message_type] ?? msg.message_type}
                             </span>
@@ -526,6 +526,7 @@ export default function AdminMessagingPage() {
                   </div>
                 )}
               </div>
+
             </div>
           )}
 

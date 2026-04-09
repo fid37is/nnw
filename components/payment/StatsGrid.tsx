@@ -23,7 +23,7 @@ export default function StatsGrid({ stats }: StatsGridProps) {
   }
 
   return (
-    <div className="grid grid-cols-5 gap-3 mb-6">
+    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 mb-6">
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-3">
         <p className="text-xs text-gray-500 mb-1">Total Accepted</p>
         <p className="text-xl font-bold text-naija-green-900">{stats.total}</p>
@@ -40,7 +40,8 @@ export default function StatsGrid({ stats }: StatsGridProps) {
         <p className="text-xs text-gray-500 mb-1">Confirmed</p>
         <p className="text-xl font-bold text-green-600">{stats.confirmed}</p>
       </div>
-      <div className="bg-gradient-to-br from-naija-green-600 to-naija-green-700 rounded-lg shadow-md p-3 text-white">
+      {/* Revenue card spans full width on mobile so the currency figure has room */}
+      <div className="col-span-2 sm:col-span-3 lg:col-span-1 bg-gradient-to-br from-naija-green-600 to-naija-green-700 rounded-lg shadow-md p-3 text-white">
         <p className="text-xs opacity-90 mb-1">Total Revenue</p>
         <p className="text-lg font-bold">{formatCurrency(stats.totalConfirmedAmount)}</p>
       </div>
