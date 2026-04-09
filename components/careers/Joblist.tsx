@@ -247,7 +247,7 @@ export default function JobsList() {
                 </svg>
               </a>
               <a
-                href="https://facebook.com/naijaninjawarrior"
+                href="https://www.facebook.com/share/1BCg1h1J6B/"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-12 h-12 sm:w-14 sm:h-14 bg-gray-100 hover:bg-gray-200 rounded-full flex items-center justify-center transition-all hover:scale-110 group"
@@ -256,7 +256,7 @@ export default function JobsList() {
                 <Facebook className="w-5 h-5 sm:w-6 sm:h-6 text-gray-700 group-hover:text-gray-900" />
               </a>
               <a
-                href="https://linkedin.com/company/naijaninjawarrior"
+                href="https://linkedin.com/company/nnw"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-12 h-12 sm:w-14 sm:h-14 bg-gray-100 hover:bg-gray-200 rounded-full flex items-center justify-center transition-all hover:scale-110 group"
