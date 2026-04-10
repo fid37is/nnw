@@ -1,3 +1,5 @@
+// app/(auth)/layouts
+
 'use client'
 
 import Link from 'next/link'
@@ -27,14 +29,15 @@ function AuthLayoutContent({ children }: { children: React.ReactNode }) {
         </div>
       </nav>
 
-      {/* Split Layout Container */}
-      <div className="max-w-7xl mx-auto flex flex-1 w-full overflow-hidden">
+      {/* Split Layout Container — min-h-0 lets flex children resolve h-full correctly */}
+      <div className="flex-1 min-h-0 flex max-w-7xl mx-auto w-full">
 
         {/* LEFT SIDE - Video (Desktop Only) */}
         <div className="hidden lg:flex lg:w-1/2 items-center justify-center overflow-hidden">
           <video
             autoPlay
             muted
+            loop
             playsInline
             className="w-full h-full object-contain"
           >
