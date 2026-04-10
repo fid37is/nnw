@@ -5,10 +5,16 @@ const ADMIN_SUB     = 'admin'
 const INVESTOR_SUB  = 'investor'
 
 export function proxy(req: NextRequest) {
-  const url      = req.nextUrl.clone()
-  const host     = req.headers.get('host') || ''
-  const hostname = host.split(':')[0]
+  const url        = req.nextUrl.clone()
+  const host       = req.headers.get('host') || ''
+  const hostname   = host.split(':')[0]
   const isLocalDev = hostname.includes('localhost') || hostname.includes('127.0.0.1')
+
+  // ✅ Always pass through API routes and static assets
+  const BYPASS_PREFIXES = ['/api/', '/manifest.json']
+  if (BYPASS_PREFIXES.some(p => url.pathname.startsWith(p) || url.pathname === p.replace('/', ''))) {
+    return NextResponse.next()
+  }
 
   // Determine subdomain
   let subdomain: string | null = null
@@ -17,7 +23,9 @@ export function proxy(req: NextRequest) {
     if (parts.length >= 2) subdomain = parts[0]
   } else {
     if (hostname.endsWith(`.${PUBLIC_DOMAIN}`)) {
-      subdomain = hostname.replace(`.${PUBLIC_DOMAIN}`, '')
+      const sub = hostname.replace(`.${PUBLIC_DOMAIN}`, '')
+      // ✅ www is the main domain — don't treat it as a subdomain
+      if (sub !== 'www') subdomain = sub
     }
   }
 
@@ -72,13 +80,6 @@ export function proxy(req: NextRequest) {
 
 export const config = {
   matcher: [
-    /*
-     * Only run middleware on page routes — NOT on:
-     * - _next/static  (static files)
-     * - _next/image   (image optimisation)
-     * - favicon, images, fonts, css, js
-     * This is critical for performance — middleware ran on EVERY request before
-     */
     '/((?!_next/static|_next/image|favicon\\.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|css|js|woff|woff2|ttf)$).*)',
   ],
 }
