@@ -45,10 +45,6 @@ export default function Home() {
   const [videos,   setVideos]   = useState<YouTubeVideo[]>([])
   const [sponsors, setSponsors] = useState<Sponsor[]>([])
 
-  // ── Hero is visible immediately — no loading gate ─────────────────────────
-  // Data loads in the background and sections update as it arrives.
-  // This removes the full-screen spinner that was blocking first paint.
-
   const hasFetched = useRef(false)
 
   useEffect(() => {
@@ -59,8 +55,6 @@ export default function Home() {
 
   const loadData = async () => {
     try {
-      // ── Phase 1: Fetch season + sponsors + videos in TRUE parallel ──────────
-      // Previously these ran one-after-another. Now all three fire simultaneously.
       const [seasonRes, sponsorRes, videoRes] = await Promise.all([
         supabase
           .from('seasons')
@@ -86,7 +80,6 @@ export default function Home() {
 
       if (!seasonData) return
 
-      // ── Phase 2: Season-dependent queries — also in parallel ───────────────
       const [championRes, runnersRes, totalRes, eliminatedRes] = await Promise.all([
         supabase
           .from('champions')
@@ -102,7 +95,7 @@ export default function Home() {
           .order('position', { ascending: true }),
         supabase
           .from('applications')
-          .select('id', { count: 'exact', head: true }) // head:true = count only, no rows returned
+          .select('id', { count: 'exact', head: true })
           .eq('season_id', seasonData.id)
           .eq('status', 'approved'),
         supabase
@@ -126,7 +119,7 @@ export default function Home() {
         })))
       }
 
-      const total     = totalRes.count     || 0
+      const total      = totalRes.count     || 0
       const eliminated = eliminatedRes.count || 0
       setStats({ total, active: total - eliminated, eliminated })
 
@@ -141,12 +134,6 @@ export default function Home() {
     <main className="min-h-screen bg-white">
       <Navbar isApplicationOpen={applicationOpen} />
 
-      {/* ── NO LOADING GATE ────────────────────────────────────────────────────
-          The hero renders immediately. Sections that need data show skeleton
-          states or empty states until data arrives — much faster perceived load.
-      ─────────────────────────────────────────────────────────────────────── */}
-
-      {/* Application status banner — only shown once season loads */}
       {season && (
         <div className={`${applicationOpen ? 'bg-naija-green-600' : 'bg-gray-800'} text-white text-center text-xs font-bold py-2.5 tracking-wide mt-20`}>
           {applicationOpen
