@@ -1,5 +1,3 @@
-// app/(auth)/layouts
-
 'use client'
 
 import Link from 'next/link'
@@ -37,7 +35,6 @@ function AuthLayoutContent({ children }: { children: React.ReactNode }) {
           <video
             autoPlay
             muted
-            loop
             playsInline
             className="w-full h-full object-contain"
           >

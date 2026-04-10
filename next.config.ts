@@ -1,7 +1,11 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  compress: true,
+
   images: {
+    formats: ['image/avif', 'image/webp'],
+    minimumCacheTTL: 60 * 60 * 24 * 30,
     remotePatterns: [
       {
         protocol: 'https',
@@ -15,19 +19,46 @@ const nextConfig: NextConfig = {
     ],
   },
 
-  // Required for subdomain routing via middleware
   async headers() {
     return [
+      {
+        source: '/_next/static/(.*)',
+        headers: [{ key: 'Cache-Control', value: 'public, max-age=31536000, immutable' }],
+      },
+      {
+        source: '/_next/image(.*)',
+        headers: [{ key: 'Cache-Control', value: 'public, max-age=2592000, stale-while-revalidate=86400' }],
+      },
+      {
+        source: '/(.*)\\.(ico|svg|png|jpg|jpeg|webp|woff|woff2|ttf)',
+        headers: [{ key: 'Cache-Control', value: 'public, max-age=31536000, immutable' }],
+      },
       {
         source: '/(.*)',
         headers: [
           { key: 'X-Frame-Options',        value: 'SAMEORIGIN' },
           { key: 'X-Content-Type-Options', value: 'nosniff' },
           { key: 'Referrer-Policy',        value: 'strict-origin-when-cross-origin' },
+          { key: 'X-DNS-Prefetch-Control', value: 'on' },
         ],
       },
     ]
   },
-};
+
+  async redirects() {
+    return [
+      {
+        source: '/(.*)',
+        has: [{ type: 'host', value: 'www.naijaninja.net' }],
+        destination: 'https://naijaninja.net/:path*',
+        permanent: true,
+      },
+    ]
+  },
+
+  experimental: {
+    optimizePackageImports: ['lucide-react'],
+  },
+}
 
 export default nextConfig;

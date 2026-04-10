@@ -1,3 +1,4 @@
+// File: components/sections/HeroSection.tsx
 'use client'
 
 import Link from 'next/link'
@@ -11,6 +12,15 @@ interface Season { id:string; name:string; year:number; application_start_date:s
 interface HeroSectionProps { champion:Champion|null; season:Season|null; isApplicationOpen:boolean }
 
 const ZONES = ['South-South','South-West','South-East','North-Central','North-East','North-West']
+
+const DOTS = Array.from({length:25},(_,i)=>({
+  w: (((i*7+3)%40)/10)+1,
+  h: (((i*11+5)%40)/10)+1,
+  l: ((i*17+13)%100),
+  t: ((i*23+7)%100),
+  dur: (((i*3+2)%40)/10)+3,
+  delay: (((i*5+1)%30)/10),
+}))
 
 function Countdown({ deadline }: { deadline:string }) {
   const [t,setT] = useState({d:0,h:0,m:0,s:0})
@@ -64,16 +74,15 @@ export default function HeroSection({champion,season,isApplicationOpen}:HeroSect
 
   return (
     <section className="relative min-h-[95vh] overflow-hidden bg-gray-950 flex items-center">
-      {/* Background layers */}
       <div className="absolute inset-0 bg-gradient-to-br from-gray-950 via-naija-green-950/30 to-gray-950"/>
       <div className="absolute inset-0 opacity-[0.025]" style={{backgroundImage:'linear-gradient(rgba(255,255,255,1) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,1) 1px,transparent 1px)',backgroundSize:'60px 60px'}}/>
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-naija-green-600/8 rounded-full blur-3xl"/>
       <div className="absolute bottom-0 right-0 w-[500px] h-[350px] bg-naija-green-800/10 rounded-full blur-3xl"/>
-      {/* Floating dots */}
+
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {Array.from({length:25}).map((_,i)=>(
+        {DOTS.map((d,i)=>(
           <div key={i} className="absolute rounded-full bg-naija-green-400/20"
-            style={{width:`${Math.random()*4+1}px`,height:`${Math.random()*4+1}px`,left:`${Math.random()*100}%`,top:`${Math.random()*100}%`,animation:`pulse ${Math.random()*4+3}s ease-in-out ${Math.random()*3}s infinite`}}/>
+            style={{width:`${d.w}px`,height:`${d.h}px`,left:`${d.l}%`,top:`${d.t}%`,animation:`pulse ${d.dur}s ease-in-out ${d.delay}s infinite`}}/>
         ))}
       </div>
 
@@ -147,7 +156,6 @@ export default function HeroSection({champion,season,isApplicationOpen}:HeroSect
                 </>
               ) : (
                 <>
-                  {/* Base layer: revealed after curtain pulls away */}
                   <div className="w-full h-full bg-gradient-to-br from-gray-900 to-black flex items-center justify-center">
                     <div className="text-[160px] font-black text-white/5 select-none">?</div>
                   </div>
@@ -158,7 +166,7 @@ export default function HeroSection({champion,season,isApplicationOpen}:HeroSect
                     {isApplicationOpen && <p className="text-naija-green-300 text-sm mt-2">Apply now and make history</p>}
                   </div>
 
-                  {/* The logo IS the curtain — covers card initially, rolls up to reveal */}
+                  {/* ✅ Curtain with bigger, bolder logo */}
                   <div
                     className="absolute inset-0 z-20 flex items-center justify-center origin-top transition-all duration-[2500ms] ease-in-out"
                     style={{
@@ -166,18 +174,23 @@ export default function HeroSection({champion,season,isApplicationOpen}:HeroSect
                       background: 'linear-gradient(to bottom right, #052e16, #111827, #000)',
                     }}
                   >
-                    {/* Decorative horizontal lines on curtain */}
                     {Array.from({length:16}).map((_,i)=>(
                       <div key={i} className="absolute left-0 right-0 border-b border-naija-green-800/30" style={{top:`${(i/16)*100}%`}}/>
                     ))}
-                    {/* Logo displayed on the curtain face */}
-                    <Image
-                      src={logoUrl}
-                      alt="NNW"
-                      width={200}
-                      height={200}
-                      className="object-contain drop-shadow-2xl relative z-10"
-                    />
+                    <div className="relative z-10 flex flex-col items-center gap-4">
+                      {/* Glow ring behind logo */}
+                      <div className="absolute w-72 h-72 rounded-full bg-naija-green-500/20 blur-2xl"/>
+                      <div className="absolute w-56 h-56 rounded-full bg-naija-green-400/15 blur-xl"/>
+                      <Image
+                        src={logoUrl}
+                        alt="NNW"
+                        width={320}
+                        height={320}
+                        className="object-contain drop-shadow-[0_0_40px_rgba(16,192,132,0.6)] relative z-10"
+                        priority
+                      />
+                      <p className="text-naija-green-400 text-xs font-black tracking-[0.3em] uppercase">Naija Ninja Warrior</p>
+                    </div>
                   </div>
                 </>
               )}
