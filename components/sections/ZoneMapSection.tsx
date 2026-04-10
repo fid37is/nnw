@@ -5,12 +5,12 @@ import { ArrowRight, MapPin, Trophy } from 'lucide-react'
 import { useScrollReveal } from '@/lib/hooks'
 
 const ZONES = [
-  { name:'South-South',  states:'Cross River, Rivers, Delta, Bayelsa, Akwa Ibom, Edo,', color:'from-teal-600 to-cyan-700',           num:'01', contestants:'Coming Soon' },
-  { name:'South-West',   states:'Lagos, Ogun, Oyo, Osun, Ondo, Ekiti',                 color:'from-emerald-600 to-naija-green-700', num:'02', contestants:'Coming Soon' },
-  { name:'South-East',   states:'Anambra, Imo, Enugu, Abia, Ebonyi',                   color:'from-naija-green-700 to-green-800',   num:'03', contestants:'Coming Soon' },
-  { name:'North-Central',states:'FCT, Niger, Kwara, Kogi, Benue, Plateau, Nasarawa',   color:'from-amber-600 to-orange-700',        num:'04', contestants:'Coming Soon' },
-  { name:'North-West',   states:'Kano, Jigawa, Katsina, Sokoto, Kebbi, Zamfara',       color:'from-orange-600 to-red-700',          num:'05', contestants:'Coming Soon' },
-  { name:'North-East',   states:'Bauchi, Borno, Adamawa, Gombe, Taraba, Yobe',         color:'from-purple-700 to-indigo-800',       num:'06', contestants:'Coming Soon' },
+  { name:'South-West',   states:'Lagos, Ogun, Oyo, Osun, Ondo, Ekiti',               color:'from-emerald-600 to-naija-green-700', num:'01', contestants:'Coming Soon' },
+  { name:'South-South',  states:'Rivers, Delta, Bayelsa, Akwa Ibom, Edo, Cross River',color:'from-teal-600 to-cyan-700',           num:'02', contestants:'Coming Soon' },
+  { name:'South-East',   states:'Anambra, Imo, Enugu, Abia, Ebonyi',                  color:'from-naija-green-700 to-green-800',   num:'03', contestants:'Coming Soon' },
+  { name:'North-Central',states:'FCT, Niger, Kwara, Kogi, Benue, Plateau, Nasarawa',  color:'from-amber-600 to-orange-700',        num:'04', contestants:'Coming Soon' },
+  { name:'North-East',   states:'Kano, Jigawa, Katsina, Sokoto, Kebbi, Zamfara',      color:'from-orange-600 to-red-700',          num:'05', contestants:'Coming Soon' },
+  { name:'North-West',   states:'Bauchi, Borno, Adamawa, Gombe, Taraba, Yobe',        color:'from-purple-700 to-indigo-800',       num:'06', contestants:'Coming Soon' },
 ]
 
 export default function ZoneMapSection({ isApplicationOpen = false }: { isApplicationOpen?: boolean }) {
@@ -80,8 +80,8 @@ export default function ZoneMapSection({ isApplicationOpen = false }: { isApplic
               <p className="text-white font-black text-2xl">Grand Finale — Abuja, FCT</p>
               <p className="text-gray-400 text-sm mt-1">All 6 zone winners compete for the ultimate title</p>
             </div>
-            <div className="flex items-center gap-2 text-3xl flex-shrink-0">
-              
+            <div className="flex items-center justify-center w-10 h-10 bg-yellow-500/20 rounded-full flex-shrink-0">
+              <Trophy size={20} className="text-yellow-400"/>
             </div>
           </div>
         </div>
