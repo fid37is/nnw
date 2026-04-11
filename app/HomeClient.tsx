@@ -11,20 +11,19 @@ import StatsSection from '../components/sections/StatsSection'
 import ZoneMapSection from '../components/sections/ZoneMapSection'
 import CompetitionProcessSection from '../components/sections/CompetionProcessSection'
 
-// ✅ Below-fold sections loaded dynamically — not in initial JS bundle
-const VideoHighlights = dynamic(() => import('../components/sections/VideoHighlights'))
-const TopCompetitors = dynamic(() => import('../components/sections/TopCompetitors'))
-const SponsorsSection = dynamic(() => import('../components/sections/SponsorsSection'))
-const FAQSection = dynamic(() => import('../components/sections/FAQSection'))
-const InquirySection = dynamic(() => import('../components/sections/InquirySection'))
+const VideoHighlights    = dynamic(() => import('../components/sections/VideoHighlights'))
+const TopCompetitors     = dynamic(() => import('../components/sections/TopCompetitors'))
+const SponsorsSection    = dynamic(() => import('../components/sections/SponsorsSection'))
+const FAQSection         = dynamic(() => import('../components/sections/FAQSection'))
+const InquirySection     = dynamic(() => import('../components/sections/InquirySection'))
 const SocialMediaSection = dynamic(() => import('../components/sections/SocialMediaSection'))
-const CTASection = dynamic(() => import('../components/sections/CTASection'))
+const CTASection         = dynamic(() => import('../components/sections/CTASection'))
 
-interface Champion { id: string; user_id: string; season_id: string; full_name: string; position: number; photo_url: string | null; final_points?: number }
-interface Runner { id: string; user_id: string; full_name: string; position: number; photo_url: string | null }
-interface Season { id: string; name: string; year: number; application_start_date: string; application_end_date: string; status: string }
+interface Champion     { id: string; user_id: string; season_id: string; full_name: string; position: number; photo_url: string | null; final_points?: number }
+interface Runner       { id: string; user_id: string; full_name: string; position: number; photo_url: string | null }
+interface Season       { id: string; name: string; year: number; application_start_date: string; application_end_date: string; status: string }
 interface YouTubeVideo { id: string; title: string; youtube_url: string; description: string; category: string; order_position: number }
-interface Sponsor { id: string; name: string; logo_url: string; website_url: string }
+interface Sponsor      { id: string; name: string; logo_url: string; website_url: string }
 
 const extractYouTubeId = (url: string): string => {
   const patterns = [
@@ -43,10 +42,10 @@ const isOpen = (season: Season | null): boolean => {
 
 export default function HomeClient() {
   const [champion, setChampion] = useState<Champion | null>(null)
-  const [runners, setRunners] = useState<Runner[]>([])
-  const [season, setSeason] = useState<Season | null>(null)
-  const [stats, setStats] = useState({ total: 0, active: 0, eliminated: 0 })
-  const [videos, setVideos] = useState<YouTubeVideo[]>([])
+  const [runners,  setRunners]  = useState<Runner[]>([])
+  const [season,   setSeason]   = useState<Season | null>(null)
+  const [stats,    setStats]    = useState({ total: 0, active: 0, eliminated: 0 })
+  const [videos,   setVideos]   = useState<YouTubeVideo[]>([])
   const [sponsors, setSponsors] = useState<Sponsor[]>([])
 
   const hasFetched = useRef(false)
@@ -90,7 +89,7 @@ export default function HomeClient() {
           .select('id,user_id,season_id,full_name,position,photo_url,final_points')
           .eq('season_id', seasonData.id)
           .eq('position', 1)
-          .single(),
+          .maybeSingle(), // ✅ fixed from .single()
         supabase
           .from('champions')
           .select('id,user_id,full_name,position,photo_url')
@@ -115,7 +114,7 @@ export default function HomeClient() {
         setChampion({
           id: c.id, user_id: c.user_id, season_id: c.season_id,
           full_name: c.full_name, position: c.position, photo_url: c.photo_url,
-          final_points: c.final_points
+          final_points: c.final_points,
         })
       }
       if (runnersRes.data) {
@@ -125,7 +124,7 @@ export default function HomeClient() {
         })))
       }
 
-      const total = totalRes.count || 0
+      const total     = totalRes.count     || 0
       const eliminated = eliminatedRes.count || 0
       setStats({ total, active: total - eliminated, eliminated })
 
@@ -138,7 +137,8 @@ export default function HomeClient() {
 
   return (
     <main className="min-h-screen bg-white">
-      <Navbar isApplicationOpen={applicationOpen} />
+      {/* ✅ Navbar manages its own application status to avoid hydration mismatch */}
+      <Navbar />
 
       {season && (
         <div className={`${applicationOpen ? 'bg-naija-green-600' : 'bg-gray-800'} text-white text-center text-xs font-bold py-2.5 tracking-wide mt-20`}>
@@ -148,7 +148,6 @@ export default function HomeClient() {
         </div>
       )}
 
-      {/* Above fold — loaded eagerly */}
       <HeroSection
         champion={champion}
         season={season}
@@ -158,7 +157,6 @@ export default function HomeClient() {
       <ZoneMapSection isApplicationOpen={applicationOpen} />
       <CompetitionProcessSection isApplicationOpen={applicationOpen} />
 
-      {/* Below fold — loaded dynamically */}
       <VideoHighlights videos={videos} extractYouTubeId={extractYouTubeId} />
       <TopCompetitors champion={champion} runners={runners} />
       <SponsorsSection sponsors={sponsors} />

@@ -1,5 +1,20 @@
 'use client'
 
+// File: app/(auth)/layout.tsx
+// Fix: hydration mismatch on <video> loop attribute.
+// A browser extension (video enhancer/looper) injects loop=true on the client
+// after the server has already rendered loop=null — React flags the mismatch.
+//
+// Two-part fix:
+// 1. Add loop={false} explicitly so the server and client agree on the value
+// 2. Add suppressHydrationWarning on the <video> element so if a browser
+//    extension still mutates it, React silently ignores the diff instead
+//    of throwing a console error
+//
+// suppressHydrationWarning is safe here — it only suppresses warnings on
+// that single element, not its children, and video attribute mismatches
+// from extensions are expected and harmless.
+
 import Link from 'next/link'
 import Image from 'next/image'
 import { useLogoConfig } from '@/components/context/LogoContext'
@@ -27,7 +42,7 @@ function AuthLayoutContent({ children }: { children: React.ReactNode }) {
         </div>
       </nav>
 
-      {/* Split Layout Container — min-h-0 lets flex children resolve h-full correctly */}
+      {/* Split Layout Container */}
       <div className="flex-1 min-h-0 flex max-w-7xl mx-auto w-full">
 
         {/* LEFT SIDE - Video (Desktop Only) */}
@@ -35,7 +50,10 @@ function AuthLayoutContent({ children }: { children: React.ReactNode }) {
           <video
             autoPlay
             muted
+            loop={false}
             playsInline
+            suppressHydrationWarning      
+            onEnded={(e) => e.currentTarget.pause()}
             className="w-full h-full object-contain"
           >
             <source

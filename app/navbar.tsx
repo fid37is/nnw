@@ -1,19 +1,18 @@
+// File: app/navbar.tsx
 'use client'
 
 import Link from 'next/link'
 import Image from 'next/image'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { usePathname } from 'next/navigation'
 import { Menu, X } from 'lucide-react'
+import { supabase } from '@/lib/supabase/client'
 import { useLogoConfig } from '../components/context/LogoContext'
 
-interface NavbarProps {
-  isApplicationOpen?: boolean
-}
-
-export default function Navbar({ isApplicationOpen = false }: NavbarProps) {
+export default function Navbar() {
   const { logoUrl } = useLogoConfig()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [isApplicationOpen, setIsApplicationOpen] = useState(false)
   const pathname = usePathname()
 
   const navigationLinks = [
@@ -24,6 +23,27 @@ export default function Navbar({ isApplicationOpen = false }: NavbarProps) {
   ]
 
   const isActive = (href: string) => pathname === href
+
+  useEffect(() => {
+    // ✅ Fetch application status client-side after mount
+    // This avoids SSR/client mismatch entirely
+    const checkApplicationStatus = async () => {
+      const { data } = await supabase
+        .from('seasons')
+        .select('application_start_date, application_end_date')
+        .order('year', { ascending: false })
+        .limit(1)
+        .maybeSingle()
+
+      if (data) {
+        const today = new Date().toISOString().split('T')[0]
+        setIsApplicationOpen(
+          today >= data.application_start_date && today <= data.application_end_date
+        )
+      }
+    }
+    checkApplicationStatus()
+  }, [])
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-gray-900 backdrop-blur-md border-b border-gray-800">
@@ -76,7 +96,6 @@ export default function Navbar({ isApplicationOpen = false }: NavbarProps) {
             </Link>
             <Link
               href="/register"
-              // ✅ Changed: -600 → -700 for sufficient contrast ratio with white text
               className="px-6 py-2.5 bg-naija-green-700 text-white text-sm font-bold rounded-full hover:bg-naija-green-800 transition-all duration-300 shadow-lg"
             >
               {isApplicationOpen ? 'Apply' : 'Register'}
@@ -119,7 +138,6 @@ export default function Navbar({ isApplicationOpen = false }: NavbarProps) {
             </Link>
             <Link
               href="/register"
-              // ✅ Changed: -600 → -700 for sufficient contrast ratio with white text
               className="block w-full px-6 py-3 bg-naija-green-700 text-white font-bold rounded-xl hover:bg-naija-green-800 transition text-center shadow-lg"
               onClick={() => setMobileMenuOpen(false)}
             >
