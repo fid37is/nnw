@@ -3,10 +3,16 @@
 
 import { useState, useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
-import { supabase } from '@/lib/supabase/client'
+import { createBrowserClient } from '@supabase/ssr'   // ← replaces supabase client import
 import { toast } from 'sonner'
 import { Eye, EyeOff, Lock, Mail, Shield } from 'lucide-react'
 import Image from 'next/image'
+
+// ── SSR-aware browser client — writes session to cookie, not localStorage ─────
+const supabase = createBrowserClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+)
 
 const logoUrl = 'https://res.cloudinary.com/lordefid/image/upload/v1765296838/NNW_hnchr8.png'
 
@@ -16,7 +22,7 @@ export default function AdminLoginForm() {
   const [showPw, setShowPw]   = useState(false)
   const [loading, setLoading] = useState(false)
 
-  // Pre-fill email if redirected from main login
+  // Pre-fill email if redirected from main login — unchanged
   useEffect(() => {
     const email = searchParams.get('email')
     if (email) setForm(f => ({ ...f, email: decodeURIComponent(email) }))
@@ -47,6 +53,7 @@ export default function AdminLoginForm() {
         return
       }
 
+      // Role check — unchanged
       const { data: userData, error: userError } = await supabase
         .from('users')
         .select('role')
@@ -68,7 +75,10 @@ export default function AdminLoginForm() {
       }
 
       toast.success('Welcome back!')
-      window.location.href = '/admin/dashboard'
+
+      // window.location.replace triggers a full navigation so the proxy
+      // reads the fresh cookie before serving the dashboard — no flash
+      window.location.replace('/admin/dashboard')
     } catch {
       toast.error('Something went wrong. Please try again.')
       setLoading(false)

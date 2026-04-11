@@ -1,3 +1,4 @@
+// File: next.config.ts
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
@@ -45,19 +46,12 @@ const nextConfig: NextConfig = {
     ]
   },
 
-  async redirects() {
-    return [
-      {
-        source: '/(.*)',
-        has: [{ type: 'host', value: 'www.naijaninja.net' }],
-        destination: 'https://naijaninja.net/:path*',
-        permanent: true,
-      },
-    ]
-  },
-
   experimental: {
     optimizePackageImports: ['lucide-react'],
+  },
+
+  compiler: {
+    removeConsole: process.env.NODE_ENV === 'production',
   },
 }
 

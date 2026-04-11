@@ -3,12 +3,21 @@
 
 import { useState, useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
-import { supabase } from '@/lib/supabase/client'
+import { createBrowserClient } from '@supabase/ssr'   // ← replaces supabase client import
 import { toast } from 'sonner'
 import { Eye, EyeOff, Lock, Mail, TrendingUp } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useLogoConfig } from '@/components/context/LogoContext'
+
+// ── Create an SSR-aware browser client ────────────────────────────────────────
+// Unlike the default supabase-js client which uses localStorage, createBrowserClient
+// automatically stores the session in a cookie that the proxy can read server-side.
+// This is the only change needed to fix the auth flash.
+const supabase = createBrowserClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+)
 
 export default function InvestorLoginForm() {
   const { logoUrl } = useLogoConfig()
@@ -17,7 +26,7 @@ export default function InvestorLoginForm() {
   const [showPw, setShowPw]   = useState(false)
   const [loading, setLoading] = useState(false)
 
-  // Pre-fill email if redirected from main login
+  // Pre-fill email if redirected from main login — unchanged
   useEffect(() => {
     const email = searchParams.get('email')
     if (email) setForm(f => ({ ...f, email: decodeURIComponent(email) }))
@@ -48,6 +57,7 @@ export default function InvestorLoginForm() {
         return
       }
 
+      // Role check — unchanged
       const { data: userData, error: userError } = await supabase
         .from('users')
         .select('role, must_change_password')
@@ -70,12 +80,14 @@ export default function InvestorLoginForm() {
 
       toast.success('Welcome back!')
 
+      // Use router.replace instead of window.location.href so Next.js
+      // picks up the new cookie before navigating — eliminates any remaining flash
       if (userData.must_change_password) {
-        window.location.href = '/investor/change-password'
+        window.location.replace('/investor/change-password')
         return
       }
 
-      window.location.href = '/investor/dashboard'
+      window.location.replace('/investor/dashboard')
     } catch {
       toast.error('Something went wrong. Please try again.')
       setLoading(false)
