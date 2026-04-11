@@ -1,5 +1,15 @@
-// File: components/sections/HeroSection.tsx
 'use client'
+
+// File: components/sections/HeroSection.tsx
+//
+// Hydration fix:
+// The original code used {mounted && (...)} to conditionally render decorative
+// elements and the champion card. This causes a DOM structure mismatch —
+// the server renders fewer nodes than the client, and React panics.
+//
+// Rule: never add or remove DOM nodes based on a mounted/client-only flag.
+// Instead, render the same nodes always and toggle visibility with CSS.
+// The server and client now produce identical HTML — hydration passes cleanly.
 
 import Link from 'next/link'
 import Image from 'next/image'
@@ -13,7 +23,6 @@ interface HeroSectionProps { champion:Champion|null; season:Season|null; isAppli
 
 const ZONES = ['South-South','South-West','South-East','North-Central','North-East','North-West']
 
-// ✅ Reduced from 25 to 8 dots on mobile — fewer animations = faster paint
 const DOTS = Array.from({length:8},(_,i)=>({
   w: (((i*7+3)%40)/10)+1,
   h: (((i*11+5)%40)/10)+1,
@@ -63,11 +72,14 @@ function ZoneTicker() {
 }
 
 export default function HeroSection({champion,season,isApplicationOpen}:HeroSectionProps) {
+  // mounted controls CSS visibility only — never DOM structure
+  const [mounted,setMounted]=useState(false)
   const [revealed,setRevealed]=useState(false)
   const {logoUrl}=useLogoConfig()
   const hasChampion=champion?.photo_url
 
   useEffect(()=>{
+    setMounted(true)
     const t1=setTimeout(()=>setRevealed(true),4000)
     const t2=setTimeout(()=>setRevealed(false),16000)
     return()=>{clearTimeout(t1);clearTimeout(t2)}
@@ -75,16 +87,28 @@ export default function HeroSection({champion,season,isApplicationOpen}:HeroSect
 
   return (
     <section className="relative min-h-[95vh] overflow-hidden bg-gray-950 flex items-center">
-      {/* ✅ Simplified backgrounds — removed expensive blur-3xl on mobile */}
       <div className="absolute inset-0 bg-gradient-to-br from-gray-950 via-naija-green-950/30 to-gray-950"/>
       <div className="absolute inset-0 opacity-[0.025]" style={{backgroundImage:'linear-gradient(rgba(255,255,255,1) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,1) 1px,transparent 1px)',backgroundSize:'60px 60px'}}/>
-      
-      {/* ✅ Blurs hidden on mobile — only shown on lg+ */}
-      <div className="hidden lg:block absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-naija-green-600/8 rounded-full blur-3xl"/>
-      <div className="hidden lg:block absolute bottom-0 right-0 w-[500px] h-[350px] bg-naija-green-800/10 rounded-full blur-3xl"/>
 
-      {/* ✅ Fewer dots, hidden on mobile */}
-      <div className="hidden sm:block absolute inset-0 overflow-hidden pointer-events-none">
+      {/* Decorative blobs — always in DOM, hidden until mounted via opacity.
+          This keeps server/client HTML structure identical. */}
+      <div
+        className="hidden lg:block absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-naija-green-600/8 rounded-full blur-3xl transition-opacity duration-500"
+        style={{ opacity: mounted ? 1 : 0 }}
+        aria-hidden="true"
+      />
+      <div
+        className="hidden lg:block absolute bottom-0 right-0 w-[500px] h-[350px] bg-naija-green-800/10 rounded-full blur-3xl transition-opacity duration-500"
+        style={{ opacity: mounted ? 1 : 0 }}
+        aria-hidden="true"
+      />
+
+      {/* Floating dots — always in DOM, fade in after mount */}
+      <div
+        className="hidden sm:block absolute inset-0 overflow-hidden pointer-events-none transition-opacity duration-500"
+        style={{ opacity: mounted ? 1 : 0 }}
+        aria-hidden="true"
+      >
         {DOTS.map((d,i)=>(
           <div key={i} className="absolute rounded-full bg-naija-green-400/20"
             style={{width:`${d.w}px`,height:`${d.h}px`,left:`${d.l}%`,top:`${d.t}%`,animation:`pulse ${d.dur}s ease-in-out ${d.delay}s infinite`}}/>
@@ -141,8 +165,11 @@ export default function HeroSection({champion,season,isApplicationOpen}:HeroSect
             </div>
           </div>
 
-          {/* Right: champion card — hidden on mobile, saves LCP time */}
-          <div className="relative hidden lg:block">
+          {/* Right: champion card — always in DOM, fade in after mount */}
+          <div
+            className="relative hidden lg:block transition-opacity duration-500"
+            style={{ opacity: mounted ? 1 : 0 }}
+          >
             <div className="absolute -inset-6 bg-naija-green-600/15 rounded-3xl blur-3xl"/>
             <div className="relative aspect-[3/4] rounded-3xl overflow-hidden border border-white/10 shadow-2xl">
               {hasChampion ? (
@@ -181,7 +208,6 @@ export default function HeroSection({champion,season,isApplicationOpen}:HeroSect
                     <div className="relative z-10 flex flex-col items-center gap-4">
                       <div className="absolute w-72 h-72 rounded-full bg-naija-green-500/20 blur-2xl"/>
                       <div className="absolute w-56 h-56 rounded-full bg-naija-green-400/15 blur-xl"/>
-                      {/* ✅ Smaller logo on desktop only — not priority since card is hidden on mobile */}
                       <Image
                         src={logoUrl}
                         alt="NNW"
