@@ -29,7 +29,6 @@ export default function Navbar({ isApplicationOpen = false }: NavbarProps) {
     <nav className="fixed top-0 left-0 right-0 z-50 bg-gray-900 backdrop-blur-md border-b border-gray-800">
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
         <div className="flex items-center justify-between h-20">
-          {/* Logo with Trademark */}
           <Link href="/" className="flex items-center gap-3">
             <div className="relative">
               {logoUrl ? (
@@ -43,7 +42,7 @@ export default function Navbar({ isApplicationOpen = false }: NavbarProps) {
                   priority
                 />
               ) : (
-                <div className="w-12 h-12 bg-gradient-to-br from-naija-green-600 to-naija-green-700 rounded-xl flex items-center justify-center shadow-lg">
+                <div className="w-12 h-12 bg-gradient-to-br from-naija-green-700 to-naija-green-800 rounded-xl flex items-center justify-center shadow-lg">
                   <span className="text-white font-black text-lg">NNW</span>
                 </div>
               )}
@@ -53,7 +52,6 @@ export default function Navbar({ isApplicationOpen = false }: NavbarProps) {
             </span>
           </Link>
 
-          {/* Desktop Navigation - Centered with pill background */}
           <div className="hidden md:flex items-center justify-center flex-1 mx-8">
             <div className="flex items-center gap-2 bg-gray-800 backdrop-blur-sm rounded-full px-6 py-3 border border-gray-700">
               {navigationLinks.map((link) => (
@@ -72,20 +70,19 @@ export default function Navbar({ isApplicationOpen = false }: NavbarProps) {
             </div>
           </div>
 
-          {/* Desktop Auth Buttons */}
           <div className="hidden md:flex items-center gap-4">
             <Link href="/login" className="text-sm font-semibold text-gray-300 hover:text-white transition">
               Login
             </Link>
             <Link
               href="/register"
-              className="px-6 py-2.5 bg-naija-green-600 text-white text-sm font-bold rounded-full hover:bg-naija-green-700 transition-all duration-300 shadow-lg"
+              // ✅ Changed: -600 → -700 for sufficient contrast ratio with white text
+              className="px-6 py-2.5 bg-naija-green-700 text-white text-sm font-bold rounded-full hover:bg-naija-green-800 transition-all duration-300 shadow-lg"
             >
               {isApplicationOpen ? 'Apply' : 'Register'}
             </Link>
           </div>
 
-          {/* Mobile Menu Button */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             className="md:hidden p-2 text-white hover:text-gray-300 rounded-lg hover:bg-gray-800 transition"
@@ -95,7 +92,6 @@ export default function Navbar({ isApplicationOpen = false }: NavbarProps) {
         </div>
       </div>
 
-      {/* Mobile Navigation */}
       {mobileMenuOpen && (
         <div className="md:hidden bg-gray-800 backdrop-blur-md border-t border-gray-700">
           <div className="px-6 py-6 space-y-2">
@@ -123,7 +119,8 @@ export default function Navbar({ isApplicationOpen = false }: NavbarProps) {
             </Link>
             <Link
               href="/register"
-              className="block w-full px-6 py-3 bg-naija-green-600 text-white font-bold rounded-xl hover:bg-naija-green-700 transition text-center shadow-lg"
+              // ✅ Changed: -600 → -700 for sufficient contrast ratio with white text
+              className="block w-full px-6 py-3 bg-naija-green-700 text-white font-bold rounded-xl hover:bg-naija-green-800 transition text-center shadow-lg"
               onClick={() => setMobileMenuOpen(false)}
             >
               {isApplicationOpen ? 'Apply' : 'Register'}

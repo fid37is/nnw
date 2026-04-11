@@ -20,7 +20,6 @@ interface VideoHighlightsProps {
 export default function VideoHighlights({ videos, extractYouTubeId, youtubeChannelUrl = 'https://youtube.com/@naijaninjawarrior' }: VideoHighlightsProps) {
   const [expandedVideo, setExpandedVideo] = useState<YouTubeVideo | null>(null)
   
-  // Show only first 6 videos on homepage
   const featuredVideos = videos.slice(0, 6)
   
   return (
@@ -45,17 +44,17 @@ export default function VideoHighlights({ videos, extractYouTubeId, youtubeChann
                   <div className="aspect-video bg-gradient-to-br from-gray-800 to-gray-900 relative overflow-hidden">
                     {videoId && !isExpanded ? (
                       <>
+                        {/* ✅ youtube-nocookie.com — no tracking cookies */}
                         <iframe
                           width="100%"
                           height="100%"
-                          src={`https://www.youtube.com/embed/${videoId}?enablejsapi=1`}
+                          src={`https://www.youtube-nocookie.com/embed/${videoId}?enablejsapi=1`}
                           title={video.title}
                           frameBorder="0"
                           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                           allowFullScreen
                           className="w-full h-full"
-                        ></iframe>
-                        {/* Expand Button Overlay */}
+                        />
                         <button
                           onClick={() => setExpandedVideo(video)}
                           className="absolute top-3 right-3 p-2 bg-black/70 hover:bg-black/90 text-white rounded-lg transition-all opacity-0 group-hover:opacity-100 z-10"
@@ -86,7 +85,6 @@ export default function VideoHighlights({ videos, extractYouTubeId, youtubeChann
             })}
           </div>
 
-          {/* View All + YouTube Links */}
           <div className="text-center space-y-4">
             {videos.length > 6 && (
               <Link 
@@ -131,7 +129,6 @@ export default function VideoHighlights({ videos, extractYouTubeId, youtubeChann
         </div>
       )}
 
-      {/* Expanded Video Modal */}
       {expandedVideo && (
         <div 
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/95 p-4 animate-in fade-in duration-200"
@@ -141,7 +138,6 @@ export default function VideoHighlights({ videos, extractYouTubeId, youtubeChann
             className="relative w-full max-w-6xl bg-gray-900 rounded-2xl overflow-hidden shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Close Button */}
             <button
               onClick={() => setExpandedVideo(null)}
               className="absolute top-4 right-4 z-10 p-3 bg-black/70 hover:bg-black text-white rounded-full transition-all hover:scale-110"
@@ -149,21 +145,20 @@ export default function VideoHighlights({ videos, extractYouTubeId, youtubeChann
               <X size={24} />
             </button>
 
-            {/* Video Player */}
             <div className="aspect-video w-full">
+              {/* ✅ youtube-nocookie.com — no tracking cookies */}
               <iframe
                 width="100%"
                 height="100%"
-                src={`https://www.youtube.com/embed/${extractYouTubeId(expandedVideo.youtube_url)}?autoplay=1&enablejsapi=1`}
+                src={`https://www.youtube-nocookie.com/embed/${extractYouTubeId(expandedVideo.youtube_url)}?autoplay=1&enablejsapi=1`}
                 title={expandedVideo.title}
                 frameBorder="0"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowFullScreen
                 className="w-full h-full"
-              ></iframe>
+              />
             </div>
 
-            {/* Video Info */}
             <div className="p-6 bg-gray-900 text-white border-t border-gray-800">
               <h3 className="text-2xl font-black mb-2">{expandedVideo.title}</h3>
               {expandedVideo.description && (

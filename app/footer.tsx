@@ -7,7 +7,7 @@ export default function Footer() {
   const { logoUrl } = useLogoConfig()
 
   return (
-    <footer className="bg-gray-900 text-gray-300 border-t border-gray-800">
+    <footer className="bg-gray-900 text-gray-200 border-t border-gray-800">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
           {/* About Column */}
@@ -31,7 +31,7 @@ export default function Footer() {
                 <sup className="text-xs font-black ml-1">™</sup>
               </h3>
             </div>
-            <p className="text-sm text-gray-400 mb-4">
+            <p className="text-sm text-gray-300 mb-4">
               Africa's first ninja competition series. Test your strength, speed, and spirit.
             </p>
             <div className="flex gap-3 flex-wrap">
@@ -125,7 +125,7 @@ export default function Footer() {
         </div>
 
         <div className="border-t border-gray-800 pt-8 text-center text-sm text-gray-500">
-          <p>© 2026 Naija Ninja Warrior. All rights reserved.</p>
+          <p className="text-gray-300">© 2026 Naija Ninja Warrior. All rights reserved.</p>
         </div>
       </div>
     </footer>

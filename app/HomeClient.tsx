@@ -12,19 +12,19 @@ import ZoneMapSection from '../components/sections/ZoneMapSection'
 import CompetitionProcessSection from '../components/sections/CompetionProcessSection'
 
 // ✅ Below-fold sections loaded dynamically — not in initial JS bundle
-const VideoHighlights    = dynamic(() => import('../components/sections/VideoHighlights'))
-const TopCompetitors     = dynamic(() => import('../components/sections/TopCompetitors'))
-const SponsorsSection    = dynamic(() => import('../components/sections/SponsorsSection'))
-const FAQSection         = dynamic(() => import('../components/sections/FAQSection'))
-const InquirySection     = dynamic(() => import('../components/sections/InquirySection'))
+const VideoHighlights = dynamic(() => import('../components/sections/VideoHighlights'))
+const TopCompetitors = dynamic(() => import('../components/sections/TopCompetitors'))
+const SponsorsSection = dynamic(() => import('../components/sections/SponsorsSection'))
+const FAQSection = dynamic(() => import('../components/sections/FAQSection'))
+const InquirySection = dynamic(() => import('../components/sections/InquirySection'))
 const SocialMediaSection = dynamic(() => import('../components/sections/SocialMediaSection'))
-const CTASection         = dynamic(() => import('../components/sections/CTASection'))
+const CTASection = dynamic(() => import('../components/sections/CTASection'))
 
-interface Champion     { id:string; user_id:string; season_id:string; full_name:string; position:number; photo_url:string|null; final_points?:number }
-interface Runner       { id:string; user_id:string; full_name:string; position:number; photo_url:string|null }
-interface Season       { id:string; name:string; year:number; application_start_date:string; application_end_date:string; status:string }
-interface YouTubeVideo { id:string; title:string; youtube_url:string; description:string; category:string; order_position:number }
-interface Sponsor      { id:string; name:string; logo_url:string; website_url:string }
+interface Champion { id: string; user_id: string; season_id: string; full_name: string; position: number; photo_url: string | null; final_points?: number }
+interface Runner { id: string; user_id: string; full_name: string; position: number; photo_url: string | null }
+interface Season { id: string; name: string; year: number; application_start_date: string; application_end_date: string; status: string }
+interface YouTubeVideo { id: string; title: string; youtube_url: string; description: string; category: string; order_position: number }
+interface Sponsor { id: string; name: string; logo_url: string; website_url: string }
 
 const extractYouTubeId = (url: string): string => {
   const patterns = [
@@ -43,10 +43,10 @@ const isOpen = (season: Season | null): boolean => {
 
 export default function HomeClient() {
   const [champion, setChampion] = useState<Champion | null>(null)
-  const [runners,  setRunners]  = useState<Runner[]>([])
-  const [season,   setSeason]   = useState<Season | null>(null)
-  const [stats,    setStats]    = useState({ total: 0, active: 0, eliminated: 0 })
-  const [videos,   setVideos]   = useState<YouTubeVideo[]>([])
+  const [runners, setRunners] = useState<Runner[]>([])
+  const [season, setSeason] = useState<Season | null>(null)
+  const [stats, setStats] = useState({ total: 0, active: 0, eliminated: 0 })
+  const [videos, setVideos] = useState<YouTubeVideo[]>([])
   const [sponsors, setSponsors] = useState<Sponsor[]>([])
 
   const hasFetched = useRef(false)
@@ -65,7 +65,7 @@ export default function HomeClient() {
           .select('id,name,year,status,application_start_date,application_end_date')
           .order('year', { ascending: false })
           .limit(1)
-          .single(),
+          .maybeSingle(),
         supabase
           .from('sponsors')
           .select('id,name,logo_url,website_url')
@@ -112,18 +112,20 @@ export default function HomeClient() {
 
       if (championRes.data) {
         const c = championRes.data
-        setChampion({ id:c.id, user_id:c.user_id, season_id:c.season_id,
-          full_name:c.full_name, position:c.position, photo_url:c.photo_url,
-          final_points:c.final_points })
+        setChampion({
+          id: c.id, user_id: c.user_id, season_id: c.season_id,
+          full_name: c.full_name, position: c.position, photo_url: c.photo_url,
+          final_points: c.final_points
+        })
       }
       if (runnersRes.data) {
         setRunners(runnersRes.data.map((r: any) => ({
-          id:r.id, user_id:r.user_id, full_name:r.full_name,
-          position:r.position, photo_url:r.photo_url,
+          id: r.id, user_id: r.user_id, full_name: r.full_name,
+          position: r.position, photo_url: r.photo_url,
         })))
       }
 
-      const total      = totalRes.count     || 0
+      const total = totalRes.count || 0
       const eliminated = eliminatedRes.count || 0
       setStats({ total, active: total - eliminated, eliminated })
 

@@ -120,7 +120,7 @@ export default function InquirySection() {
             <button
               type="submit"
               disabled={submittingInquiry}
-              className="w-full px-8 py-4 bg-primary text-white font-bold rounded-full hover:bg-primary-700 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg hover:shadow-xl hover:scale-105"
+              className="w-full px-8 py-4 bg-naija-green-700 text-white font-bold rounded-full hover:bg-naija-green-800 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg hover:shadow-xl hover:scale-105"
             >
               {submittingInquiry ? (
                 <>
