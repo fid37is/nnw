@@ -1,7 +1,4 @@
 // File: proxy.ts
-// Auth checks removed from proxy — routing only.
-// Auth is handled client-side in each dashboard page via useAuthGuard hook.
-// See: hooks/useAuthGuard.ts
 
 import { NextRequest, NextResponse } from 'next/server'
 
@@ -10,64 +7,91 @@ const ADMIN_SUB     = 'admin'
 const INVESTOR_SUB  = 'investor'
 
 export async function proxy(req: NextRequest) {
-  const url      = req.nextUrl.clone()
-  const host     = req.headers.get('host') || ''
-  const hostname = host.split(':')[0]
+  const url        = req.nextUrl.clone()
+  const host       = req.headers.get('host') || ''
+  const hostname   = host.split(':')[0]
   const isLocalDev = hostname.includes('localhost') || hostname.includes('127.0.0.1')
 
   let subdomain: string | null = null
 
   if (isLocalDev) {
-    // Local dev: derive subdomain from path prefix since subdomains
-    // don't work on localhost without hosts file changes
-    if (url.pathname.startsWith('/admin'))    subdomain = ADMIN_SUB
-    if (url.pathname.startsWith('/investor')) subdomain = INVESTOR_SUB
+    const parts = hostname.split('.')
+    if (parts.length >= 2) {
+      if (parts[0] === ADMIN_SUB)    subdomain = ADMIN_SUB
+      if (parts[0] === INVESTOR_SUB) subdomain = INVESTOR_SUB
+    }
+
+    if (!subdomain) {
+      if (url.pathname.startsWith('/admin'))                                     subdomain = ADMIN_SUB
+      if (url.pathname === '/investor' || url.pathname.startsWith('/investor/')) subdomain = INVESTOR_SUB
+    }
   } else {
     if (hostname.endsWith(`.${PUBLIC_DOMAIN}`)) {
       subdomain = hostname.replace(`.${PUBLIC_DOMAIN}`, '')
     }
   }
 
-  // ── ADMIN ─────────────────────────────────────────────────────────────────
+  // ── ADMIN ──────────────────────────────────────────────────────────────────
   if (subdomain === ADMIN_SUB) {
-    if (url.pathname === '/login' || url.pathname === '/admin/login') {
-      url.pathname = '/admin/login'
-      return NextResponse.rewrite(url)
+
+    // Strip /admin/ prefix — redirect browser to clean URL
+    // e.g. admin.localhost:3000/admin/login → admin.localhost:3000/login
+    if (url.pathname.startsWith('/admin/')) {
+      const cleanUrl    = req.nextUrl.clone()
+      cleanUrl.pathname = url.pathname.replace(/^\/admin/, '') || '/'
+      return NextResponse.next()
     }
+
+    // Root → redirect to /dashboard (browser URL becomes admin.localhost:3000/dashboard)
     if (url.pathname === '/' || url.pathname === '/admin') {
-      url.pathname = '/admin/dashboard'
-      return NextResponse.redirect(url)
+      const cleanUrl    = req.nextUrl.clone()
+      cleanUrl.pathname = '/dashboard'
+      return NextResponse.redirect(cleanUrl)
     }
+
+    // All other clean paths — rewrite internally to /admin/* for Next.js routing
+    // Browser stays at admin.localhost:3000/dashboard
+    // Next.js serves app/admin/dashboard/page.tsx
     if (!url.pathname.startsWith('/admin')) {
       url.pathname = `/admin${url.pathname}`
     }
     return NextResponse.rewrite(url)
   }
 
-  // ── INVESTOR ──────────────────────────────────────────────────────────────
+  // ── INVESTOR ───────────────────────────────────────────────────────────────
   if (subdomain === INVESTOR_SUB) {
-    if (url.pathname === '/login' || url.pathname === '/investor/login') {
-      url.pathname = '/investor/login'
-      return NextResponse.rewrite(url)
+
+    // Strip /investor/ prefix — redirect browser to clean URL
+    if (url.pathname.startsWith('/investor/')) {
+      const cleanUrl    = req.nextUrl.clone()
+      cleanUrl.pathname = url.pathname.replace(/^\/investor/, '') || '/'
+      return NextResponse.redirect(cleanUrl)
     }
+
+    // Root → redirect to /dashboard
     if (url.pathname === '/' || url.pathname === '/investor') {
-      url.pathname = '/investor/dashboard'
-      return NextResponse.redirect(url)
+      const cleanUrl    = req.nextUrl.clone()
+      cleanUrl.pathname = '/dashboard'
+      return NextResponse.redirect(cleanUrl)
     }
+
+    // All other clean paths — rewrite internally to /investor/* for Next.js routing
     if (!url.pathname.startsWith('/investor')) {
       url.pathname = `/investor${url.pathname}`
     }
     return NextResponse.rewrite(url)
   }
 
-  // ── Main domain — redirect direct /admin or /investor access ─────────────
+  // ── Main domain — redirect /admin and /investor paths to subdomains ─────────
   if (!isLocalDev) {
     if (url.pathname.startsWith('/admin')) {
       url.host     = `${ADMIN_SUB}.${PUBLIC_DOMAIN}`
       url.pathname = url.pathname.replace('/admin', '') || '/'
       return NextResponse.redirect(url)
     }
-    if (url.pathname.startsWith('/investor')) {
+
+    // /investors (public page) is excluded — only exact /investor or /investor/*
+    if (url.pathname === '/investor' || url.pathname.startsWith('/investor/')) {
       url.host     = `${INVESTOR_SUB}.${PUBLIC_DOMAIN}`
       url.pathname = url.pathname.replace('/investor', '') || '/'
       return NextResponse.redirect(url)

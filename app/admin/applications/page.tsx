@@ -88,7 +88,7 @@ export default function AdminApplicationsPage() {
       const { data: { session } } = await supabase.auth.getSession()
 
       if (!session) {
-        window.location.href = '/admin/login'
+        window.location.href = '/login'
         return
       }
 
@@ -101,7 +101,7 @@ export default function AdminApplicationsPage() {
       if (userError) {
         console.error('Error fetching user role:', userError)
         toast.error('Failed to verify admin access')
-        window.location.href = '/admin/login'
+        window.location.href = '/login'
         return
       }
 

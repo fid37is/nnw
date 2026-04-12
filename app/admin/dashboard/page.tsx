@@ -110,7 +110,7 @@ function AnalyticsSkeleton() {
 export default function AnalyticsPage() {
   const { authChecked } = useAuthGuard({
     requiredRole: 'admin',
-    loginPath:    '/admin/login',
+    loginPath:    '/login',
   })
 
   const [analytics, setAnalytics] = useState<Analytics | null>(null)

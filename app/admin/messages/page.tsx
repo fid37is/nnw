@@ -97,7 +97,7 @@ export default function AdminMessagingPage() {
   const loadData = async () => {
     try {
       const { data: { session } } = await supabase.auth.getSession()
-      if (!session) { window.location.href = '/admin/login'; return }
+      if (!session) { window.location.href = '/login'; return }
 
       const { data: userData } = await supabase
         .from('users').select('role').eq('id', session.user.id).single()
