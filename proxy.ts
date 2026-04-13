@@ -67,17 +67,12 @@ export async function proxy(req: NextRequest) {
       cleanUrl.pathname = url.pathname.replace(/^\/investor/, '') || '/'
       return NextResponse.redirect(cleanUrl)
     }
-
-    // Root → redirect to /dashboard
-    if (url.pathname === '/' || url.pathname === '/investor') {
-      const cleanUrl    = req.nextUrl.clone()
-      cleanUrl.pathname = '/dashboard'
-      return NextResponse.redirect(cleanUrl)
-    }
-
-    // All other clean paths — rewrite internally to /investor/* for Next.js routing
-    if (!url.pathname.startsWith('/investor')) {
-      url.pathname = `/investor${url.pathname}`
+    if (url.pathname === '/investor') {
+  url.pathname = '/investor/dashboard'
+  return NextResponse.redirect(url)
+}
+  if (url.pathname !== '/' && !url.pathname.startsWith('/investor')) {
+  url.pathname = `/investor${url.pathname}`
     }
     return NextResponse.rewrite(url)
   }
