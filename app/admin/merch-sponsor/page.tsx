@@ -90,7 +90,7 @@ export default function MerchSponsorsVideosPage() {
     try {
       const { data: { session } } = await supabase.auth.getSession()
       if (!session) {
-        window.location.href = '/admin/login'
+        window.location.href = '/login'
         return
       }
 

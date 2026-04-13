@@ -3,44 +3,67 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
-import { LayoutDashboard, Calendar, Users, Database, CreditCard, LogOut, Menu, X, Trophy, ClipboardList, MessageSquare, Zap, Clock, TrendingUp, ChevronDown } from 'lucide-react'
-import { useState } from 'react'
+import {
+  LayoutDashboard, Calendar, Users, Database, CreditCard, LogOut,
+  Menu, X, Trophy, ClipboardList, MessageSquare, Zap, Clock,
+  TrendingUp, ChevronDown, ListChecks, ChevronLeft
+} from 'lucide-react'
+import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase/client'
 import { toast } from 'sonner'
-import { useLogoConfig } from '@/components/context/LogoContext'
+import { useLogoConfig } from '@/components/context/LogoContext'   // ← Fixed import
 
 const navItems = [
-  { label: 'Dashboard',      href: '/admin/dashboard',        icon: LayoutDashboard },
-  { label: 'Applications',   href: '/admin/applications',     icon: Users },
-  { label: 'Payments',       href: '/admin/payment',          icon: CreditCard },
-  { label: 'Users',          href: '/admin/users',            icon: Users },
-  { label: 'Job Applicants', href: '/admin/job-applications', icon: Users },
-  { label: 'Champions',      href: '/admin/champions',        icon: Trophy },
-  { label: 'Seasons',        href: '/admin/seasons',          icon: Calendar },
+  { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
+  { label: 'Applications', href: '/applications', icon: Users },
+  { label: 'Payments', href: '/payment', icon: CreditCard },
+  { label: 'Users', href: '/users', icon: Users },
+  { label: 'Job Applicants', href: '/job-applications', icon: Users },
+  { label: 'Champions', href: '/champions', icon: Trophy },
+  { label: 'Seasons', href: '/seasons', icon: Calendar },
   {
     label: 'Competition',
     icon: Zap,
     submenu: [
-      { label: 'Stages',      href: '/admin/stages',          icon: Zap },
-      { label: 'Performance', href: '/admin/performance',     icon: Clock },
-      { label: 'Progress',    href: '/admin/stage-progress',  icon: TrendingUp },
+      { label: 'Stages', href: '/stages', icon: Zap },
+      { label: 'Performance', href: '/performance', icon: Clock },
+      { label: 'Progress', href: '/stage-progress', icon: TrendingUp },
     ],
   },
-  { label: 'Messages',  href: '/admin/messages',      icon: MessageSquare },
-  { label: 'Investors', href: '/admin/investors',     icon: TrendingUp },
-  { label: 'Audit Logs',href: '/admin/audit-logs',    icon: ClipboardList },
-  { label: 'Add Items', href: '/admin/merch-sponsor', icon: Database },
+  { label: 'Messages', href: '/messages', icon: MessageSquare },
+  { label: 'Investors', href: '/investors', icon: TrendingUp },
+  { label: 'Audit Logs', href: '/audit-logs', icon: ClipboardList },
+  { label: 'Add Items', href: '/merch-sponsor', icon: Database },
+  { label: 'Waiting List', href: '/waiting-list', icon: ListChecks },
 ]
 
 export default function AdminSidebar() {
   const pathname = usePathname()
-  const [open, setOpen] = useState(false)
   const { logoUrl } = useLogoConfig()
 
-  const activeParent = navItems.find(item =>
-    item.submenu?.some((sub: any) => pathname === sub.href || pathname.startsWith(sub.href + '/'))
-  )
-  const [expandedMenu, setExpandedMenu] = useState<string | null>(activeParent?.label ?? null)
+  const [isMobileOpen, setIsMobileOpen] = useState(false)
+  const [isCollapsed, setIsCollapsed] = useState(false)
+  const [expandedMenu, setExpandedMenu] = useState<string | null>(null)
+
+  // Persist collapsed state
+  useEffect(() => {
+    const saved = localStorage.getItem('sidebarCollapsed')
+    if (saved !== null) setIsCollapsed(JSON.parse(saved))
+  }, [])
+
+  useEffect(() => {
+    localStorage.setItem('sidebarCollapsed', JSON.stringify(isCollapsed))
+  }, [isCollapsed])
+
+  // Auto-expand active submenu
+  useEffect(() => {
+    const activeParent = navItems.find(item =>
+      item.submenu?.some((sub: any) =>
+        pathname === sub.href || pathname.startsWith(sub.href + '/')
+      )
+    )
+    if (activeParent) setExpandedMenu(activeParent.label)
+  }, [pathname])
 
   const handleLogout = async () => {
     await supabase.auth.signOut()
@@ -48,39 +71,64 @@ export default function AdminSidebar() {
     window.location.href = '/'
   }
 
-  const isMenuActive = (item: any) => {
-    if (item.href) return pathname === item.href || pathname.startsWith(item.href + '/')
-    if (item.submenu) return item.submenu.some((sub: any) => pathname === sub.href || pathname.startsWith(sub.href + '/'))
+  const isMenuActive = (item: any): boolean => {
+    if (item.href) {
+      return pathname === item.href || pathname.startsWith(item.href + '/')
+    }
+    if (item.submenu) {
+      return item.submenu.some((sub: any) =>
+        pathname === sub.href || pathname.startsWith(sub.href + '/')
+      )
+    }
     return false
   }
 
+  const toggleCollapse = () => setIsCollapsed(!isCollapsed)
+
   return (
     <>
-      {/* Mobile Menu Button */}
+      {/* Mobile Hamburger */}
       <button
-        onClick={() => setOpen(!open)}
-        className="lg:hidden fixed top-4 left-4 z-50 p-2 bg-white rounded-lg border border-gray-200 hover:bg-gray-50"
+        onClick={() => setIsMobileOpen(!isMobileOpen)}
+        className="lg:hidden fixed top-4 left-4 z-50 p-2 bg-white rounded-lg border border-gray-200 hover:bg-gray-50 shadow-sm"
       >
-        {open ? <X size={24} /> : <Menu size={24} />}
+        {isMobileOpen ? <X size={24} /> : <Menu size={24} />}
       </button>
 
       {/* Sidebar */}
       <aside
-        className={`fixed left-0 top-0 h-screen w-64 bg-naija-green-900 text-white p-6 overflow-y-auto transition-transform duration-300 z-40 ${
-          open ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
-        }`}
+        className={`fixed left-0 top-0 h-screen bg-naija-green-900 text-white overflow-y-auto transition-all duration-300 z-40 flex flex-col ${isCollapsed ? 'w-20' : 'w-64'
+          } ${isMobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}
       >
-        {/* Logo */}
-        <Link href="/admin/dashboard" className="flex items-center gap-3 mb-8">
-          {logoUrl && (
-            <Image src={logoUrl} alt="Naija Ninja Logo" width={60} height={60} loading="eager" priority className="rounded-lg" />
-          )}
-          <span className="font-bold text-lg truncate">Admin</span>
-        </Link>
+        {/* Logo + Collapse Button */}
+        <div className="p-6 flex items-center justify-between mb-8">
+          <Link href="/dashboard" className="flex items-center gap-3 flex-1 min-w-0">
+            {logoUrl && (
+              <Image
+                src={logoUrl}
+                alt="Logo"
+                width={48}
+                height={48}
+                className="rounded-lg flex-shrink-0"
+              />
+            )}
+            {!isCollapsed && <span className="font-bold text-xl truncate">Admin</span>}
+          </Link>
+
+          <button
+            onClick={toggleCollapse}
+            className="hidden lg:block text-naija-green-300 hover:text-white p-1 rounded-lg hover:bg-naija-green-800 transition"
+          >
+            <ChevronLeft
+              size={20}
+              className={`transition-transform ${isCollapsed ? 'rotate-180' : ''}`}
+            />
+          </button>
+        </div>
 
         {/* Navigation */}
-        <nav className="space-y-1 mb-8">
-          {navItems.map(item => {
+        <nav className="flex-1 px-3 space-y-1">
+          {navItems.map((item) => {
             const Icon = item.icon
             const isActive = isMenuActive(item)
             const isExpanded = expandedMenu === item.label
@@ -91,34 +139,33 @@ export default function AdminSidebar() {
                   <>
                     <button
                       onClick={() => setExpandedMenu(isExpanded ? null : item.label)}
-                      className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition truncate ${
-                        isActive ? 'bg-naija-green-600 text-white' : 'text-naija-green-100 hover:bg-naija-green-800'
-                      }`}
+                      className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${isActive ? 'bg-naija-green-600 text-white' : 'text-naija-green-100 hover:bg-naija-green-800'
+                        }`}
                     >
                       <Icon size={20} className="flex-shrink-0" />
-                      <span className="font-medium flex-1 text-left truncate">{item.label}</span>
-                      <ChevronDown size={18} className={`flex-shrink-0 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
+                      {!isCollapsed && (
+                        <>
+                          <span className="font-medium flex-1 text-left">{item.label}</span>
+                          <ChevronDown size={18} className={`transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
+                        </>
+                      )}
                     </button>
 
-                    {isExpanded && (
-                      <div className="mt-1 ml-4 space-y-1 border-l-2 border-naija-green-700 pl-2">
-                        {item.submenu.map((subitem: any) => {
-                          const SubIcon = subitem.icon
-                          const isSubActive = pathname === subitem.href || pathname.startsWith(subitem.href + '/')
+                    {isExpanded && !isCollapsed && (
+                      <div className="mt-1 ml-6 space-y-1 border-l-2 border-naija-green-700 pl-4">
+                        {item.submenu.map((sub: any) => {
+                          const SubIcon = sub.icon
+                          const isSubActive = pathname === sub.href || pathname.startsWith(sub.href + '/')
                           return (
                             <Link
-                              key={subitem.href}
-                              href={subitem.href}
-                              onClick={() => {
-                                setOpen(false)
-                                if (window.innerWidth < 1024) setExpandedMenu(null)
-                              }}
-                              className={`flex items-center gap-3 px-4 py-2 rounded-lg transition truncate ${
-                                isSubActive ? 'bg-naija-green-600 text-white' : 'text-naija-green-100 hover:bg-naija-green-800'
-                              }`}
+                              key={sub.href}
+                              href={sub.href}
+                              onClick={() => setIsMobileOpen(false)}
+                              className={`flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm transition-all ${isSubActive ? 'bg-naija-green-600 text-white' : 'text-naija-green-100 hover:bg-naija-green-800'
+                                }`}
                             >
                               <SubIcon size={18} className="flex-shrink-0" />
-                              <span className="font-medium text-sm truncate">{subitem.label}</span>
+                              <span className="font-medium">{sub.label}</span>
                             </Link>
                           )
                         })}
@@ -128,13 +175,12 @@ export default function AdminSidebar() {
                 ) : (
                   <Link
                     href={item.href!}
-                    onClick={() => setOpen(false)}
-                    className={`flex items-center gap-3 px-4 py-3 rounded-lg transition truncate ${
-                      isActive ? 'bg-naija-green-600 text-white' : 'text-naija-green-100 hover:bg-naija-green-800'
-                    }`}
+                    onClick={() => setIsMobileOpen(false)}
+                    className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${isActive ? 'bg-naija-green-600 text-white' : 'text-naija-green-100 hover:bg-naija-green-800'
+                      }`}
                   >
                     <Icon size={20} className="flex-shrink-0" />
-                    <span className="font-medium truncate">{item.label}</span>
+                    {!isCollapsed && <span className="font-medium">{item.label}</span>}
                   </Link>
                 )}
               </div>
@@ -143,18 +189,23 @@ export default function AdminSidebar() {
         </nav>
 
         {/* Logout */}
-        <button
-          onClick={handleLogout}
-          className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-naija-green-100 hover:bg-naija-green-800 transition truncate"
-        >
-          <LogOut size={20} className="flex-shrink-0" />
-          <span className="font-medium truncate">Logout</span>
-        </button>
+        <div className="p-3 mt-auto border-t border-naija-green-800">
+          <button
+            onClick={handleLogout}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-naija-green-100 hover:bg-naija-green-800 transition-all ${isCollapsed ? 'justify-center' : ''}`}
+          >
+            <LogOut size={20} />
+            {!isCollapsed && <span className="font-medium">Logout</span>}
+          </button>
+        </div>
       </aside>
 
       {/* Mobile Overlay */}
-      {open && (
-        <div className="fixed inset-0 bg-black/50 z-30 lg:hidden" onClick={() => setOpen(false)} />
+      {isMobileOpen && (
+        <div
+          className="fixed inset-0 bg-black/60 z-30 lg:hidden"
+          onClick={() => setIsMobileOpen(false)}
+        />
       )}
     </>
   )

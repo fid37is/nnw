@@ -1,4 +1,3 @@
-// components/investor/InvestorSidebar.tsx
 'use client'
 
 import Link from 'next/link'
@@ -13,11 +12,12 @@ import { supabase } from '@/lib/supabase/client'
 import { toast } from 'sonner'
 import { useLogoConfig } from '@/components/context/LogoContext'
 
+// Proxy handles /investor prefix — sidebar hrefs are clean paths only
 const navItems = [
-  { label: 'Dashboard',       href: '/investor/dashboard',       icon: LayoutDashboard },
-  { label: 'Documents',       href: '/investor/documents',       icon: FileText },
-  { label: 'Change Password', href: '/investor/update-password', icon: KeyRound },
-  { label: 'Contact',         href: '/contact',                  icon: Mail },
+  { label: 'Dashboard',       href: '/dashboard',       icon: LayoutDashboard },
+  { label: 'Documents',       href: '/documents',       icon: FileText },
+  { label: 'Change Password', href: '/update-password', icon: KeyRound },
+  { label: 'Contact',         href: '/contact',         icon: Mail },
 ]
 
 export default function InvestorSidebar() {
@@ -29,7 +29,7 @@ export default function InvestorSidebar() {
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (_event, session) => {
-        if (!session) router.replace('/investor/login')
+        if (!session) router.replace('/login')
       }
     )
     return () => subscription.unsubscribe()
@@ -38,7 +38,7 @@ export default function InvestorSidebar() {
   const handleLogout = async () => {
     await supabase.auth.signOut()
     toast.success('Logged out')
-    router.replace('/investor/login')
+    router.replace('/login')
   }
 
   return (
@@ -58,7 +58,7 @@ export default function InvestorSidebar() {
         }`}
       >
         {/* Logo */}
-        <Link href="/investor/dashboard" className="flex items-center gap-3 mb-2">
+        <Link href="/dashboard" className="flex items-center gap-3 mb-2">
           {logoUrl ? (
             <Image src={logoUrl} alt="NNW Logo" width={48} height={48} className="rounded-lg" priority />
           ) : (
@@ -78,7 +78,7 @@ export default function InvestorSidebar() {
         <nav className="space-y-1 flex-1">
           {navItems.map(item => {
             const Icon = item.icon
-            const isActive = pathname === item.href
+            const isActive = pathname === item.href || pathname.startsWith(item.href + '/')
             return (
               <Link
                 key={item.href}

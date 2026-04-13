@@ -59,7 +59,7 @@ export default function AdminLoginForm() {
       }
 
       toast.success('Welcome back!')
-      window.location.replace('/admin/dashboard')
+      window.location.replace('/dashboard')
     } catch {
       toast.error('Something went wrong. Please try again.')
       setLoading(false)

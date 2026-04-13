@@ -10,6 +10,7 @@ import HeroSection from '../components/sections/HeroSection'
 import StatsSection from '../components/sections/StatsSection'
 import ZoneMapSection from '../components/sections/ZoneMapSection'
 import CompetitionProcessSection from '../components/sections/CompetionProcessSection'
+import WaitingListSection from '../components/sections/WaitinglistSection'
 
 const VideoHighlights    = dynamic(() => import('../components/sections/VideoHighlights'))
 const TopCompetitors     = dynamic(() => import('../components/sections/TopCompetitors'))
@@ -41,12 +42,13 @@ const isOpen = (season: Season | null): boolean => {
 }
 
 export default function HomeClient() {
-  const [champion, setChampion] = useState<Champion | null>(null)
-  const [runners,  setRunners]  = useState<Runner[]>([])
-  const [season,   setSeason]   = useState<Season | null>(null)
-  const [stats,    setStats]    = useState({ total: 0, active: 0, eliminated: 0 })
-  const [videos,   setVideos]   = useState<YouTubeVideo[]>([])
-  const [sponsors, setSponsors] = useState<Sponsor[]>([])
+  const [champion,     setChampion]     = useState<Champion | null>(null)
+  const [runners,      setRunners]      = useState<Runner[]>([])
+  const [season,       setSeason]       = useState<Season | null>(null)
+  const [stats,        setStats]        = useState({ total: 0, active: 0, eliminated: 0 })
+  const [videos,       setVideos]       = useState<YouTubeVideo[]>([])
+  const [sponsors,     setSponsors]     = useState<Sponsor[]>([])
+  const [waitingCount, setWaitingCount] = useState(0)
 
   const hasFetched = useRef(false)
 
@@ -58,7 +60,8 @@ export default function HomeClient() {
 
   const loadData = async () => {
     try {
-      const [seasonRes, sponsorRes, videoRes] = await Promise.all([
+      // All independent queries in parallel — including waiting list count
+      const [seasonRes, sponsorRes, videoRes, waitingRes] = await Promise.all([
         supabase
           .from('seasons')
           .select('id,name,year,status,application_start_date,application_end_date')
@@ -74,22 +77,28 @@ export default function HomeClient() {
           .select('id,title,youtube_url,description,category,order_position')
           .order('order_position', { ascending: true })
           .limit(6),
+        // head:true returns only the count — no row data transferred
+        supabase
+          .from('waiting_list')
+          .select('*', { count: 'exact', head: true }),
       ])
 
       const seasonData = seasonRes.data
       if (seasonData) setSeason(seasonData)
       setSponsors(sponsorRes.data || [])
-      setVideos(videoRes.data || [])
+      setVideos(videoRes.data     || [])
+      if (!waitingRes.error) setWaitingCount(waitingRes.count ?? 0)
 
       if (!seasonData) return
 
+      // Season-dependent queries in parallel
       const [championRes, runnersRes, totalRes, eliminatedRes] = await Promise.all([
         supabase
           .from('champions')
           .select('id,user_id,season_id,full_name,position,photo_url,final_points')
           .eq('season_id', seasonData.id)
           .eq('position', 1)
-          .maybeSingle(), // ✅ fixed from .single()
+          .maybeSingle(),
         supabase
           .from('champions')
           .select('id,user_id,full_name,position,photo_url')
@@ -124,7 +133,7 @@ export default function HomeClient() {
         })))
       }
 
-      const total     = totalRes.count     || 0
+      const total      = totalRes.count     || 0
       const eliminated = eliminatedRes.count || 0
       setStats({ total, active: total - eliminated, eliminated })
 
@@ -137,7 +146,6 @@ export default function HomeClient() {
 
   return (
     <main className="min-h-screen bg-white">
-      {/* ✅ Navbar manages its own application status to avoid hydration mismatch */}
       <Navbar />
 
       {season && (
@@ -148,22 +156,52 @@ export default function HomeClient() {
         </div>
       )}
 
+      {/* 1. HERO */}
       <HeroSection
         champion={champion}
         season={season}
         isApplicationOpen={applicationOpen}
       />
-      <StatsSection stats={stats} />
+
+      {/* 2. WAITING LIST — only visible when applications are closed */}
+      {!applicationOpen && (
+        <WaitingListSection waitingCount={waitingCount} />
+      )}
+
+      {/* 3. STATS */}
+      <StatsSection
+        stats={stats}
+        waitingCount={waitingCount}
+        isApplicationOpen={applicationOpen}
+      />
+
+      {/* 4. ZONE MAP */}
       <ZoneMapSection isApplicationOpen={applicationOpen} />
+
+      {/* 5. COMPETITION PROCESS */}
       <CompetitionProcessSection isApplicationOpen={applicationOpen} />
 
+      {/* 6. VIDEO HIGHLIGHTS */}
       <VideoHighlights videos={videos} extractYouTubeId={extractYouTubeId} />
+
+      {/* 7. TOP COMPETITORS */}
       <TopCompetitors champion={champion} runners={runners} />
+
+      {/* 8. SPONSORS */}
       <SponsorsSection sponsors={sponsors} />
+
+      {/* 9. FAQ */}
       <FAQSection />
+
+      {/* 10. INQUIRY */}
       <InquirySection />
+
+      {/* 11. SOCIAL MEDIA */}
       <SocialMediaSection />
+
+      {/* 12. FINAL CTA */}
       <CTASection champion={champion} isApplicationOpen={applicationOpen} />
+
       <Footer />
     </main>
   )

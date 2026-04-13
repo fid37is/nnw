@@ -1,58 +1,84 @@
-// File: components/sections/StatsSection.tsx
-'use client'
-
-import { useScrollReveal, useCountUp } from '@/lib/hooks'
-import { ShieldCheck } from 'lucide-react'
-
 interface StatsSectionProps {
-  stats: { total:number; active:number; eliminated:number }
+  stats: {
+    total: number
+    active: number
+    eliminated: number
+  }
+  waitingCount?: number
+  isApplicationOpen?: boolean
 }
 
-function StatCard({ value, label, color, delay }: { value:number; label:string; color:string; delay:number }) {
-  const {ref, visible} = useScrollReveal()
-  const count = useCountUp(value, visible)
+export default function StatsSection({ stats, waitingCount = 0, isApplicationOpen = false }: StatsSectionProps) {
   return (
-    <div ref={ref as any}
-      className="text-center"
-      style={{opacity:visible?1:0, transform:visible?'translateY(0)':'translateY(32px)', transition:`all 0.7s ease ${delay}ms`}}>
-      <span className={`text-6xl md:text-7xl font-black ${color} tabular-nums`}>
-        {count.toLocaleString()}
-      </span>
-      <p className="text-gray-500 font-bold text-sm uppercase tracking-widest mt-3">{label}</p>
-    </div>
-  )
-}
+    <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+      <div className="glass rounded-3xl p-8 md:p-12 shadow-md">
 
-export default function StatsSection({ stats }: StatsSectionProps) {
-  const {ref, visible} = useScrollReveal(0.1)
-
-  return (
-    <section ref={ref as any} className="py-20 bg-white border-b border-gray-100">
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div
-          className="relative rounded-3xl overflow-hidden border-2 border-gray-100 bg-gradient-to-br from-gray-50 to-white"
-          style={{opacity:visible?1:0, transform:visible?'translateY(0)':'translateY(24px)', transition:'all 0.6s ease'}}>
-          
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-96 h-1 bg-gradient-to-r from-transparent via-naija-green-400 to-transparent"/>
-
-          <div className="relative p-12 grid grid-cols-1 md:grid-cols-3 gap-10 divide-y md:divide-y-0 md:divide-x divide-gray-100">
-            <StatCard value={stats.total}      label="Total Warriors"  color="text-naija-green-600" delay={0}/>
-            <StatCard value={stats.active}     label="Still Competing" color="text-blue-600"         delay={100}/>
-            <StatCard value={stats.eliminated} label="Eliminated"      color="text-red-500"          delay={200}/>
-          </div>
-
-          {stats.total === 0 && (
-            <div className="absolute inset-0 flex items-center justify-center bg-white/80 rounded-3xl">
-              <div className="text-center px-8">
-                <div className="flex items-center justify-center w-12 h-12 bg-naija-green-100 rounded-xl mb-3 mx-auto">
-                  <ShieldCheck size={24} className="text-naija-green-600"/>
-                </div>
-                <p className="font-black text-gray-900 text-xl">Season 1 Loading</p>
-                <p className="text-gray-500 text-sm mt-1">Stats will appear once competition begins</p>
-              </div>
+        {/* Pre-season: show waiting list count prominently */}
+        {!isApplicationOpen && waitingCount > 0 && (
+          <div className="text-center mb-10">
+            <p className="text-sm font-bold text-naija-green-600 tracking-widest uppercase mb-2">
+              Season 1 — Building Momentum
+            </p>
+            <div className="text-6xl md:text-8xl font-black text-naija-green-600">
+              {waitingCount.toLocaleString()}
             </div>
-          )}
-        </div>
+            <p className="text-muted-foreground font-bold text-lg mt-2">
+              Warriors on the waiting list
+            </p>
+            <p className="text-sm text-muted-foreground mt-1">
+              Across all 6 geopolitical zones — and growing.
+            </p>
+          </div>
+        )}
+
+        {/* Divider if both sections showing */}
+        {!isApplicationOpen && waitingCount > 0 && stats.total > 0 && (
+          <div className="border-t border-border mb-10" />
+        )}
+
+        {/* Active season stats */}
+        {stats.total > 0 && (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="text-center group">
+              <div className="relative inline-block mb-4">
+                <div className="absolute inset-0 bg-primary/20 rounded-2xl blur-xl group-hover:blur-2xl transition-all"></div>
+                <div className="relative text-6xl md:text-7xl font-black text-primary">
+                  {stats.total}
+                </div>
+              </div>
+              <p className="text-muted-foreground font-bold text-lg">Total Warriors</p>
+            </div>
+
+            <div className="text-center group">
+              <div className="relative inline-block mb-4">
+                <div className="absolute inset-0 bg-success/20 rounded-2xl blur-xl group-hover:blur-2xl transition-all"></div>
+                <div className="relative text-6xl md:text-7xl font-black text-success">
+                  {stats.active}
+                </div>
+              </div>
+              <p className="text-muted-foreground font-bold text-lg">Competing</p>
+            </div>
+
+            <div className="text-center group">
+              <div className="relative inline-block mb-4">
+                <div className="absolute inset-0 bg-destructive/20 rounded-2xl blur-xl group-hover:blur-2xl transition-all"></div>
+                <div className="relative text-6xl md:text-7xl font-black text-destructive/70">
+                  {stats.eliminated}
+                </div>
+              </div>
+              <p className="text-muted-foreground font-bold text-lg">Eliminated</p>
+            </div>
+          </div>
+        )}
+
+        {/* Empty pre-season, no signups yet */}
+        {!isApplicationOpen && waitingCount === 0 && stats.total === 0 && (
+          <div className="text-center py-4">
+            <p className="text-4xl md:text-6xl font-black text-primary mb-2">Season 1</p>
+            <p className="text-muted-foreground font-bold text-lg">Coming Soon - Across All 6 Zones</p>
+          </div>
+        )}
+
       </div>
     </section>
   )
