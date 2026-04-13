@@ -97,7 +97,7 @@ export default function Footer() {
             <h3 className="text-white font-bold text-lg mb-4">Company</h3>
             <ul className="space-y-2 text-sm">
               <li><Link href="/partners" className="hover:text-naija-green-400 transition">Partners & Sponsors</Link></li>
-              <li><Link href="/investors" className="hover:text-naija-green-400 transition">Investor Relations</Link></li>
+              <li><Link href="/investor" className="hover:text-naija-green-400 transition">Investor Relations</Link></li>
               <li><Link href="/careers" className="hover:text-naija-green-400 transition">Careers</Link></li>
               <li><Link href="/contact" className="hover:text-naija-green-400 transition">Contact Us</Link></li>
             </ul>
