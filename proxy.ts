@@ -54,8 +54,8 @@ export async function proxy(req: NextRequest) {
   url.pathname = '/investor/dashboard'
   return NextResponse.redirect(url)
 }
-    if (!url.pathname.startsWith('/investor')) {
-      url.pathname = `/investor${url.pathname}`
+  if (url.pathname !== '/' && !url.pathname.startsWith('/investor')) {
+  url.pathname = `/investor${url.pathname}`
     }
     return NextResponse.rewrite(url)
   }
