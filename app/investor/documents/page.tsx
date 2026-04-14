@@ -18,10 +18,10 @@ interface Document {
 
 const typeColor = (t: string) => {
   switch (t) {
-    case 'agreement':   return 'bg-blue-100 text-blue-700'
-    case 'report':      return 'bg-green-100 text-green-700'
+    case 'agreement': return 'bg-blue-100 text-blue-700'
+    case 'report': return 'bg-green-100 text-green-700'
     case 'certificate': return 'bg-purple-100 text-purple-700'
-    default:            return 'bg-gray-100 text-gray-600'
+    default: return 'bg-gray-100 text-gray-600'
   }
 }
 
@@ -30,17 +30,18 @@ const typeLabel = (t: string) =>
 
 export default function InvestorDocumentsPage() {
   const [documents, setDocuments] = useState<Document[]>([])
-  const [loading, setLoading]     = useState(true)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => { loadDocuments() }, [])
 
   const loadDocuments = async () => {
     try {
-      const { data: { session } } = await supabase.auth.getSession()
-      if (!session) { window.location.href = '/investor/login'; return }
+      // ✅ new
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) { window.location.href = '/investor/login'; return }
 
       const { data: userData } = await supabase
-        .from('users').select('role').eq('id', session.user.id).single()
+        .from('users').select('role').eq('id', user.id).single()
 
       if (userData?.role !== 'investor') {
         window.location.href = '/user/dashboard'; return
