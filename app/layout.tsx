@@ -1,9 +1,4 @@
 // File: app/layout.tsx
-// Changes from your current version:
-// 1. Added `viewport` as a separate export (required in Next.js 14+ — avoids deprecation warning)
-// 2. Upgraded JSON-LD from generic Organization to SportsOrganization (better Google rich results)
-// 3. Added SportsEvent schema stub (update dates/location when your season is confirmed)
-// Everything else is exactly as you had it.
 
 import type { Metadata, Viewport } from 'next'
 import { Inter } from 'next/font/google'
@@ -61,9 +56,9 @@ export const metadata: Metadata = {
   publisher: 'Naija Ninja Warrior',
 
   formatDetection: {
-    email:     false,
-    address:   false,
-    telephone: false,
+    email:      false,
+    address:    false,
+    telephone:  false,
   },
 
   openGraph: {
@@ -176,15 +171,15 @@ const jsonLd = {
         '@type': 'Place',
         name:    'Lagos, Nigeria',
         address: {
-          '@type':           'PostalAddress',
-          addressLocality:   'Lagos',
-          addressCountry:    'NG',
+         '@type':           'PostalAddress',
+         addressLocality:   'Lagos',
+         addressCountry:    'NG',
         },
       },
       // startDate: '2026-01-01',
       // endDate:   '2026-12-31',
-      eventStatus:             'https://schema.org/EventScheduled',
-      eventAttendanceMode:     'https://schema.org/OfflineEventAttendanceMode',
+      eventStatus:          'https://schema.org/EventScheduled',
+      eventAttendanceMode:  'https://schema.org/OfflineEventAttendanceMode',
     },
   ],
 }
@@ -197,6 +192,19 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
+        {/* Google tag (gtag.js) */}
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-T7YMZR1QYR"></script>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('js', new Date());
+              gtag('config', 'G-T7YMZR1QYR');
+            `,
+          }}
+        />
+        
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
