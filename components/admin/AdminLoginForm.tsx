@@ -16,8 +16,8 @@ const logoUrl = 'https://res.cloudinary.com/lordefid/image/upload/v1765296838/NN
 
 export default function AdminLoginForm() {
   const searchParams = useSearchParams()
-  const [form, setForm]       = useState({ email: '', password: '' })
-  const [showPw, setShowPw]   = useState(false)
+  const [form, setForm] = useState({ email: '', password: '' })
+  const [showPw, setShowPw] = useState(false)
   const [loading, setLoading] = useState(false)
 
   useEffect(() => {
@@ -29,12 +29,12 @@ export default function AdminLoginForm() {
     e.preventDefault()
 
     if (!form.email.includes('@')) { toast.error('Enter a valid email address'); return }
-    if (form.password.length < 6)  { toast.error('Enter your password'); return }
+    if (form.password.length < 6) { toast.error('Enter your password'); return }
 
     setLoading(true)
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
-        email:    form.email,
+        email: form.email,
         password: form.password,
       })
 
@@ -51,7 +51,8 @@ export default function AdminLoginForm() {
         return
       }
 
-      if (userData.role !== 'admin') {
+      // ✅ allow both admin and super_admin
+      if (userData.role !== 'admin' && userData.role !== 'super_admin') {
         toast.error('This portal is for administrators only.')
         await supabase.auth.signOut()
         setLoading(false)
@@ -86,31 +87,31 @@ export default function AdminLoginForm() {
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">Email Address</label>
                 <div className="relative">
-                  <Mail size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"/>
+                  <Mail size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                   <input type="email" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
                     placeholder="admin@email.com" autoComplete="email" autoFocus={!form.email}
-                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-naija-green-500 focus:border-transparent"/>
+                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-naija-green-500 focus:border-transparent" />
                 </div>
               </div>
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">Password</label>
                 <div className="relative">
-                  <Lock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"/>
+                  <Lock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                   <input type={showPw ? 'text' : 'password'} value={form.password}
                     onChange={e => setForm(f => ({ ...f, password: e.target.value }))}
                     placeholder="Enter your password" autoComplete="current-password" autoFocus={!!form.email}
-                    className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-naija-green-500 focus:border-transparent"/>
+                    className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-naija-green-500 focus:border-transparent" />
                   <button type="button" onClick={() => setShowPw(!showPw)}
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
-                    {showPw ? <EyeOff size={15}/> : <Eye size={15}/>}
+                    {showPw ? <EyeOff size={15} /> : <Eye size={15} />}
                   </button>
                 </div>
               </div>
               <button type="submit" disabled={loading}
                 className="w-full flex items-center justify-center gap-2 py-3.5 bg-gray-800 text-white font-bold rounded-xl hover:bg-gray-900 transition disabled:opacity-50">
                 {loading
-                  ? <><span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"/>Signing in...</>
-                  : <><Shield size={16}/>Sign In</>}
+                  ? <><span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />Signing in...</>
+                  : <><Shield size={16} />Sign In</>}
               </button>
             </form>
             <div className="mt-6 pt-6 border-t border-gray-100 text-center">

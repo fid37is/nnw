@@ -3,11 +3,11 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 
 const PUBLIC_DOMAIN = process.env.NEXT_PUBLIC_ROOT_DOMAIN || 'naijaninja.net'
-const ADMIN_SUB     = 'admin'
-const INVESTOR_SUB  = 'investor'
+const ADMIN_SUB = 'admin'
+const INVESTOR_SUB = 'investor'
 
 // ✅ Public paths that never need auth
-const ADMIN_PUBLIC_PATHS    = ['/login', '/admin/login']
+const ADMIN_PUBLIC_PATHS = ['/login', '/admin/login']
 const INVESTOR_PUBLIC_PATHS = ['/login', '/investor/login']
 
 async function getSessionRole(req: NextRequest): Promise<string | null> {
@@ -20,7 +20,7 @@ async function getSessionRole(req: NextRequest): Promise<string | null> {
       {
         cookies: {
           getAll: () => req.cookies.getAll(),
-          setAll: () => {},
+          setAll: () => { },
         },
       }
     )
@@ -42,9 +42,9 @@ async function getSessionRole(req: NextRequest): Promise<string | null> {
 }
 
 export async function proxy(req: NextRequest) {
-  const url        = req.nextUrl.clone()
-  const host       = req.headers.get('host') || ''
-  const hostname   = host.split(':')[0]
+  const url = req.nextUrl.clone()
+  const host = req.headers.get('host') || ''
+  const hostname = host.split(':')[0]
   const isLocalDev = hostname.includes('localhost') || hostname.includes('127.0.0.1')
 
   let subdomain: string | null = null
@@ -52,11 +52,11 @@ export async function proxy(req: NextRequest) {
   if (isLocalDev) {
     const parts = hostname.split('.')
     if (parts.length >= 2) {
-      if (parts[0] === ADMIN_SUB)    subdomain = ADMIN_SUB
+      if (parts[0] === ADMIN_SUB) subdomain = ADMIN_SUB
       if (parts[0] === INVESTOR_SUB) subdomain = INVESTOR_SUB
     }
     if (!subdomain) {
-      if (url.pathname.startsWith('/admin'))                                     subdomain = ADMIN_SUB
+      if (url.pathname.startsWith('/admin')) subdomain = ADMIN_SUB
       if (url.pathname === '/investor' || url.pathname.startsWith('/investor/')) subdomain = INVESTOR_SUB
     }
   } else {
@@ -73,14 +73,14 @@ export async function proxy(req: NextRequest) {
 
     // Strip /admin/ prefix — redirect to clean URL
     if (url.pathname.startsWith('/admin/')) {
-      const cleanUrl    = req.nextUrl.clone()
+      const cleanUrl = req.nextUrl.clone()
       cleanUrl.pathname = cleanPath
       return NextResponse.redirect(cleanUrl)
     }
 
     // Root → /dashboard
     if (url.pathname === '/' || url.pathname === '/admin') {
-      const cleanUrl    = req.nextUrl.clone()
+      const cleanUrl = req.nextUrl.clone()
       cleanUrl.pathname = '/dashboard'
       return NextResponse.redirect(cleanUrl)
     }
@@ -89,8 +89,9 @@ export async function proxy(req: NextRequest) {
     const isPublic = ADMIN_PUBLIC_PATHS.includes(url.pathname)
     if (!isPublic) {
       const role = await getSessionRole(req)
-      if (role !== 'admin') {
-        const loginUrl    = req.nextUrl.clone()
+      
+      if (role !== 'admin' && role !== 'super_admin') {
+        const loginUrl = req.nextUrl.clone()
         loginUrl.pathname = '/admin/login'
         return NextResponse.redirect(loginUrl)
       }
@@ -107,14 +108,14 @@ export async function proxy(req: NextRequest) {
   if (subdomain === INVESTOR_SUB) {
     // Strip /investor/ prefix
     if (url.pathname.startsWith('/investor/')) {
-      const cleanUrl    = req.nextUrl.clone()
+      const cleanUrl = req.nextUrl.clone()
       cleanUrl.pathname = url.pathname.replace(/^\/investor/, '') || '/'
       return NextResponse.redirect(cleanUrl)
     }
 
     // Root → /dashboard
     if (url.pathname === '/' || url.pathname === '/investor') {
-      const cleanUrl    = req.nextUrl.clone()
+      const cleanUrl = req.nextUrl.clone()
       cleanUrl.pathname = '/dashboard'
       return NextResponse.redirect(cleanUrl)
     }
@@ -124,7 +125,7 @@ export async function proxy(req: NextRequest) {
     if (!isPublic) {
       const role = await getSessionRole(req)
       if (role !== 'investor') {
-        const loginUrl    = req.nextUrl.clone()
+        const loginUrl = req.nextUrl.clone()
         loginUrl.pathname = '/investor/login'
         return NextResponse.redirect(loginUrl)
       }
@@ -140,12 +141,12 @@ export async function proxy(req: NextRequest) {
   // ── Main domain ────────────────────────────────────────────────────────────
   if (!isLocalDev) {
     if (url.pathname.startsWith('/admin')) {
-      url.host     = `${ADMIN_SUB}.${PUBLIC_DOMAIN}`
+      url.host = `${ADMIN_SUB}.${PUBLIC_DOMAIN}`
       url.pathname = url.pathname.replace('/admin', '') || '/'
       return NextResponse.redirect(url)
     }
     if (url.pathname === '/investor' || url.pathname.startsWith('/investor/')) {
-      url.host     = `${INVESTOR_SUB}.${PUBLIC_DOMAIN}`
+      url.host = `${INVESTOR_SUB}.${PUBLIC_DOMAIN}`
       url.pathname = url.pathname.replace('/investor', '') || '/'
       return NextResponse.redirect(url)
     }
