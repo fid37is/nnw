@@ -144,7 +144,7 @@ export default function AnalyticsPage() {
           .eq('id', user.id)
           .single()
 
-        if (roleError || !userData || userData.role !== 'admin') {
+        if (roleError || !userData || (userData.role !== 'admin' && userData.role !== 'super_admin')) {
           await supabase.auth.signOut()
           window.location.replace('/login')
           return

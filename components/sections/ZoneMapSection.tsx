@@ -5,12 +5,12 @@ import { ArrowRight, MapPin, Trophy } from 'lucide-react'
 import { useScrollReveal } from '@/lib/hooks'
 
 const ZONES = [
-  { name:'South-West',   states:'Lagos, Ogun, Oyo, Osun, Ondo, Ekiti',               color:'from-emerald-600 to-naija-green-700', num:'01', contestants:'Coming Soon' },
+  { name:'South-West',   states:'Lagos, Ogun, Oyo, Osun, Ondo, Ekiti', color:'from-emerald-600 to-naija-green-700', num:'01', contestants:'Coming Soon' },
   { name:'South-South',  states:'Rivers, Delta, Bayelsa, Akwa Ibom, Edo, Cross River',color:'from-teal-600 to-cyan-700',           num:'02', contestants:'Coming Soon' },
-  { name:'South-East',   states:'Anambra, Imo, Enugu, Abia, Ebonyi',                  color:'from-naija-green-700 to-green-800',   num:'03', contestants:'Coming Soon' },
-  { name:'North-Central',states:'FCT, Niger, Kwara, Kogi, Benue, Plateau, Nasarawa',  color:'from-amber-600 to-orange-700',        num:'04', contestants:'Coming Soon' },
-  { name:'North-East',   states:'Kano, Jigawa, Katsina, Sokoto, Kebbi, Zamfara',      color:'from-orange-600 to-red-700',          num:'05', contestants:'Coming Soon' },
-  { name:'North-West',   states:'Bauchi, Borno, Adamawa, Gombe, Taraba, Yobe',        color:'from-purple-700 to-indigo-800',       num:'06', contestants:'Coming Soon' },
+  { name:'South-East',   states:'Anambra, Imo, Enugu, Abia, Ebonyi', color:'from-naija-green-700 to-green-800',   num:'03', contestants:'Coming Soon' },
+  { name:'North-Central',states:'FCT, Niger, Kwara, Kogi, Benue, Plateau, Nasarawa', color:'from-amber-600 to-orange-700',num:'04', contestants:'Coming Soon' },
+  { name:'North-East',   states:'Borno, Adamawa, Bauchi, Gombe, Taraba, Yobe', color:'from-orange-600 to-red-700', num:'05', contestants:'Coming Soon' },
+  { name:'North-West',   states:'Kano, Kaduna, Katsina, Sokoto, Kebbi, Zamfara, Jigawa', color:'from-purple-700 to-indigo-800', num:'06', contestants:'Coming Soon' },
 ]
 
 export default function ZoneMapSection({ isApplicationOpen = false }: { isApplicationOpen?: boolean }) {

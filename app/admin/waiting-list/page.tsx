@@ -39,7 +39,7 @@ function PageSkeleton() {
     <div className="flex">
       <AdminSidebar />
       <main className="flex-1 lg:ml-64 min-h-screen bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 py-6 lg:px-8 lg:py-8">
+        <div className="mx-auto px-4 py-6 lg:px-8 lg:py-8">
           {/* Header */}
           <div className="flex items-center justify-between mb-6">
             <div className="space-y-2">
@@ -183,7 +183,7 @@ export default function WaitingListPage() {
       <AdminSidebar />
 
       <main className="flex-1 lg:ml-64 min-h-screen bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 py-6 lg:px-8 lg:py-8">
+        <div className="mx-auto px-4 py-6 lg:px-8 lg:py-8">
 
           {/* ── Header ── */}
           <div className="flex items-center justify-between mb-6">

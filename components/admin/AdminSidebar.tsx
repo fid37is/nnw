@@ -4,38 +4,54 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname, useRouter } from 'next/navigation'
 import {
-  LayoutDashboard, Calendar, Users, Database, CreditCard, LogOut,
-  Menu, X, Trophy, ClipboardList, MessageSquare, Zap, Clock,
-  TrendingUp, ChevronDown, ListChecks, ChevronLeft,
-  KeyRound, ShieldCheck, UserPlus, UserCog, ChevronRight,
-} from 'lucide-react'
+  LayoutDashboard,
+  Calendar,
+  Users,
+  Database,
+  CreditCard,
+  LogOut,
+  Menu,
+  X,
+  Trophy,
+  ClipboardList,
+  MessageSquare,
+  Zap,
+  Clock,
+  TrendingUp,
+  ChevronDown,
+  ListChecks,
+  ChevronLeft,
+  KeyRound,
+  UserCog,
+  ChevronRight,
+} from '@/components/ui/icons';
 import { useState, useEffect, useRef } from 'react'
 import { supabase } from '@/lib/supabase/client'
 import { toast } from 'sonner'
 import { useLogoConfig } from '@/components/context/LogoContext'
 
 const navItems = [
-  { label: 'Dashboard',     href: '/dashboard',        icon: LayoutDashboard },
-  { label: 'Applications',  href: '/applications',     icon: Users           },
-  { label: 'Payments',      href: '/payment',          icon: CreditCard      },
-  { label: 'Users',         href: '/users',            icon: Users           },
-  { label: 'Job Applicants',href: '/job-applications', icon: Users           },
-  { label: 'Champions',     href: '/champions',        icon: Trophy          },
-  { label: 'Seasons',       href: '/seasons',          icon: Calendar        },
+  { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
+  { label: 'Applications', href: '/applications', icon: Users },
+  { label: 'Payments', href: '/payment', icon: CreditCard },
+  { label: 'Users', href: '/users', icon: Users },
+  { label: 'Job Applicants', href: '/job-applications', icon: Users },
+  { label: 'Champions', href: '/champions', icon: Trophy },
+  { label: 'Seasons', href: '/seasons', icon: Calendar },
   {
     label: 'Competition',
     icon: Zap,
     submenu: [
-      { label: 'Stages',      href: '/stages',         icon: Zap        },
-      { label: 'Performance', href: '/performance',    icon: Clock      },
-      { label: 'Progress',    href: '/stage-progress', icon: TrendingUp },
+      { label: 'Stages', href: '/stages', icon: Zap },
+      { label: 'Performance', href: '/performance', icon: Clock },
+      { label: 'Progress', href: '/stage-progress', icon: TrendingUp },
     ],
   },
-  { label: 'Messages',    href: '/messages',       icon: MessageSquare },
-  { label: 'Investors',   href: '/investors',      icon: TrendingUp    },
-  { label: 'Audit Logs',  href: '/audit-logs',     icon: ClipboardList },
-  { label: 'Add Items',   href: '/merch-sponsor',  icon: Database      },
-  { label: 'Waiting List',href: '/waiting-list',   icon: ListChecks    },
+  { label: 'Messages', href: '/messages', icon: MessageSquare },
+  { label: 'Investors', href: '/investors', icon: TrendingUp },
+  { label: 'Audit Logs', href: '/audit-logs', icon: ClipboardList },
+  { label: 'Add Items', href: '/merch-sponsor', icon: Database },
+  { label: 'Waiting List', href: '/waiting-list', icon: ListChecks },
 ]
 
 interface AdminUser {
@@ -46,21 +62,21 @@ interface AdminUser {
 }
 
 export default function AdminSidebar() {
-  const pathname  = usePathname()
-  const router    = useRouter()
+  const pathname = usePathname()
+  const router = useRouter()
   const { logoUrl } = useLogoConfig()
 
-  const [isMobileOpen,  setIsMobileOpen]  = useState(false)
-  const [isCollapsed,   setIsCollapsed]   = useState(false)
-  const [expandedMenu,  setExpandedMenu]  = useState<string | null>(null)
-  const [showPopup,     setShowPopup]     = useState(false)
-  const [currentAdmin,  setCurrentAdmin]  = useState<AdminUser | null>(null)
-  const [isSuperAdmin,  setIsSuperAdmin]  = useState(false)
+  const [isMobileOpen, setIsMobileOpen] = useState(false)
+  const [isCollapsed, setIsCollapsed] = useState(false)
+  const [expandedMenu, setExpandedMenu] = useState<string | null>(null)
+  const [showPopup, setShowPopup] = useState(false)
+  const [currentAdmin, setCurrentAdmin] = useState<AdminUser | null>(null)
+  const [isSuperAdmin, setIsSuperAdmin] = useState(false)
 
   // Password reset modal state
-  const [showPwModal,   setShowPwModal]   = useState(false)
-  const [newPassword,   setNewPassword]   = useState('')
-  const [pwLoading,     setPwLoading]     = useState(false)
+  const [showPwModal, setShowPwModal] = useState(false)
+  const [newPassword, setNewPassword] = useState('')
+  const [pwLoading, setPwLoading] = useState(false)
 
   const popupRef = useRef<HTMLDivElement>(null)
 
@@ -205,7 +221,7 @@ export default function AdminSidebar() {
         <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-1 scrollbar-thin scrollbar-thumb-naija-green-700">
           {navItems.map((item) => {
             const Icon = item.icon
-            const isActive   = isMenuActive(item)
+            const isActive = isMenuActive(item)
             const isExpanded = expandedMenu === item.label
 
             return (
@@ -294,20 +310,20 @@ export default function AdminSidebar() {
             {/* Popup */}
             {showPopup && (
               <div className={`absolute bottom-full mb-2 bg-white rounded-xl shadow-2xl border border-gray-100 overflow-hidden z-50 w-56
-                ${isCollapsed ? 'left-full ml-2 bottom-0 mb-0' : 'left-0'}`}>
+    ${isCollapsed ? 'left-full ml-2 bottom-0 mb-0' : 'left-0'}`}>
 
                 {/* Admin info header */}
                 <div className="px-4 py-3 bg-naija-green-50 border-b border-gray-100">
                   <p className="text-xs font-bold text-naija-green-900 truncate">{currentAdmin?.full_name}</p>
                   <p className="text-xs text-gray-500 truncate">{currentAdmin?.email}</p>
                   <span className={`mt-1 inline-block text-xs px-2 py-0.5 rounded-full font-semibold
-                    ${isSuperAdmin ? 'bg-red-100 text-red-700' : 'bg-naija-green-100 text-naija-green-700'}`}>
+        ${isSuperAdmin ? 'bg-red-100 text-red-700' : 'bg-naija-green-100 text-naija-green-700'}`}>
                     {isSuperAdmin ? 'Super Admin' : 'Admin'}
                   </span>
                 </div>
 
                 <div className="py-1">
-                  {/* Reset password */}
+                  {/* Reset own password */}
                   <button
                     onClick={() => { setShowPopup(false); setShowPwModal(true) }}
                     className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition"
@@ -316,36 +332,16 @@ export default function AdminSidebar() {
                     Reset Password
                   </button>
 
-                  {/* Permission settings — super admin only */}
+                  {/* Manage Admins — super admin only */}
                   {isSuperAdmin && (
                     <button
-                      onClick={() => { setShowPopup(false); router.push('/admin/admins') }}
+                      onClick={() => { setShowPopup(false); router.push('/admins') }}
                       className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition"
                     >
-                      <ShieldCheck size={15} className="text-gray-400" />
-                      Permission Settings
+                      <UserCog size={15} className="text-gray-400" />
+                      Manage Admins
                     </button>
                   )}
-
-                  {/* Add admin — super admin only */}
-                  {isSuperAdmin && (
-                    <button
-                      onClick={() => { setShowPopup(false); router.push('/admin/admins?action=add') }}
-                      className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition"
-                    >
-                      <UserPlus size={15} className="text-gray-400" />
-                      Add Admin
-                    </button>
-                  )}
-
-                  {/* Admins list */}
-                  <button
-                    onClick={() => { setShowPopup(false); router.push('/admin/admins') }}
-                    className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition"
-                  >
-                    <UserCog size={15} className="text-gray-400" />
-                    Manage Admins
-                  </button>
 
                   <div className="border-t border-gray-100 mt-1 pt-1">
                     <button
