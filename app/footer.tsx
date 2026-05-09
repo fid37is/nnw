@@ -31,8 +31,11 @@ export default function Footer() {
                 <sup className="text-xs font-black ml-1">™</sup>
               </h3>
             </div>
-            <p className="text-sm text-gray-300 mb-4">
+            <p className="text-sm text-gray-300 mb-2">
               Africa's first ninja competition series. Test your strength, speed, and spirit.
+            </p>
+            <p className="text-xs text-gray-500 mb-4">
+              A WLA Entertainment Company
             </p>
             <div className="flex gap-3 flex-wrap">
               <a href="https://x.com/officialnnw" target="_blank" rel="noopener noreferrer" 
@@ -112,13 +115,13 @@ export default function Footer() {
               <li><Link href="/faq" className="hover:text-naija-green-400 transition">FAQ</Link></li>
             </ul>
             <div className="space-y-2 text-sm">
-              <a href="mailto:phyd3lis@gmail.com" className="flex items-center gap-2 hover:text-naija-green-400 transition">
+              <a href="mailto:support@naijaninja.net" className="flex items-center gap-2 hover:text-naija-green-400 transition">
                 <Mail size={16} />
-                <span>phyd3lis@gmail.com</span>
+                <span>support@naijaninja.net</span>
               </a>
-              <a href="tel:+2347038264911" className="flex items-center gap-2 hover:text-naija-green-400 transition">
+              <a href="tel:+2348085952266" className="flex items-center gap-2 hover:text-naija-green-400 transition">
                 <Phone size={16} />
-                <span>+234 703 826 4911</span>
+                <span>+234 808 595 2266</span>
               </a>
             </div>
           </div>
@@ -126,6 +129,11 @@ export default function Footer() {
 
         <div className="border-t border-gray-800 pt-8 text-center text-sm text-gray-500">
           <p className="text-gray-300">© 2026 Naija Ninja Warrior. All rights reserved.</p>
+          <p className="mt-2 text-gray-500 text-xs tracking-wide">
+            Naija Ninja Warrior is{' '}
+            <span className="text-naija-green-400 font-semibold">A WLA Entertainment Company</span>
+            {' '}· RC No. 9529867
+          </p>
         </div>
       </div>
     </footer>

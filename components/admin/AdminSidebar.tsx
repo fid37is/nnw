@@ -202,7 +202,12 @@ export default function AdminSidebar() {
               </div>
             )}
             {!isCollapsed && (
-              <span className="font-bold text-lg truncate text-white">Admin</span>
+              <div className="flex flex-col leading-tight min-w-0">
+                <span className="font-bold text-lg truncate text-white">Admin</span>
+                <span className="text-[10px] text-naija-green-400 font-semibold tracking-wider uppercase">
+                  Powered by WLA
+                </span>
+              </div>
             )}
           </button>
 

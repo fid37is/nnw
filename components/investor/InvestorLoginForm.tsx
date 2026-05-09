@@ -1,7 +1,4 @@
-// File: app/investor/login/InvestorLoginForm.tsx
-// Uses shared supabase client from lib/supabase/client.ts
-// That client now uses createBrowserClient internally — writes cookies automatically.
-
+// File: components/investor/InvestorLoginForm.tsx
 'use client'
 
 import { useState, useEffect } from 'react'
@@ -78,6 +75,8 @@ export default function InvestorLoginForm() {
         style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '32px 32px' }} />
       <div className="w-full max-w-md relative">
         <div className="bg-white rounded-2xl shadow-2xl overflow-hidden">
+
+          {/* Header */}
           <div className="bg-gradient-to-br from-naija-green-700 to-naija-green-800 px-8 py-10 text-center">
             {logoUrl ? (
               <Image src={logoUrl} alt="NNW" width={64} height={64} className="rounded-xl mx-auto mb-4 shadow-lg" />
@@ -89,6 +88,8 @@ export default function InvestorLoginForm() {
             <h1 className="text-2xl font-bold text-white mb-1">Investor Portal</h1>
             <p className="text-naija-green-200 text-sm">Naija Ninja Warrior</p>
           </div>
+
+          {/* Form */}
           <div className="px-8 py-8">
             <p className="text-gray-600 text-sm text-center mb-6">Sign in with the credentials provided by the NNW team.</p>
             <form onSubmit={handleSubmit} className="space-y-5">
@@ -125,17 +126,37 @@ export default function InvestorLoginForm() {
             <div className="mt-6 pt-6 border-t border-gray-100 text-center">
               <p className="text-xs text-gray-500 leading-relaxed">
                 Don't have access? Contact the NNW team at{' '}
-                <a href="mailto:phyd3lis@gmail.com" className="text-naija-green-600 hover:underline font-medium">phyd3lis@gmail.com</a>
+                <a href="mailto:support@naijaninja.net" className="text-naija-green-600 hover:underline font-medium">support@naijaninja.net</a>
               </p>
             </div>
           </div>
+
+          {/* WLA Footer Strip */}
+          <div className="bg-gray-950 border-t border-gray-800 px-6 py-4 flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-lg overflow-hidden bg-black flex-shrink-0 flex items-center justify-center">
+                <Image
+                  src="/wla-logo.png"
+                  alt="WLA"
+                  width={36}
+                  height={36}
+                  className="object-contain"
+                />
+              </div>
+              <div>
+                <p className="text-white text-xs font-bold leading-tight">WLA Entertainment Ltd</p>
+                <p className="text-gray-500 text-[10px] leading-tight">A WLA Entertainment Company · RC No. 9529867</p>
+              </div>
+            </div>
+            <Link href="https://naijaninja.net" className="text-naija-green-400 text-xs hover:text-naija-green-300 transition whitespace-nowrap">
+              ← Main site
+            </Link>
+          </div>
         </div>
-        <div className="text-center mt-6">
-          <p className="text-naija-green-300 text-xs">© {new Date().getFullYear()} Naija Ninja Warrior · NNW Entertainment Limited</p>
-          <Link href="https://naijaninja.net" className="text-naija-green-400 text-xs hover:text-naija-green-300 transition mt-1 inline-block">
-            ← Back to main site
-          </Link>
-        </div>
+
+        <p className="text-naija-green-400 text-xs text-center mt-4">
+          © {new Date().getFullYear()} WLA Entertainment Ltd · All Rights Reserved
+        </p>
       </div>
     </main>
   )

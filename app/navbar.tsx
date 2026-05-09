@@ -67,9 +67,12 @@ export default function Navbar() {
                 </div>
               )}
             </div>
-            <span className="font-black text-xl text-white hidden sm:inline leading-none">
-              Naija Ninja
-            </span>
+            <div className="hidden sm:flex flex-col leading-tight">
+              <span className="font-black text-xl text-white leading-none">Naija Ninja</span>
+              <span className="text-[10px] text-naija-green-400 font-semibold tracking-wider uppercase leading-tight">
+                A WLA Company
+              </span>
+            </div>
           </Link>
 
           <div className="hidden md:flex items-center justify-center flex-1 mx-8">
