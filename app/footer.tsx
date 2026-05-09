@@ -115,13 +115,13 @@ export default function Footer() {
               <li><Link href="/faq" className="hover:text-naija-green-400 transition">FAQ</Link></li>
             </ul>
             <div className="space-y-2 text-sm">
-              <a href="mailto:phyd3lis@gmail.com" className="flex items-center gap-2 hover:text-naija-green-400 transition">
+              <a href="mailto:support@naijaninja.net" className="flex items-center gap-2 hover:text-naija-green-400 transition">
                 <Mail size={16} />
-                <span>phyd3lis@gmail.com</span>
+                <span>support@naijaninja.net</span>
               </a>
-              <a href="tel:+2347038264911" className="flex items-center gap-2 hover:text-naija-green-400 transition">
+              <a href="tel:+2348085952266" className="flex items-center gap-2 hover:text-naija-green-400 transition">
                 <Phone size={16} />
-                <span>+234 703 826 4911</span>
+                <span>+234 808 595 2266</span>
               </a>
             </div>
           </div>
