@@ -31,8 +31,11 @@ export default function Footer() {
                 <sup className="text-xs font-black ml-1">™</sup>
               </h3>
             </div>
-            <p className="text-sm text-gray-300 mb-4">
+            <p className="text-sm text-gray-300 mb-2">
               Africa's first ninja competition series. Test your strength, speed, and spirit.
+            </p>
+            <p className="text-xs text-gray-500 mb-4">
+              A WLA Entertainment Company
             </p>
             <div className="flex gap-3 flex-wrap">
               <a href="https://x.com/officialnnw" target="_blank" rel="noopener noreferrer" 
@@ -126,6 +129,11 @@ export default function Footer() {
 
         <div className="border-t border-gray-800 pt-8 text-center text-sm text-gray-500">
           <p className="text-gray-300">© 2026 Naija Ninja Warrior. All rights reserved.</p>
+          <p className="mt-2 text-gray-500 text-xs tracking-wide">
+            Naija Ninja Warrior is{' '}
+            <span className="text-naija-green-400 font-semibold">A WLA Entertainment Company</span>
+            {' '}· RC No. 9529867
+          </p>
         </div>
       </div>
     </footer>

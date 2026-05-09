@@ -73,6 +73,11 @@ function AuthLayoutContent({ children }: { children: React.ReactNode }) {
             <p className="text-xs text-gray-500 text-center mt-6">
               By using this platform, you agree to our Terms of Service and Privacy Policy
             </p>
+            <p className="text-xs text-gray-400 text-center mt-2">
+              Powered by{' '}
+              <span className="text-naija-green-600 font-semibold">WLA</span>
+              {' '}· Warrior League Africa
+            </p>
           </div>
         </div>
       </div>
