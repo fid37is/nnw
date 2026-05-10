@@ -271,7 +271,7 @@ export default function PartnersPage() {
               We invite investors, media partners, and corporate sponsors to collaborate on launching Africa's most exciting sports entertainment platform. Together, we can inspire millions and create lasting value.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
-              <a href="mailto:phyd3lis@gmail.com" className="inline-block px-8 py-3 bg-white text-primary font-bold rounded-full hover:bg-primary-50 transition-all shadow-lg hover:shadow-xl">
+              <a href="mailto:fidelis@naijaninja.net" className="inline-block px-8 py-3 bg-white text-primary font-bold rounded-full hover:bg-primary-50 transition-all shadow-lg hover:shadow-xl">
                 Request Partnership Deck
               </a>
               <Link href="/contact" className="inline-block px-8 py-3 bg-primary-500 text-white font-bold rounded-full hover:bg-primary-400 border-2 border-white transition-all shadow-lg hover:shadow-xl">
@@ -281,7 +281,7 @@ export default function PartnersPage() {
             <div className="pt-8 border-t border-white/20">
               <p className="text-sm text-primary-100 mb-2">Partnership Inquiries</p>
               <p className="font-semibold">Fidelis Agba</p>
-              <p className="text-primary-100">phyd3lis@gmail.com | Mobile: +234 703 826 4911 | WhatsApp: +234 703 826 4911</p>
+              <p className="text-primary-100">fidelis@naijaninja.net | Mobile: +234 703 826 4911 | WhatsApp: +234 808 595 2266</p>
             </div>
           </div>
         </div>
