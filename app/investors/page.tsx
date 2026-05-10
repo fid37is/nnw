@@ -1,11 +1,12 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import {
   ArrowLeft, TrendingUp, Target, Users, Globe,
   BarChart3, Award, PieChart, DollarSign, Tv,
   ShoppingBag, Smartphone, CheckCircle, AlertTriangle, ArrowRight
-} from 'lucide-react'
+} from '@/components/ui/icons'
 import Navbar from '../navbar'
 import Footer from '../footer'
 
@@ -28,18 +29,33 @@ export default function InvestorRelationsPage() {
           <p className="text-xl text-gray-600">Investment Opportunity in Africa's Premier Sports Entertainment Platform</p>
         </div>
 
+        {/* WLA Parent Banner */}
+        <div className="rounded-2xl overflow-hidden border border-gray-800 shadow-lg mb-10">
+          <div className="bg-gray-950 px-6 py-6 flex flex-col sm:flex-row items-center gap-6">
+            <div className="flex-shrink-0 w-20 h-20 rounded-xl overflow-hidden bg-black flex items-center justify-center border border-gray-800">
+              <Image src="/wla-logo.png" alt="WLA Entertainment Ltd" width={80} height={80} className="object-contain" />
+            </div>
+            <div className="text-center sm:text-left">
+              <p className="text-yellow-400 text-xs font-bold tracking-widest uppercase mb-0.5">Parent Company & Legal Entity</p>
+              <h2 className="text-xl font-black text-white mb-1">WLA Entertainment Ltd</h2>
+              <p className="text-gray-400 text-xs mb-2">A WLA Entertainment Company · RC No. 9529867 · Incorporated May 2026</p>
+              <p className="text-gray-300 text-sm">Naija Ninja Warrior is the flagship property of WLA Entertainment Ltd - a CAC-registered company built to own, operate, and expand warrior-format sports entertainment across Africa.</p>
+            </div>
+          </div>
+        </div>
+
         {/* Executive Summary */}
         <div className="bg-gradient-to-br from-naija-green-600 to-naija-green-700 text-white rounded-xl p-8 md:p-12 mb-16">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">Investment Opportunity</h2>
           <p className="text-lg text-green-50 leading-relaxed mb-8">
-            Naija Ninja Warrior (NNW) is Nigeria's first national-scale physical challenge competition franchise.
-            Operating across all six geopolitical zones with a Grand Finale in Abuja, NNW combines live sports
+            Naija Ninja Warrior (NNW) is Nigeria's first national-scale physical challenge competition franchise, operated by WLA Entertainment Ltd.
+            Running across all six geopolitical zones with a Grand Finale in Abuja, NNW combines live sports
             entertainment, digital media, and cultural identity into a scalable, multi-revenue business built
             for both local dominance and continental expansion.
           </p>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {[
-              { value: '₦500M',   label: 'Series A Target' },
+              { value: '₦600M',   label: 'Series A Target' },
               { value: '220M+',   label: 'Addressable Audience' },
               { value: '70%',     label: 'Population Under 30' },
               { value: 'Q4 2026', label: 'Season 1 Launch' },
@@ -60,7 +76,7 @@ export default function InvestorRelationsPage() {
               { icon: <Globe size={24}/>, title: 'First-Mover Advantage',
                 desc: "Zero direct competitors in African ninja-style sports entertainment. NNW enters an untapped market with a proven global format adapted for the world's youngest major economy." },
               { icon: <Users size={24}/>, title: 'Massive Youth Demographic',
-                desc: "70% of Nigeria's 220M+ population is under 30 — precisely the demographic that drives streaming, social media engagement, and live event attendance." },
+                desc: "70% of Nigeria's 220M+ population is under 30 - precisely the demographic that drives streaming, social media engagement, and live event attendance." },
               { icon: <TrendingUp size={24}/>, title: 'Proven Global Model',
                 desc: "American Ninja Warrior generates $100M+ annually. NNW replicates this formula with Nigerian identity and a proprietary tactical obstacle format that does not exist anywhere else globally." },
               { icon: <Target size={24}/>, title: 'Multi-Revenue Architecture',
@@ -88,9 +104,9 @@ export default function InvestorRelationsPage() {
                   {[
                     ['Nigeria Entertainment Market','$7.2B (2024), growing 15% YoY'],
                     ['African Fitness Industry','$2.3B addressable market'],
-                    ['Sports Broadcasting — Nigeria','$850M annual market'],
-                    ['Digital Streaming — Sub-Saharan Africa','45% annual growth'],
-                    ['Direct NNW Competitors in Africa','Zero — absolute first-mover'],
+                    ['Sports Broadcasting - Nigeria','$850M annual market'],
+                    ['Digital Streaming - Sub-Saharan Africa','45% annual growth'],
+                    ['Direct NNW Competitors in Africa','Zero - absolute first-mover'],
                   ].map(([l,v],i)=>(
                     <li key={i} className="flex gap-3">
                       <span className="text-naija-green-600 font-bold flex-shrink-0">•</span>
@@ -106,9 +122,9 @@ export default function InvestorRelationsPage() {
                 <ul className="space-y-3 text-gray-700">
                   {[
                     'Zero direct competitors in African ninja entertainment',
-                    'Proprietary tactical equipment-based obstacle format — not replicated globally',
-                    'Live website, contestant platform, and trademark already in place',
-                    'Scalable franchise model designed for continental expansion',
+                    'Proprietary tactical obstacle format - not replicated globally',
+                    'Live website, contestant platform, and CAC-registered entity already in place',
+                    'Scalable franchise model designed for continental expansion under WLA',
                   ].map((item,i)=>(
                     <li key={i} className="flex gap-3">
                       <span className="text-naija-green-600 font-bold flex-shrink-0">✓</span>
@@ -150,10 +166,10 @@ export default function InvestorRelationsPage() {
                 desc:'Licensing to DSTV, Africa Magic, Channels TV, Netflix Africa, Amazon Prime Video, and YouTube monetisation.' },
               { icon:<Users size={22}/>, stream:'Ticket Sales & Live Events', tag:'Direct Cash Flow',
                 y1:'₦85M', y3:'₦150M', y5:'₦200M',
-                desc:'6 zonal events (2,000 avg. attendees at ₦5,000) plus Grand Finale in Abuja (5,000 attendees). Includes vendor booth fees.' },
+                desc:'6 zonal events plus Grand Finale in Abuja. Includes vendor booth fees and hospitality packages.' },
               { icon:<CheckCircle size={22}/>, stream:'Registration Fees', tag:'Scalable Income',
                 y1:'₦30M', y3:'₦55M', y5:'₦80M',
-                desc:'Free registration for all applicants. Only approved contestants pay a participation token (₦5,000–₦10,000), ensuring commitment and filtering.' },
+                desc:'Free registration for all applicants. Only approved contestants pay a participation token, ensuring commitment and filtering.' },
               { icon:<ShoppingBag size={22}/>, stream:'Merchandise', tag:'Brand Equity Converted',
                 y1:'₦20M', y3:'₦80M', y5:'₦180M',
                 desc:'Branded apparel, sportswear, accessories, and fitness gear sold online and at all competition events.' },
@@ -161,8 +177,8 @@ export default function InvestorRelationsPage() {
                 y1:'₦15M', y3:'₦60M', y5:'₦150M',
                 desc:'Fan subscriptions, in-app advertising, and social media brand deals via the NNW digital platform and channels.' },
               { icon:<Globe size={22}/>, stream:'Franchise Licensing', tag:'Season 3+ Expansion',
-                y1:'—', y3:'₦50M', y5:'₦170M',
-                desc:'Licensing the NNW format and brand to other African markets under the "Africa Ninja Challenge" model.' },
+                y1:'-', y3:'₦50M', y5:'₦170M',
+                desc:'Licensing the NNW format and WLA brand to other African markets under the continental expansion model.' },
             ].map((item,i)=>(
               <div key={i} className="bg-white rounded-xl p-6 border-2 border-gray-200 flex flex-col">
                 <div className="flex items-center justify-between mb-3">
@@ -203,7 +219,7 @@ export default function InvestorRelationsPage() {
                     ['Registration Fees','₦30M','₦40M','₦55M','₦65M','₦80M'],
                     ['Merchandise','₦20M','₦35M','₦80M','₦120M','₦180M'],
                     ['Digital Platform','₦15M','₦35M','₦60M','₦100M','₦150M'],
-                    ['Franchise Licensing','—','—','₦50M','₦120M','₦170M'],
+                    ['Franchise Licensing','-','-','₦50M','₦120M','₦170M'],
                   ].map((row,i)=>(
                     <tr key={i} className={i%2===0?'bg-white':'bg-naija-green-50'}>
                       {row.map((cell,j)=>(
@@ -251,7 +267,7 @@ export default function InvestorRelationsPage() {
             </div>
             <div className="p-6 bg-white">
               <p className="text-gray-600 text-sm mb-6 leading-relaxed">
-                Investor acquires equity in NNW Entertainment Limited. As the company grows, equity appreciates in value. Returns come through profit distributions and, ultimately, an exit event.
+                Investor acquires equity in WLA Entertainment Ltd. As the company grows, equity appreciates in value. Returns come through profit distributions and, ultimately, an exit event.
               </p>
               <div className="overflow-x-auto mb-6">
                 <table className="w-full text-sm border border-gray-200 rounded-lg overflow-hidden">
@@ -264,7 +280,7 @@ export default function InvestorRelationsPage() {
                   </thead>
                   <tbody>
                     <tr className="bg-naija-green-50">
-                      {['₦500M (Series A)','25%','₦1.5B','₦2.0B','₦25M'].map((c,i)=>(
+                      {['₦600M (Series A)','25%','₦1.8B','₦2.4B','₦25M'].map((c,i)=>(
                         <td key={i} className="px-4 py-3 text-center font-bold text-naija-green-700">{c}</td>
                       ))}
                     </tr>
@@ -332,7 +348,7 @@ export default function InvestorRelationsPage() {
                 </table>
               </div>
               <div className="bg-naija-green-50 border border-naija-green-200 rounded-lg p-4 text-sm text-gray-700 italic">
-                <strong>Example:</strong> An investor commits ₦100M. Under 30% revenue share on Year 1 projected revenue of ₦380M, the investor receives ₦114M in Year 1 — fully recovering capital with a 14% return in the first year alone, before the ongoing royalty phase begins.
+                <strong>Example:</strong> An investor commits ₦100M. Under 30% revenue share on Year 1 projected revenue of ₦380M, the investor receives ₦114M in Year 1 - fully recovering capital with a 14% return in the first year alone, before the ongoing royalty phase begins.
               </div>
             </div>
           </div>
@@ -348,7 +364,7 @@ export default function InvestorRelationsPage() {
             </div>
             <div className="p-6 bg-white">
               <p className="text-gray-600 text-sm mb-6 leading-relaxed">
-                Corporate sponsors do not receive financial dividends. Their return is measured in brand value, market penetration, and competitive positioning — through the most concentrated access to Nigeria's youth demographic available in any single entertainment platform.
+                Corporate sponsors do not receive financial dividends. Their return is measured in brand value, market penetration, and competitive positioning - through the most concentrated access to Nigeria's youth demographic available in any single entertainment platform.
               </p>
               <div className="overflow-x-auto">
                 <table className="w-full text-sm border border-gray-200 rounded-lg overflow-hidden">
@@ -421,16 +437,16 @@ export default function InvestorRelationsPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div>
                 <h3 className="font-bold text-gray-900 mb-6 text-xl flex items-center gap-2">
-                  <PieChart className="text-naija-green-600" size={24}/>Series A Allocation (₦500M)
+                  <PieChart className="text-naija-green-600" size={24}/>Series A Allocation (₦600M)
                 </h3>
                 <div className="space-y-3">
                   {[
-                    {c:'Production & Course Build',a:'₦180M',p:'36%',d:'Obstacle design, construction (portable/reusable), event staging across 6 zones'},
-                    {c:'Marketing & Brand Building',a:'₦100M',p:'20%',d:'Campaign launch, influencer partnerships, PR and nationwide awareness'},
-                    {c:'Operations & Logistics',a:'₦80M',p:'16%',d:'Transportation, crew, event management and staffing across all zones'},
-                    {c:'Technology Platform',a:'₦60M',p:'12%',d:'Website, mobile app and streaming platform integration'},
-                    {c:'Working Capital',a:'₦50M',p:'10%',d:'Operational buffer, emergency reserve and contestant welfare fund'},
-                    {c:'Legal & Compliance',a:'₦30M',p:'6%',d:'Legal counsel, insurance, regulatory compliance and IP protection'},
+                    {c:'Production & Course Build',a:'₦216M',p:'36%',d:'Obstacle design, construction (portable/reusable), event staging across 6 zones'},
+                    {c:'Marketing & Brand Building',a:'₦120M',p:'20%',d:'Campaign launch, influencer partnerships, PR and nationwide awareness'},
+                    {c:'Operations & Logistics',a:'₦96M',p:'16%',d:'Transportation, crew, event management and staffing across all zones'},
+                    {c:'Technology Platform',a:'₦72M',p:'12%',d:'Website, mobile app and streaming platform integration'},
+                    {c:'Working Capital',a:'₦60M',p:'10%',d:'Operational buffer, emergency reserve and contestant welfare fund'},
+                    {c:'Legal & Compliance',a:'₦36M',p:'6%',d:'Legal counsel, insurance, regulatory compliance and IP protection'},
                   ].map((item,i)=>(
                     <div key={i} className="p-3 bg-white rounded-lg border border-naija-green-200">
                       <div className="flex justify-between items-center mb-1">
@@ -446,19 +462,25 @@ export default function InvestorRelationsPage() {
                 <h3 className="font-bold text-gray-900 mb-6 text-xl">Key Milestones</h3>
                 <div className="space-y-3">
                   {[
-                    {m:'LLC incorporation & legal setup complete',s:'Planned',d:'Q2 2026'},
+                    {m:'WLA Entertainment Ltd incorporated - CAC registered',s:'Completed',d:'May 2026'},
                     {m:'Trademark strategy & IP protection finalised',s:'Planned',d:'Q2 2026'},
                     {m:'Series A close & partner agreements signed',s:'Planned',d:'Q3 2026'},
                     {m:'Course construction & pilot episode',s:'Planned',d:'Q3 2026'},
                     {m:'Season 1 launch across 6 zones',s:'Planned',d:'Q4 2026'},
-                    {m:'National Finals broadcast — Abuja',s:'Planned',d:'Q4 2026'},
-                    {m:'Franchise expansion prep — Africa',s:'Future',d:'Q1 2027'},
-                    {m:'Season 2 + 2 new African markets',s:'Future',d:'Q2 2027'},
+                    {m:'National Finals broadcast - Abuja',s:'Planned',d:'Q4 2026'},
+                    {m:'Franchise expansion prep - Africa',s:'Future',d:'Q1 2027'},
+                    {m:'Season 2 + new African markets',s:'Future',d:'Q2 2027'},
                   ].map((item,i)=>(
                     <div key={i} className="p-3 bg-white rounded-lg border border-naija-green-200">
                       <p className="text-gray-700 text-sm font-medium mb-1">{item.m}</p>
                       <div className="flex items-center gap-2">
-                        <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${item.s==='Planned'?'bg-naija-green-100 text-naija-green-700':'bg-gray-100 text-gray-600'}`}>{item.s}</span>
+                        <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                          item.s==='Completed'
+                            ? 'bg-green-100 text-green-700'
+                            : item.s==='Planned'
+                            ? 'bg-naija-green-100 text-naija-green-700'
+                            : 'bg-gray-100 text-gray-600'
+                        }`}>{item.s}</span>
                         <span className="text-xs text-gray-500">{item.d}</span>
                       </div>
                     </div>
@@ -477,13 +499,13 @@ export default function InvestorRelationsPage() {
               <h3 className="font-bold text-gray-900 mb-4 text-lg">Deal Structure</h3>
               <div className="space-y-3 text-sm">
                 {[
-                  ['Raising Amount','₦500M (~$300K–$350K USD)'],
+                  ['Raising Amount','₦600M'],
                   ['Equity Offered','25%'],
-                  ['Pre-Money Valuation','₦1.5B'],
-                  ['Post-Money Valuation','₦2.0B'],
+                  ['Pre-Money Valuation','₦1.8B'],
+                  ['Post-Money Valuation','₦2.4B'],
                   ['Minimum Investment','₦25M'],
                   ['Target Close Date','Q3 2026'],
-                  ['Legal Entity','NNW Entertainment Limited (in incorporation)'],
+                  ['Legal Entity','WLA Entertainment Ltd (RC No. 9529867)'],
                 ].map(([l,v],i)=>(
                   <div key={i} className="flex justify-between py-2 border-b border-gray-100 last:border-0">
                     <span className="text-gray-600">{l}</span>
@@ -495,14 +517,14 @@ export default function InvestorRelationsPage() {
             <div className="bg-white rounded-xl p-6 border-2 border-gray-200">
               <h3 className="font-bold text-gray-900 mb-3 text-lg">Investor Portal Access</h3>
               <p className="text-sm text-gray-600 mb-4 leading-relaxed">
-                Upon completing their investment, all investors receive secure access to the NNW Investor Portal — a dedicated dashboard providing real-time visibility into their investment.
+                Upon completing their investment, all investors receive secure access to the NNW Investor Portal - a dedicated dashboard providing real-time visibility into their investment.
               </p>
               <ul className="space-y-2 text-sm">
                 {[
-                  'Live financial metrics — revenue, expenditure, returns by stream',
-                  'Operational metrics — contestants, event progress, ticket sales',
+                  'Live financial metrics - revenue, expenditure, returns by stream',
+                  'Operational metrics - contestants, event progress, ticket sales',
                   'Season milestone tracker with live status updates',
-                  'Secure document library — agreements, reports, certificates',
+                  'Secure document library - agreements, reports, certificates',
                   'Quarterly financial reports (downloadable PDF)',
                   'Direct communication channel with the founding team',
                 ].map((item,i)=>(
@@ -526,9 +548,9 @@ export default function InvestorRelationsPage() {
               </div>
               <div className="flex-1">
                 <h3 className="text-2xl font-bold text-gray-900 mb-1">Fidelis Agba</h3>
-                <p className="text-naija-green-600 font-semibold mb-4">Founder & CEO — NNW Entertainment Limited</p>
+                <p className="text-naija-green-600 font-semibold mb-4">Founder & CEO - WLA Entertainment Ltd</p>
                 <p className="text-gray-600 leading-relaxed mb-4">
-                  Creator of the Naija Ninja Warrior franchise concept, including the proprietary tactical equipment-based obstacle format. Responsible for brand development, IP strategy, platform architecture, investor relations, and overall business direction. NNW is built from the ground up to be Nigeria's first nationally scaled ninja competition — with the ambition to expand across the African continent.
+                  Founder of WLA Entertainment Ltd and creator of the Naija Ninja Warrior franchise, including the proprietary tactical obstacle format. Responsible for brand development, IP strategy, platform architecture, investor relations, and overall business direction. WLA is built from the ground up to own and operate Nigeria's first nationally scaled ninja competition - with a clear mandate to expand across the African continent.
                 </p>
                 <div className="flex flex-wrap gap-2">
                   {['Brand Strategy','Franchise Development','IP Ownership','Investor Relations','Platform Development'].map((s,i)=>(
@@ -555,11 +577,11 @@ export default function InvestorRelationsPage() {
               {risk:'Sponsorship Revenue', desc:'Reliance on corporate sponsors in an uncertain economic environment.',
                mitigation:'Diversified sponsor target list across telecoms, banks, FMCG, and sportswear. Revenue-share model reduces sponsor risk. Multiple partnership tiers lower the barrier to entry.'},
               {risk:'Operational Complexity', desc:'Running events across 6 geopolitical zones is logistically demanding.',
-               mitigation:'Phased rollout — zones run sequentially, not simultaneously. Portable and reusable course design reduces per-zone cost. Experienced production partners contracted before Season 1.'},
+               mitigation:'Phased rollout - zones run sequentially, not simultaneously. Portable and reusable course design reduces per-zone cost. Experienced production partners contracted before Season 1.'},
               {risk:'Broadcaster Negotiations', desc:'Securing TV deals before Season 1 content is delivered is challenging.',
-               mitigation:'Live platform, trademark, and social presence demonstrate credibility. Pilot episode provides content for broadcaster conversations. Digital-first launch reduces dependency on traditional TV.'},
+               mitigation:'Live platform, CAC registration, and social presence demonstrate credibility. Pilot episode provides content for broadcaster conversations. Digital-first launch reduces dependency on traditional TV.'},
               {risk:'Regulatory & Legal', desc:'NBC compliance, data protection (NDPR), and event liability exposure.',
-               mitigation:'Legal counsel being retained for LLC incorporation, contestant waivers, and NBC compliance review. NDPR-compliant data handling on the digital platform from day one.'},
+               mitigation:'Legal counsel retained for WLA incorporation (complete), contestant waivers, and NBC compliance review. NDPR-compliant data handling on the digital platform from day one.'},
             ].map((item,i)=>(
               <div key={i} className="bg-white rounded-lg p-6 border-2 border-gray-200">
                 <div className="flex items-start gap-4">
@@ -584,11 +606,11 @@ export default function InvestorRelationsPage() {
           <div className="max-w-3xl mx-auto text-center">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">Ready to Invest in Africa's Future?</h2>
             <p className="text-lg text-green-50 mb-8 leading-relaxed">
-              NNW is a first-mover opportunity in a proven global format entering an untapped market.
+              NNW is a first-mover opportunity in a proven global format entering an untapped market, backed by a CAC-registered company built for the long game.
               Contact us directly to receive the full investment deck and begin the conversation.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
-              <a href="mailto:phyd3lis@gmail.com?subject=Investment Inquiry - Naija Ninja Warrior"
+              <a href="mailto:legal@naijaninja.net?subject=Investment Inquiry - NNW / WLA Entertainment"
                  className="inline-flex items-center justify-center gap-2 px-8 py-3 bg-white text-naija-green-600 font-bold rounded-full hover:bg-green-50 transition shadow-lg">
                 Request Investment Deck <ArrowRight size={16}/>
               </a>
@@ -598,13 +620,10 @@ export default function InvestorRelationsPage() {
               </Link>
             </div>
             <div className="pt-8 border-t border-green-500 text-sm">
-              <p className="text-green-100 mb-1">Investor Relations Contact</p>
-              <p className="font-bold text-lg mb-1">Fidelis Agba — Founder & CEO</p>
+              <p className="text-green-100 mb-1">Investor Relations - WLA Entertainment Ltd</p>
+              <p className="font-bold text-lg mb-1">Fidelis Agba - Founder & CEO</p>
               <p className="text-green-100">
-                phyd3lis@gmail.com &nbsp;|&nbsp; Mobile: +234 703 826 4911 &nbsp;|&nbsp; WhatsApp: +234 808 595 2266
-              </p>
-              <p className="text-green-200 mt-2 text-xs">
-                naijaninja.net/investors &nbsp;|&nbsp; naijaninja.net/partners
+                legal@naijaninja.net &nbsp;|&nbsp; +234 808 595 2266
               </p>
             </div>
           </div>

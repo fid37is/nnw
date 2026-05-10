@@ -192,7 +192,7 @@ export default function JobsList() {
           ) : (
             <>
               <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-3 sm:mb-4">
-                🚀 Exciting Opportunities Coming Soon!
+                Opportunities Coming Soon
               </h2>
               <p className="text-base sm:text-lg text-gray-700 mb-4 sm:mb-6 max-w-2xl mx-auto leading-relaxed px-4">
                 We're currently preparing new career opportunities at Naija Ninja Warrior. 
@@ -282,10 +282,10 @@ export default function JobsList() {
           <p className="text-xs sm:text-sm text-gray-500 mt-4 sm:mt-6 px-4">
             Questions? Contact us at{' '}
             <a 
-              href="mailto:careers@naijaninjawarrior.com" 
+              href="mailto:support@naijaninja.net" 
               className="text-naija-green-600 hover:underline font-semibold"
             >
-              careers@naijaninjawarrior.com
+              support@naijaninja.net
             </a>
           </p>
         </div>
