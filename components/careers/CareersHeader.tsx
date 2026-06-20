@@ -1,9 +1,6 @@
-// ==========================================
-// FILE: components/careers/CareersHeader.tsx
-// ==========================================
-
+// components/careers/CareersHeader.tsx
 import Link from 'next/link'
-import { ArrowLeft, Briefcase } from 'lucide-react'
+import { ArrowLeft, Briefcase } from '@/components/ui/icons'
 
 export default function CareersHeader() {
   return (
@@ -16,7 +13,7 @@ export default function CareersHeader() {
         <Briefcase size={40} className="text-naija-green-600" />
         <h1 className="text-4xl md:text-5xl font-bold text-gray-900">Join Our Team</h1>
       </div>
-      <p className="text-xl text-gray-600">Help Us Build Africa's Premier Ninja Warrior Competition</p>
+      <p className="text-xl text-gray-600">Careers at WLA Entertainment Ltd - Home of Naija Ninja Warrior</p>
     </div>
   )
 }
