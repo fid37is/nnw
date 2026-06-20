@@ -85,11 +85,17 @@ export async function proxy(req: NextRequest) {
       return NextResponse.redirect(cleanUrl)
     }
 
+    // ✅ API routes — bypass rewrite and auth entirely so /api/* handlers
+    // resolve normally instead of being prefixed to /admin/api/*
+    if (url.pathname.startsWith('/api/')) {
+      return NextResponse.next()
+    }
+
     // ✅ Public paths — no auth needed
     const isPublic = ADMIN_PUBLIC_PATHS.includes(url.pathname)
     if (!isPublic) {
       const role = await getSessionRole(req)
-      
+
       if (role !== 'admin' && role !== 'super_admin') {
         const loginUrl = req.nextUrl.clone()
         loginUrl.pathname = '/admin/login'
@@ -118,6 +124,12 @@ export async function proxy(req: NextRequest) {
       const cleanUrl = req.nextUrl.clone()
       cleanUrl.pathname = '/dashboard'
       return NextResponse.redirect(cleanUrl)
+    }
+
+    // ✅ API routes — bypass rewrite and auth entirely so /api/* handlers
+    // resolve normally instead of being prefixed to /investor/api/*
+    if (url.pathname.startsWith('/api/')) {
+      return NextResponse.next()
     }
 
     // ✅ Public paths — no auth needed
