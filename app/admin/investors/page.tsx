@@ -127,7 +127,7 @@ export default function AdminInvestorsPage() {
     const { data: { session } } = await supabase.auth.getSession()
     if (!session) { window.location.href = '/login'; return }
     const { data: u } = await supabase.from('users').select('role').eq('id', session.user.id).single()
-    if (u?.role !== 'admin') { window.location.href = '/user/dashboard'; return }
+    if (u?.role !== 'admin') { window.location.href = '/login'; return }
     await loadAll()
     setLoading(false)
   }

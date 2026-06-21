@@ -42,15 +42,32 @@ export default function AuthCallbackPage() {
         // Show verified status
         setStatus('verified')
 
-        // Redirect based on role
-        let dashboard = '/user/dashboard'
-        if (user?.role === 'admin')    dashboard = '/admin/dashboard'
-        if (user?.role === 'investor') {
-          dashboard = user.must_change_password
-            ? '/investor/change-password'
-            : '/investor/dashboard'
-        }
-        setTimeout(() => router.push(dashboard), 2000)
+        // Determine if we're in prod or local dev
+        const isProd = !window.location.hostname.includes('localhost')
+
+        // ✅ Redirect based on role
+        // Admin and investor must go to their subdomain via window.location.href
+        // so the proxy doesn't mangle the path. router.push() stays on the
+        // current domain and gets double-prefixed (/admin/admin/dashboard etc).
+        setTimeout(() => {
+          if (user?.role === 'admin' || user?.role === 'super_admin') {
+            window.location.href = isProd
+              ? 'https://admin.naijaninja.net/dashboard'
+              : 'http://admin.localhost:3001/dashboard'
+            return
+          }
+
+          if (user?.role === 'investor') {
+            const path = user.must_change_password ? '/change-password' : '/dashboard'
+            window.location.href = isProd
+              ? `https://investor.naijaninja.net${path}`
+              : `http://investor.localhost:3001${path}`
+            return
+          }
+
+          // ✅ Regular users — stay on current domain, go to /dashboard
+          router.push('/dashboard')
+        }, 2000)
 
       } catch (err) {
         console.error('Callback error:', err)
@@ -118,12 +135,8 @@ export default function AuthCallbackPage() {
 
       <style jsx>{`
         @keyframes scale-in {
-          from {
-            transform: scale(0);
-          }
-          to {
-            transform: scale(1);
-          }
+          from { transform: scale(0); }
+          to   { transform: scale(1); }
         }
         .animate-scale-in {
           animation: scale-in 0.3s ease-out;
