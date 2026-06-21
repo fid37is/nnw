@@ -104,7 +104,7 @@ export default function AdminMessagingPage() {
 
       if (userData?.role !== 'admin') {
         toast.error('Unauthorized access')
-        window.location.href = '/user/dashboard'
+        window.location.href = '/login'
         return
       }
 
