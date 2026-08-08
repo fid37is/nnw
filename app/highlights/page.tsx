@@ -65,7 +65,7 @@ export default function HighlightsPage() {
           
           <h1 className="text-4xl md:text-6xl font-black mb-4">Event Highlights</h1>
           <p className="text-xl text-green-100 max-w-2xl">
-            Watch epic moments, incredible performances, and unforgettable challenges from Naija Ninja Warrior competitions
+            Watch epic moments, incredible performances, and unforgettable challenges from Naija Next Warrior competitions
           </p>
           
           {/* YouTube Channel Link */}

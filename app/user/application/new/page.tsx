@@ -91,7 +91,7 @@ export default function ApplicationPage() {
             <div className="w-10 h-10 bg-gradient-to-br from-naija-green-600 to-naija-green-700 rounded-lg flex items-center justify-center">
               <span className="text-white font-bold">NNW</span>
             </div>
-            <span className="font-bold text-lg text-naija-green-900">Naija Ninja</span>
+            <span className="font-bold text-lg text-naija-green-900">Naija Next</span>
           </Link>
         </div>
       </nav>

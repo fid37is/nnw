@@ -86,7 +86,7 @@ export default function InvestorLoginForm() {
               </div>
             )}
             <h1 className="text-2xl font-bold text-white mb-1">Investor Portal</h1>
-            <p className="text-naija-green-200 text-sm">Naija Ninja Warrior</p>
+            <p className="text-naija-green-200 text-sm">Naija Next Warrior</p>
           </div>
 
           {/* Form */}

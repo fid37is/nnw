@@ -67,7 +67,7 @@ export default function PrivacyPage() {
         <div className="prose prose-lg max-w-none">
           <div className="bg-blue-50 border border-blue-200 rounded-xl p-6 mb-8">
             <p className="text-gray-700 leading-relaxed m-0">
-              WLA Entertainment Ltd, parent company of Naija Ninja Warrior, is committed to protecting your privacy and ensuring the security of your personal information. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you visit our website or participate in our competition.
+              WLA Entertainment Ltd, parent company of Naija Next Warrior, is committed to protecting your privacy and ensuring the security of your personal information. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you visit our website or participate in our competition.
             </p>
           </div>
 
@@ -137,7 +137,7 @@ export default function PrivacyPage() {
           <section className="mb-8">
             <h2 className="text-2xl font-bold text-gray-900 mb-4">4. Photography and Video Rights</h2>
             <p className="text-gray-700 leading-relaxed mb-4">
-              By participating in Naija Ninja Warrior, you acknowledge and agree that:
+              By participating in Naija Next Warrior, you acknowledge and agree that:
             </p>
             <ul className="space-y-2 text-gray-700">
               <li>Your image, likeness, and performance may be recorded and broadcast</li>

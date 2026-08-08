@@ -88,7 +88,7 @@ function SocialMediaSidebar() {
     },
     {
       name: 'LinkedIn',
-      handle: 'Naija-Ninja-Warrior',
+      handle: 'Naija-Next-Warrior',
       url: 'https://linkedin.com/company/naija-ninja-warrior',
       icon: (
         <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
@@ -417,8 +417,8 @@ export default function UserDashboard() {
         <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-naija-green-100">
           <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
             <Link href="/" className="flex items-center gap-2">
-              <Image src={logoUrl} alt="Naija Ninja Logo" width={60} height={60} className="rounded-lg" />
-              <span className="font-bold text-lg text-naija-green-900">Naija Ninja</span>
+              <Image src={logoUrl} alt="Naija Next Logo" width={60} height={60} className="rounded-lg" />
+              <span className="font-bold text-lg text-naija-green-900">Naija Next</span>
             </Link>
           </div>
         </nav>
@@ -437,8 +437,8 @@ export default function UserDashboard() {
       <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-naija-green-100">
         <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
-            <Image src={logoUrl} alt="Naija Ninja Logo" width={60} height={60} className="rounded-lg" priority />
-            <span className="font-bold text-lg text-naija-green-900">Naija Ninja</span>
+            <Image src={logoUrl} alt="Naija Next Logo" width={60} height={60} className="rounded-lg" priority />
+            <span className="font-bold text-lg text-naija-green-900">Naija Next</span>
           </Link>
           <UserDropdown handleLogout={handleLogout} />
         </div>
@@ -604,7 +604,7 @@ export default function UserDashboard() {
                     <span className="text-2xl">📝</span>
                   </div>
                   <h2 className="text-lg font-bold text-naija-green-900 mb-2">No Application Yet</h2>
-                  <p className="text-sm text-gray-600 mb-4">Start your journey to become a Naija Ninja Warrior!</p>
+                  <p className="text-sm text-gray-600 mb-4">Start your journey to become a Naija Next Warrior!</p>
 
                   {checkingApplicationWindow ? (
                     <div className="animate-pulse bg-gray-200 h-10 rounded-lg w-48 mx-auto"></div>

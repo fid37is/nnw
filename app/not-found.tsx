@@ -9,14 +9,14 @@ import { Home, ArrowLeft } from 'lucide-react'
 const ROASTS = [
   "You can't even find a webpage. The warped wall must be terrifying for you.",
   "Bro got lost on the internet. The obstacle course would destroy you.",
-  "This URL doesn't exist. Neither does your ninja career, apparently.",
+  "This URL doesn't exist. Neither does your Next career, apparently.",
   "404. That's also your ranking on our leaderboard. Coincidence? No.",
   "You typed a wrong URL. Our competitors fail obstacles. You? The internet.",
   "Even our eliminated contestants found the exit. You found neither.",
 ]
 
 // Arena is 448px wide (max-w-md = 28rem = 448px)
-// Wall sits at x=310px. Ninja runs from x=20 → x=265 → hits → falls
+// Wall sits at x=310px. Next runs from x=20 → x=265 → hits → falls
 type Phase = 'run' | 'jump' | 'fall' | 'splat' | 'recover'
 
 const PX: Record<Phase, number> = {
@@ -130,7 +130,7 @@ export default function NotFound() {
             Wall
           </div>
 
-          {/* ── NINJA — pixel positioned ── */}
+          {/* ── Next — pixel positioned ── */}
           {mounted && (
             <div
               className="absolute"
@@ -256,7 +256,7 @@ export default function NotFound() {
         </div>
 
         <p className="mt-5 text-naija-green-400/30 text-[10px] font-black tracking-[0.25em] uppercase">
-          Naija Ninja Warrior · A WLA Entertainment Company
+          Naija Next Warrior · A WLA Entertainment Company
         </p>
       </div>
     </div>

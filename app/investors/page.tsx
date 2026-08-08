@@ -39,7 +39,7 @@ export default function InvestorRelationsPage() {
               <p className="text-yellow-400 text-xs font-bold tracking-widest uppercase mb-0.5">Parent Company & Legal Entity</p>
               <h2 className="text-xl font-black text-white mb-1">WLA Entertainment Ltd</h2>
               <p className="text-gray-400 text-xs mb-2">A WLA Entertainment Company · RC No. 9529867 · Incorporated May 2026</p>
-              <p className="text-gray-300 text-sm">Naija Ninja Warrior is the flagship property of WLA Entertainment Ltd - a CAC-registered company built to own, operate, and expand warrior-format sports entertainment across Africa.</p>
+              <p className="text-gray-300 text-sm">Naija Next Warrior is the flagship property of WLA Entertainment Ltd - a CAC-registered company built to own, operate, and expand warrior-format sports entertainment across Africa.</p>
             </div>
           </div>
         </div>
@@ -48,7 +48,7 @@ export default function InvestorRelationsPage() {
         <div className="bg-gradient-to-br from-naija-green-600 to-naija-green-700 text-white rounded-xl p-8 md:p-12 mb-16">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">Investment Opportunity</h2>
           <p className="text-lg text-green-50 leading-relaxed mb-8">
-            Naija Ninja Warrior (NNW) is Nigeria's first national-scale physical challenge competition franchise, operated by WLA Entertainment Ltd.
+            Naija Next Warrior (NNW) is Nigeria's first national-scale physical challenge competition franchise, operated by WLA Entertainment Ltd.
             Running across all six geopolitical zones with a Grand Finale in Abuja, NNW combines live sports
             entertainment, digital media, and cultural identity into a scalable, multi-revenue business built
             for both local dominance and continental expansion.
@@ -550,7 +550,7 @@ export default function InvestorRelationsPage() {
                 <h3 className="text-2xl font-bold text-gray-900 mb-1">Fidelis Agba</h3>
                 <p className="text-naija-green-600 font-semibold mb-4">Founder & CEO - WLA Entertainment Ltd</p>
                 <p className="text-gray-600 leading-relaxed mb-4">
-                  Founder of WLA Entertainment Ltd and creator of the Naija Ninja Warrior franchise, including the proprietary tactical obstacle format. Responsible for brand development, IP strategy, platform architecture, investor relations, and overall business direction. WLA is built from the ground up to own and operate Nigeria's first nationally scaled ninja competition - with a clear mandate to expand across the African continent.
+                  Founder of WLA Entertainment Ltd and creator of the Naija Next Warrior franchise, including the proprietary tactical obstacle format. Responsible for brand development, IP strategy, platform architecture, investor relations, and overall business direction. WLA is built from the ground up to own and operate Nigeria's first nationally scaled ninja competition - with a clear mandate to expand across the African continent.
                 </p>
                 <div className="flex flex-wrap gap-2">
                   {['Brand Strategy','Franchise Development','IP Ownership','Investor Relations','Platform Development'].map((s,i)=>(

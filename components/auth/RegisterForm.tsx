@@ -597,7 +597,7 @@ export default function RegisterForm() {
           <div className="bg-naija-green-50 border border-naija-green-200 rounded-lg p-4">
             <h3 className="font-semibold text-sm text-naija-green-900 mb-2">Waiver & Terms</h3>
             <p className="text-xs text-gray-700 leading-relaxed mb-4">
-              I understand that participation in Naija Ninja Warrior involves physical exertion and inherent risks.
+              I understand that participation in Naija Next Warrior involves physical exertion and inherent risks.
               I hereby assume all risks associated with participation and waive any claims against the organizers.
             </p>
             <div className="flex items-start gap-3">

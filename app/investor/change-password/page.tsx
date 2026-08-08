@@ -160,7 +160,7 @@ export default function ChangePasswordPage() {
             </button>
           </form>
         </div>
-        <p className="text-center text-xs text-gray-400 mt-4">NNW Investor Portal · Naija Ninja Warrior</p>
+        <p className="text-center text-xs text-gray-400 mt-4">NNW Investor Portal · Naija Next Warrior</p>
       </div>
     </main>
   )

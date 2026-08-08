@@ -16,7 +16,7 @@ export default function Footer() {
               {logoUrl ? (
                 <Image
                   src={logoUrl}
-                  alt="Naija Ninja Logo"
+                  alt="Naija Next Logo"
                   width={40}
                   height={40}
                   className="rounded-full"
@@ -27,7 +27,7 @@ export default function Footer() {
                 </div>
               )}
               <h3 className="text-white font-bold text-lg">
-                Naija Ninja Warrior
+                Naija Next Warrior
                 <sup className="text-xs font-black ml-1">™</sup>
               </h3>
             </div>
@@ -128,9 +128,9 @@ export default function Footer() {
         </div>
 
         <div className="border-t border-gray-800 pt-8 text-center text-sm text-gray-500">
-          <p className="text-gray-300">© 2026 Naija Ninja Warrior. All rights reserved.</p>
+          <p className="text-gray-300">© 2026 Naija Next Warrior. All rights reserved.</p>
           <p className="mt-2 text-gray-500 text-xs tracking-wide">
-            Naija Ninja Warrior is{' '}
+            Naija Next Warrior is{' '}
             <span className="text-naija-green-400 font-semibold">A WLA Entertainment Company</span>
             {' '}· RC No. 9529867
           </p>

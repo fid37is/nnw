@@ -20,7 +20,7 @@ export default function AboutPage() {
           </Link>
           <div className="flex items-center gap-4 mb-3">
             <Info size={40} className="text-primary" />
-            <h1 className="text-4xl md:text-5xl font-bold text-foreground">About Naija Ninja Warrior</h1>
+            <h1 className="text-4xl md:text-5xl font-bold text-foreground">About Naija Next Warrior</h1>
           </div>
           <p className="text-xl text-muted-foreground">Africa's First Ninja Competition Series · A WLA Entertainment Company</p>
         </div>
@@ -29,7 +29,7 @@ export default function AboutPage() {
         <div className="bg-primary text-primary-foreground rounded-xl p-8 md:p-12 mb-16">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">Strategy. Strength. Resilience.</h2>
           <p className="text-lg text-primary-50 leading-relaxed">
-            Naija Ninja Warrior is a groundbreaking national fitness and entertainment challenge, adapted from the globally successful Ninja Warrior franchise and tailored for the Nigerian audience. Our competition showcases extraordinary athletes across all 6 geopolitical zones, celebrating the resilience, determination, and warrior spirit of Nigeria.
+            Naija Next Warrior is a groundbreaking national fitness and entertainment challenge, adapted from the globally successful Ninja Warrior franchise and tailored for the Nigerian audience. Our competition showcases extraordinary athletes across all 6 geopolitical zones, celebrating the resilience, determination, and warrior spirit of Nigeria.
           </p>
         </div>
 
@@ -38,7 +38,7 @@ export default function AboutPage() {
           <h2 className="text-3xl font-bold text-foreground mb-6">Our Story</h2>
           <div className="prose prose-lg max-w-none text-muted-foreground">
             <p className="leading-relaxed mb-4">
-              Naija Ninja Warrior was born from a vision to create a platform where Nigerians can test their physical limits, compete at the highest level, and inspire millions across the continent. We recognised that Nigeria, with its young, vibrant population and growing entertainment industry, was the perfect place to launch Africa's first ninja competition series.
+              Naija Next Warrior was born from a vision to create a platform where Nigerians can test their physical limits, compete at the highest level, and inspire millions across the continent. We recognised that Nigeria, with its young, vibrant population and growing entertainment industry, was the perfect place to launch Africa's first ninja competition series.
             </p>
             <p className="leading-relaxed">
               The global success of Ninja Warrior franchises worldwide proved that audiences crave authentic displays of human determination and athletic excellence. We're bringing that same excitement to Nigeria while celebrating our unique culture, diversity, and indomitable spirit - under the umbrella of WLA Entertainment Ltd, the company built to take this vision continental.
@@ -210,19 +210,19 @@ export default function AboutPage() {
             <div className="bg-muted rounded-xl p-6 border border-border">
               <h3 className="font-bold text-foreground text-lg mb-3">The Parent Company</h3>
               <p className="text-muted-foreground text-sm leading-relaxed">
-                WLA Entertainment Ltd (Warrior League Africa) is the registered Nigerian company behind Naija Ninja Warrior. Incorporated with the Corporate Affairs Commission in May 2026, WLA was purpose-built to own, operate, and grow warrior-format sports entertainment properties across the African continent.
+                WLA Entertainment Ltd (Warrior League Africa) is the registered Nigerian company behind Naija Next Warrior. Incorporated with the Corporate Affairs Commission in May 2026, WLA was purpose-built to own, operate, and grow warrior-format sports entertainment properties across the African continent.
               </p>
             </div>
             <div className="bg-muted rounded-xl p-6 border border-border">
               <h3 className="font-bold text-foreground text-lg mb-3">NNW as the First Franchise</h3>
               <p className="text-muted-foreground text-sm leading-relaxed">
-                Naija Ninja Warrior is the flagship competition under WLA's umbrella - the first in a planned network of regional warrior leagues. NNW sets the gold standard that future franchises across Africa will be built upon.
+                Naija Next Warrior is the flagship competition under WLA's umbrella - the first in a planned network of regional warrior leagues. NNW sets the gold standard that future franchises across Africa will be built upon.
               </p>
             </div>
             <div className="bg-muted rounded-xl p-6 border border-border">
               <h3 className="font-bold text-foreground text-lg mb-3">The Road to Pan-African</h3>
               <p className="text-muted-foreground text-sm leading-relaxed">
-                WLA's long-term vision is a continental league - with Nigeria (NNW) as the anchor, and future regional competitions like Ghana Ninja Warrior (GNW) and others expanding across Africa under the WLA banner.
+                WLA's long-term vision is a continental league - with Nigeria (NNW) as the anchor, and future regional competitions like Ghan Next Warrior (GNW) and others expanding across Africa under the WLA banner.
               </p>
             </div>
             <div className="bg-muted rounded-xl p-6 border border-border">
@@ -239,7 +239,7 @@ export default function AboutPage() {
           <div className="max-w-3xl mx-auto text-center">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">Join the Movement</h2>
             <p className="text-lg text-primary-50 mb-8">
-              Whether you're an aspiring competitor, a fitness enthusiast, or someone looking to support Nigerian excellence, there's a place for you in the Naija Ninja Warrior community - powered by WLA Entertainment Ltd.
+              Whether you're an aspiring competitor, a fitness enthusiast, or someone looking to support Nigerian excellence, there's a place for you in the Naija Next Warrior community - powered by WLA Entertainment Ltd.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/register" className="inline-block px-8 py-3 bg-background text-primary font-bold rounded-full hover:bg-primary-50 transition-all hover:scale-105">

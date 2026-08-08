@@ -54,7 +54,7 @@ export default function Navbar() {
               {logoUrl ? (
                 <Image
                   src={logoUrl}
-                  alt="Naija Ninja Logo"
+                  alt="Naija Next Logo"
                   width={80}
                   height={80}
                   className="rounded-lg"
@@ -68,7 +68,7 @@ export default function Navbar() {
               )}
             </div>
             <div className="hidden sm:flex flex-col leading-tight">
-              <span className="font-black text-xl text-white leading-none">Naija Ninja</span>
+              <span className="font-black text-xl text-white leading-none">Naija Next</span>
               <span className="text-[10px] text-naija-green-400 font-semibold tracking-wider uppercase leading-tight">
                 A WLA Company
               </span>

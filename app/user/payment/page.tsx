@@ -217,8 +217,8 @@ export default function UserPaymentPage() {
         <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-green-100">
           <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
             <Link href="/" className="flex items-center gap-2">
-              <Image src={logoUrl} alt="Naija Ninja Logo" width={40} height={40} className="rounded-lg" />
-              <span className="font-bold text-lg text-green-900">Naija Ninja</span>
+              <Image src={logoUrl} alt="Naija Next Logo" width={40} height={40} className="rounded-lg" />
+              <span className="font-bold text-lg text-green-900">Naija Next</span>
             </Link>
           </div>
         </nav>
@@ -234,8 +234,8 @@ export default function UserPaymentPage() {
       <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-green-100">
         <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
-            <Image src={logoUrl} alt="Naija Ninja Logo" width={40} height={40} className="rounded-lg" />
-            <span className="font-bold text-lg text-green-900">Naija Ninja</span>
+            <Image src={logoUrl} alt="Naija Next Logo" width={40} height={40} className="rounded-lg" />
+            <span className="font-bold text-lg text-green-900">Naija Next</span>
           </Link>
           <Link href="/user/dashboard" className="flex items-center gap-2 text-gray-700 hover:text-green-600 transition">
             <ArrowLeft size={18} />
