@@ -60,7 +60,7 @@ export default function HomeClient() {
 
   const loadData = async () => {
     try {
-      // All independent queries in parallel — including waiting list count
+      // All independent queries in parallel- including waiting list count
       const [seasonRes, sponsorRes, videoRes, waitingRes] = await Promise.all([
         supabase
           .from('seasons')
@@ -77,7 +77,7 @@ export default function HomeClient() {
           .select('id,title,youtube_url,description,category,order_position')
           .order('order_position', { ascending: true })
           .limit(6),
-        // head:true returns only the count — no row data transferred
+        // head:true returns only the count- no row data transferred
         supabase
           .from('waiting_list')
           .select('*', { count: 'exact', head: true }),
@@ -152,18 +152,17 @@ export default function HomeClient() {
         <div className={`${applicationOpen ? 'bg-naija-green-600' : 'bg-gray-800'} text-white text-center text-xs font-bold py-2.5 tracking-wide mt-20`}>
           {applicationOpen
             ? `Applications Open · Deadline: ${new Date(season.application_end_date).toLocaleDateString('en-NG', { day: 'numeric', month: 'long', year: 'numeric' })}`
-            : 'Applications Closed · Next season opening soon — Register to be notified'}
+            : 'Applications Closed · Next season opening soon- Register to be notified'}
         </div>
       )}
 
       {/* 1. HERO */}
       <HeroSection
-        champion={champion}
         season={season}
         isApplicationOpen={applicationOpen}
       />
 
-      {/* 2. WAITING LIST — only visible when applications are closed */}
+      {/* 2. WAITING LIST- only visible when applications are closed */}
       {!applicationOpen && (
         <WaitingListSection waitingCount={waitingCount} />
       )}
