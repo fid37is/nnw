@@ -77,7 +77,7 @@ export default function ZoneMapSection({ isApplicationOpen = false }: { isApplic
           <div className="relative flex flex-col md:flex-row items-center justify-between gap-6 p-8">
             <div className="text-center md:text-left">
               <p className="text-naija-green-400 text-xs font-black tracking-widest uppercase mb-1">Season Finale</p>
-              <p className="text-white font-black text-2xl">Grand Finale — Abuja, FCT</p>
+              <p className="text-white font-black text-2xl">Grand Finale - Abuja, FCT</p>
               <p className="text-gray-400 text-sm mt-1">All 6 zone winners compete for the ultimate title</p>
             </div>
             <div className="flex items-center justify-center w-10 h-10 bg-yellow-500/20 rounded-full flex-shrink-0">

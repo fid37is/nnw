@@ -18,13 +18,13 @@ function AuthLayoutContent({ children }: { children: React.ReactNode }) {
             {logoUrl && (
               <Image
                 src={logoUrl}
-                alt="Naija Ninja Logo"
+                alt="Naija Next Logo"
                 width={60}
                 height={60}
                 className="rounded-lg"
               />
             )}
-            <span className="font-bold text-lg text-naija-green-900">Ninja Warrior</span>
+            <span className="font-bold text-lg text-naija-green-900">Next Warrior</span>
           </Link>
         </div>
       </nav>
@@ -32,23 +32,15 @@ function AuthLayoutContent({ children }: { children: React.ReactNode }) {
       {/* Split Layout Container */}
       <div className="flex-1 min-h-0 flex max-w-7xl mx-auto w-full">
 
-        {/* LEFT SIDE - Video (Desktop Only) */}
+        {/* LEFT SIDE - Image (Desktop Only) */}
         <div className="hidden lg:flex lg:w-1/2 items-center justify-center overflow-hidden">
-          <video
-            autoPlay
-            muted
-            loop={false}
-            playsInline
-            suppressHydrationWarning      
-            onEnded={(e) => e.currentTarget.pause()}
+          <Image
+            src="/auth-leftsection.png"
+            alt="Naija Ninja"
+            width={1400}
+            height={1400}
             className="w-full h-full object-contain"
-          >
-            <source
-              src="https://res.cloudinary.com/lordefid/video/upload/q_auto,f_auto,w_1400,c_scale/FINEST_lmu1to.mp4"
-              type="video/mp4"
-            />
-            Your browser does not support the video tag.
-          </video>
+          />
         </div>
 
         {/* RIGHT SIDE - Forms */}

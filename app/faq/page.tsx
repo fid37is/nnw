@@ -20,159 +20,164 @@ export default function FAQPage() {
     // Registration & Eligibility
     {
       category: 'Registration',
-      question: 'How do I register for the competition?',
-      answer: 'Visit our registration page and complete the online application form. You\'ll need to provide personal information, upload a valid ID, submit a medical clearance certificate, and pay any applicable registration fees. Applications are reviewed within 5-7 business days.'
+      question: 'How do I register for Nigeria Next Warrior?',
+      answer: 'Registration is free and opens on our website when Season 1 launches. You’ll create an account, select your competition zone, and submit your application details - including physical stats and motivation - once applications officially open.'
     },
     {
       category: 'Registration',
       question: 'What are the age requirements?',
-      answer: 'Competitors must be at least 18 years old as of the competition date. Minors aged 16-17 may participate with written parental/guardian consent. Youth categories (13-15) are available with mandatory parental supervision.'
+      answer: 'You must be at least 18 years old at the time of application. There is no upper age limit - NNW celebrates competitors of every age.'
     },
     {
       category: 'Registration',
       question: 'Do I need to be a Nigerian citizen to compete?',
-      answer: 'Yes, participants must be Nigerian citizens or legal residents. Valid government-issued identification and proof of residency are required during registration.'
+      answer: 'For Season 1, competitors must be Nigerian nationals or legal residents of Nigeria. Your zone is assigned based on your state of origin or current residence, which you declare at registration.'
     },
     {
       category: 'Registration',
       question: 'Is there a registration fee?',
-      answer: 'Registration fees vary by competition level and are announced each season. Fees are non-refundable once your application is approved. Check our registration page for current fee information.'
-    },
-    
-    // Training & Preparation
-    {
-      category: 'Training',
-      question: 'Do I need prior ninja warrior experience?',
-      answer: 'No prior ninja warrior experience is required, but you should be in good physical condition. We recommend training at one of our certified facilities for 2-3 months before competing to familiarize yourself with obstacle techniques.'
+      answer: 'Registration itself is free. If you’re shortlisted after screening, you’ll pay a registration fee to secure your competition spot - this self-selects for serious, committed contestants. Full fee details are shared at the shortlisting stage.'
     },
     {
-      category: 'Training',
-      question: 'Where can I train for the competition?',
-      answer: 'We have certified training centers across all 6 geopolitical zones in Nigeria. Visit our Training Centers page to find the nearest facility. These centers offer specialized ninja warrior training programs and equipment.'
+      category: 'Registration',
+      question: 'What is the selection process?',
+      answer: 'It runs in stages: online registration → screening, where we check your submitted materials and information against our standard requirements → qualifying, where you compete for your spot in your regional semi-final → zone allocation for contestants who qualify. Each zone’s semi-final has a minimum of 10 and up to 50 contestants, depending on registration volume.'
+    },
+
+    // The Zone System
+    {
+      category: 'Zones',
+      question: 'How does the zone system work?',
+      answer: 'Nigeria Next Warrior is built around Nigeria’s six geopolitical zones - South West, South East, South South, North Central, North East, and North West. Each zone runs its own qualifying week with its own contestant pool, its own zone champion, and its own identity. You’re not just competing for yourself - you’re competing for your zone.'
     },
     {
-      category: 'Training',
-      question: 'What should I focus on in my training?',
-      answer: 'Focus on grip strength, upper body endurance, core stability, agility, and cardiovascular fitness. Practice specific obstacle techniques at training centers and work with certified coaches who understand competition requirements.'
+      category: 'Zones',
+      question: 'Do obstacle courses differ by zone?',
+      answer: 'Yes. Each zone week’s course draws on that region’s geography and culture - for example, water transitions and narrow beams for South West’s coastal identity, or endurance-based obstacles reflecting North East’s terrain. The course frame stays fixed at the venue for the season, with obstacle elements that are modular and swappable between zone weeks.'
     },
-    
+    {
+      category: 'Zones',
+      question: 'How do zone champions reach the Grand Finale?',
+      answer: 'Each zone week crowns one zone champion - the fastest or highest-scoring contestant from that week. All six zone champions advance directly to the Grand Finale.'
+    },
+
     // Competition Format
     {
       category: 'Competition',
-      question: 'How does the competition work?',
-      answer: 'The competition has three stages: Regional Qualifiers (6 zones), Semi-Finals, and the Grand Finale in Abuja. Competitors face increasingly difficult obstacle courses, with the best performers advancing to the next stage. Your time and distance determine advancement.'
+      question: 'How does the competition work overall?',
+      answer: 'The season runs through zone qualifying weeks, semi-finals, and zone finals, before the six zone champions meet at the Grand Finale. Zone week courses are single-lane and linear, with six main obstacles plus a steep climb finish. Scoring is pass/fail first, with time as the tiebreaker.'
+    },
+    {
+      category: 'Competition',
+      question: 'How is the Grand Finale different?',
+      answer: 'The Grand Finale uses a completely different, dual-lane course where two zone champions compete head-to-head at the same time. The first competitor to reach the course’s diversion point chooses their lane - an easier, slower left lane, or a harder, faster right lane - and the second competitor automatically takes the other. Both lanes reconverge for a shared final obstacle, and whoever finishes first wins.'
     },
     {
       category: 'Competition',
       question: 'What happens if I fall during my run?',
-      answer: 'Falling or touching water results in immediate elimination from that round. Your distance and time up to that point are recorded. The furthest distance and fastest times determine who advances to the next stage.'
+      answer: 'A fall or failure ends your run at that point - your distance and time up to that moment are what’s recorded. In zone weeks, the deepest obstacle reached and fastest time determine advancement in the event of a tie.'
     },
     {
       category: 'Competition',
-      question: 'Can I compete in multiple regional qualifiers?',
-      answer: 'No, you must compete in the regional qualifier for your zone of residence. This ensures fair representation across all geopolitical zones of Nigeria.'
+      question: 'Can I compete in a zone other than my own?',
+      answer: 'No - you compete in the zone matching your state of origin or current residence, as declared at registration. This keeps zone representation fair across the whole country.'
     },
-    {
-      category: 'Competition',
-      question: 'What should I wear to compete?',
-      answer: 'Wear comfortable, fitted athletic clothing that allows full range of motion. Proper athletic shoes are required (no sandals or minimalist shoes). Remove all jewelry and accessories. Specific clothing requirements will be provided upon registration approval.'
-    },
-    
+
     // Health & Safety
     {
       category: 'Health & Safety',
       question: 'Do I need a medical clearance?',
-      answer: 'Yes, all competitors must submit a medical clearance certificate from a licensed physician stating you are physically fit to participate. This must be dated within 30 days of the competition date.'
+      answer: 'You’ll self-certify that you’re physically fit to compete, and we recommend a medical check before training. If you have a known cardiac condition, severe hypertension, or another condition that intense exertion could aggravate, you’ll need to provide medical clearance from a qualified doctor before you’re permitted to run.'
     },
     {
       category: 'Health & Safety',
-      question: 'What medical conditions disqualify me?',
-      answer: 'Conditions that significantly increase risk of serious injury may result in disqualification, including uncontrolled heart conditions, severe respiratory issues, recent surgeries, or seizure disorders. Consult with your physician and disclose all conditions during registration.'
+      question: 'Is medical staff available on competition day?',
+      answer: 'Yes. A Medical Officer must be physically present before any competitor enters the course, with authority to prevent a competitor from running on medical grounds. A dedicated Safety & Security Officer also has authority to halt any run for safety reasons.'
     },
-    {
-      category: 'Health & Safety',
-      question: 'Is medical staff available during competition?',
-      answer: 'Yes, certified medical personnel and emergency response teams are present at all competitions. We have protocols for immediate medical attention if needed.'
-    },
-    {
-      category: 'Health & Safety',
-      question: 'What insurance do I need?',
-      answer: 'We strongly recommend obtaining personal accident insurance before competing. Participation involves inherent risks, and you assume full responsibility. Our liability is limited as outlined in the Terms and Conditions.'
-    },
-    
-    // Prizes & Recognition
+
+    // Prizes
     {
       category: 'Prizes',
-      question: 'What are the prizes for winners?',
-      answer: 'The champion receives ₦5,000,000 plus trophy and national recognition. Runner-up receives ₦2,500,000, and third place receives ₦1,000,000. All finalists receive certificates, merchandise, and eligibility for sponsorship opportunities.'
+      question: 'How does the prize model work?',
+      answer: 'NNW uses a progressive prize structure - starting from semi-finals, every contestant who advances a stage earns money, so no one goes home from a stage they’ve reached empty-handed. Awards increase at each stage: semi-finals, zone finals, Grand Finale qualification, and Grand Finale participation all carry their own payout, on top of the top-three prizes at the Grand Finale. Screening and qualifying, which determine your spot in the semi-final, are not paid stages.'
+    },
+    {
+      category: 'Prizes',
+      question: 'What do the top three finishers win?',
+      answer: 'The Season Champion, Runner-Up, and third-place finisher all receive significant sponsor-funded cash prizes, along with trophies, national recognition, and eligibility for future sponsorship opportunities.'
     },
     {
       category: 'Prizes',
       question: 'How and when are prizes paid out?',
-      answer: 'Winners must provide tax identification and banking information. Prize distribution typically occurs within 90 days after competition. Prizes may be subject to applicable taxes, which are the winner\'s responsibility.'
+      answer: 'Winners provide tax identification and banking information, and prize distribution follows within a defined window after the competition. Prizes may be subject to applicable taxes, which are the winner’s responsibility.'
     },
-    {
-      category: 'Prizes',
-      question: 'Are there prizes for regional winners?',
-      answer: 'Regional winners receive recognition, advancement to semi-finals, and merchandise. Major cash prizes are awarded at the Grand Finale level.'
-    },
-    
+
     // Media & Broadcasting
     {
       category: 'Media',
-      question: 'Will the competition be televised?',
-      answer: 'Yes, Naija Next Warrior will be broadcast on national TV, DSTV, and streamed on platforms like Netflix and YouTube. Specific broadcast schedules will be announced closer to competition dates.'
+      question: 'Will Nigeria Next Warrior be broadcast?',
+      answer: 'Yes - NNW is built to broadcast standard from the ground up, with multi-camera coverage, dedicated hosts, and a sideline reporter at every zone week. Specific broadcast partners and schedules will be announced closer to launch.'
     },
     {
       category: 'Media',
-      question: 'Can I record my own run?',
-      answer: 'Personal recording or livestreaming during competition is not permitted without explicit permission. Official footage will be available through our channels. You may take photos in designated areas.'
+      question: 'Can I record or livestream my own run?',
+      answer: 'Personal recording or livestreaming during competition isn’t permitted without explicit permission - official footage is made available through our channels. You’re welcome to take photos in designated spectator areas.'
     },
     {
       category: 'Media',
       question: 'Will I be interviewed on camera?',
-      answer: 'Selected competitors may be interviewed for TV segments. Participation is voluntary but encouraged. All participants grant media rights as outlined in our Terms and Conditions.'
+      answer: 'Selected competitors may be interviewed for broadcast segments. It’s voluntary but encouraged, and all participants grant media rights as outlined in our Terms and Conditions.'
     },
-    
+
     // Logistics
     {
       category: 'Logistics',
       question: 'Are travel and accommodation provided?',
-      answer: 'Travel and accommodation are the competitor\'s responsibility for regional qualifiers. For semi-finals and finals, we may provide support for select competitors - details will be communicated to qualified participants.'
+      answer: 'All zone contestants are housed in hotel blocks near the fixed venue for the duration of their zone week. Travel arrangements are coordinated as part of the zone allocation process once you’ve been screened.'
+    },
+    {
+      category: 'Logistics',
+      question: 'Can my family or supporters attend?',
+      answer: 'Yes - this is built into the format as “Zone Squad”: a small group of each zone’s family, friends, and community representatives that WLA transports to the venue to provide live atmosphere and support during that zone’s week.'
     },
     {
       category: 'Logistics',
       question: 'Can spectators attend?',
-      answer: 'Yes, tickets are available for spectators to attend live competitions. Ticket information, pricing, and availability will be announced on our website before each competition.'
+      answer: 'Zone weeks currently center on Zone Squad attendance rather than general ticketed admission. Broader public ticketing is being considered for future seasons depending on demand - updates will be posted on our website ahead of each competition.'
     },
-    {
-      category: 'Logistics',
-      question: 'What time should I arrive on competition day?',
-      answer: 'Arrive at least 2 hours before your scheduled slot for check-in, safety briefing, and warm-up. Exact times will be provided in your confirmation email. Late arrival may result in disqualification.'
-    },
-    
+
     // General
     {
       category: 'General',
+      question: 'What is Nigeria Next Warrior?',
+      answer: 'Nigeria Next Warrior (NNW) is Africa’s first obstacle-based sports entertainment franchise - the flagship edition of WLA Entertainment’s continental format. It’s an original obstacle competition built specifically around Nigerian and African identity, not an adaptation of an existing international format.'
+    },
+    {
+      category: 'General',
+      question: 'What makes NNW different from other obstacle competitions?',
+      answer: 'NNW combines athletic performance with a strategic decision-making layer that no other obstacle format uses. We’re keeping the specifics under wraps for now while that mechanic is fully protected - full details will be published closer to Season 1 launch.'
+    },
+    {
+      category: 'General',
       question: 'Can I withdraw after registering?',
-      answer: 'Yes, but registration fees are non-refundable. Notify us immediately if you need to withdraw. Your spot may be given to another competitor.'
+      answer: 'Yes - notify us as soon as possible if you need to withdraw so your spot can be offered to another contestant. Any registration fee already paid is non-refundable.'
     },
     {
       category: 'General',
       question: 'How are winners determined?',
-      answer: 'Winners are determined by furthest distance completed and fastest time. If multiple competitors complete the course, the fastest time wins. All decisions by judges and officials are final.'
+      answer: 'Completion is scored pass/fail first, with time as the tiebreaker. In a tie on completion, the contestant who reached the deepest point on the course ranks higher. All decisions by competition officials are final on competition day.'
     },
     {
       category: 'General',
-      question: 'Can I bring a coach or support team?',
-      answer: 'Yes, you may bring a limited support team. They must register for event access and will be assigned designated areas. They cannot interfere with competition or access restricted areas.'
-    }
+      question: 'Does NNW expand beyond Nigeria?',
+      answer: 'Yes - NNW is the flagship edition of a wider WLA format that’s designed to license into other African markets as national editions, with national champions eventually competing at a continental championship level. Nigeria is the starting point for a broader African footprint.'
+    },
   ]
 
-  const categories = ['All', 'Registration', 'Training', 'Competition', 'Health & Safety', 'Prizes', 'Media', 'Logistics', 'General']
+  const categories = ['All', 'Registration', 'Zones', 'Competition', 'Health & Safety', 'Prizes', 'Media', 'Logistics', 'General']
 
-  const filteredFaqs = selectedCategory === 'All' 
-    ? faqs 
+  const filteredFaqs = selectedCategory === 'All'
+    ? faqs
     : faqs.filter(faq => faq.category === selectedCategory)
 
   const toggleFAQ = (index: number) => {
@@ -194,7 +199,7 @@ export default function FAQPage() {
             <HelpCircle size={40} className="text-naija-green-600" />
             <h1 className="text-4xl md:text-5xl font-bold text-gray-900">Frequently Asked Questions</h1>
           </div>
-          <p className="text-xl text-gray-600">Find answers to common questions about Naija Next Warrior</p>
+          <p className="text-xl text-gray-600">Find answers to common questions about Nigeria Next Warrior</p>
         </div>
 
         {/* Category Filter */}
