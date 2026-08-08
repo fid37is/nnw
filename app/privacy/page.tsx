@@ -22,7 +22,7 @@ export default function PrivacyPage() {
             <Shield size={40} className="text-naija-green-600" />
             <h1 className="text-4xl md:text-5xl font-bold text-gray-900">Privacy Policy</h1>
           </div>
-          <p className="text-gray-600">Last Updated: March 2026</p>
+          <p className="text-gray-600">Last Updated: August 2026</p>
         </div>
 
         {/* WLA Legal Entity Banner */}
@@ -55,7 +55,7 @@ export default function PrivacyPage() {
           </div>
           <div className="bg-gray-900 border-t border-gray-800 px-6 py-3 flex flex-wrap gap-4">
             <a href="mailto:legal@naijaninja.net" className="flex items-center gap-1.5 text-gray-300 text-xs hover:text-yellow-400 transition">
-              <Mail size={12} className="text-yellow-500" /> legal@naijaninja.net
+              <Mail size={12} className="text-yellow-500" />hello@warriorsleague.africa
             </a>
             <a href="tel:+2348085952266" className="flex items-center gap-1.5 text-gray-300 text-xs hover:text-yellow-400 transition">
               <Phone size={12} className="text-yellow-500" /> +234 808 595 2266
@@ -246,7 +246,7 @@ export default function PrivacyPage() {
               <div className="px-6 py-4 space-y-2">
                 <p className="text-gray-300 text-sm flex items-center gap-2">
                   <Mail size={14} className="text-yellow-500 flex-shrink-0" />
-                  <a href="mailto:legal@naijaninja.net" className="hover:text-yellow-400 transition">legal@naijaninja.net</a>
+                  <a href="mailto:legal@naijaninja.net" className="hover:text-yellow-400 transition">hello@warriorsleague.africa</a>
                 </p>
                 <p className="text-gray-300 text-sm flex items-center gap-2">
                   <Phone size={14} className="text-yellow-500 flex-shrink-0" />

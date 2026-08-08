@@ -36,7 +36,7 @@ export default function CompetitionProcessSection({ isApplicationOpen = false }:
           <h2 className="text-4xl md:text-6xl font-black text-gray-900 leading-tight mt-3">
             9 Steps to Glory
           </h2>
-          <p className="text-gray-500 text-lg mt-4">From interest to champion — your path is clear.</p>
+          <p className="text-gray-500 text-lg mt-4">From interest to champion - your path is clear.</p>
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">

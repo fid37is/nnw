@@ -186,9 +186,9 @@ export default function AboutPage() {
               <div>
                 <p className="text-gray-500 text-xs uppercase tracking-widest mb-2">Contact</p>
                 <div className="flex flex-col gap-1.5">
-                  <a href="mailto:support@naijaninja.net" className="flex items-center gap-2 text-gray-200 text-sm hover:text-yellow-400 transition">
+                  <a href="mailto:hello@warriorsleague.africa" className="flex items-center gap-2 text-gray-200 text-sm hover:text-yellow-400 transition">
                     <Mail size={13} className="text-yellow-500 flex-shrink-0" />
-                    support@naijaninja.net
+                    hello@warriorsleague.africa
                   </a>
                   <a href="tel:+2348085952266" className="flex items-center gap-2 text-gray-200 text-sm hover:text-yellow-400 transition">
                     <Phone size={13} className="text-yellow-500 flex-shrink-0" />
