@@ -36,7 +36,7 @@ export default function PartnersPage() {
               <p className="text-yellow-400 text-xs font-bold tracking-widest uppercase mb-0.5">Operated by</p>
               <h2 className="text-xl font-black text-white mb-1">WLA Entertainment Ltd</h2>
               <p className="text-gray-400 text-xs mb-2">A WLA Entertainment Company · RC No. 9529867</p>
-              <p className="text-gray-300 text-sm">All partnerships and sponsorship agreements are entered into with WLA Entertainment Ltd, the registered operator of Naija Ninja Warrior.</p>
+              <p className="text-gray-300 text-sm">All partnerships and sponsorship agreements are entered into with WLA Entertainment Ltd, the registered operator of Naija Next Warrior.</p>
             </div>
           </div>
         </div>
@@ -45,7 +45,7 @@ export default function PartnersPage() {
         <div className="bg-gradient-to-br from-naija-green-600 to-naija-green-700 text-white rounded-xl p-8 md:p-12 mb-16">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">Join Africa's Biggest Sports Entertainment Platform</h2>
           <p className="text-lg text-green-50 leading-relaxed mb-6">
-            Naija Ninja Warrior offers unparalleled brand visibility, audience engagement, and market access. Partner with WLA Entertainment to reach millions of viewers across Nigeria and Africa while aligning your brand with excellence, resilience, and national pride.
+            Naija Next Warrior offers unparalleled brand visibility, audience engagement, and market access. Partner with WLA Entertainment to reach millions of viewers across Nigeria and Africa while aligning your brand with excellence, resilience, and national pride.
           </p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
             {[

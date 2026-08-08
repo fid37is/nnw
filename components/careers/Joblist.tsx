@@ -186,7 +186,7 @@ export default function JobsList() {
                 No Current Openings
               </h2>
               <p className="text-base sm:text-lg text-gray-700 mb-4 sm:mb-6 max-w-2xl mx-auto leading-relaxed px-4">
-                Thank you for your interest in joining Naija Ninja Warrior! All positions have been filled for this recruitment cycle. New opportunities will be announced soon.
+                Thank you for your interest in joining Naija WLA! All positions have been filled for this recruitment cycle. New opportunities will be announced soon.
               </p>
             </>
           ) : (
@@ -195,7 +195,7 @@ export default function JobsList() {
                 Opportunities Coming Soon
               </h2>
               <p className="text-base sm:text-lg text-gray-700 mb-4 sm:mb-6 max-w-2xl mx-auto leading-relaxed px-4">
-                We're currently preparing new career opportunities at Naija Ninja Warrior. 
+                We're currently preparing new career opportunities at WLA. 
                 We'll be opening applications for various roles across Nigeria very soon!
               </p>
             </>

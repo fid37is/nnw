@@ -55,7 +55,7 @@ export default function AdminStageProgressPage() {
       const { data: { session } } = await supabase.auth.getSession()
       if (!session) { window.location.href = '/login'; return }
       const { data: u } = await supabase.from('users').select('role').eq('id', session.user.id).single()
-      if (u?.role !== 'admin') { window.location.href = '/login'; return }
+      if (u?.role !== 'admin' && u?.role !== 'super_admin') { window.location.href = '/login'; return }
     }
     checkAuth()
   }, [])

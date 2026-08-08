@@ -68,7 +68,7 @@ export default function InvestorSidebar() {
           )}
           <div>
             <p className="font-bold text-sm leading-tight">Investor Portal</p>
-            <p className="text-naija-green-300 text-xs">Naija Ninja</p>
+            <p className="text-naija-green-300 text-xs">Naija Next</p>
             <p className="text-naija-green-400 text-[10px] font-semibold tracking-wider uppercase mt-0.5">
               Powered by WLA
             </p>

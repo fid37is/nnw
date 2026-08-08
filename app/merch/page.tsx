@@ -239,7 +239,7 @@ export default function MerchPage() {
             <ShoppingBag size={40} className="text-naija-green-600" />
             <h1 className="text-4xl md:text-5xl font-bold text-gray-900">Shop</h1>
           </div>
-          <p className="text-gray-600">Exclusive Naija Ninja branded apparel</p>
+          <p className="text-gray-600">Exclusive Naija Next branded apparel</p>
         </div>
 
         {/* Loading */}
@@ -256,7 +256,7 @@ export default function MerchPage() {
             <ShoppingBag size={64} className="text-gray-200 mb-4" />
             <h2 className="text-xl font-bold text-gray-700 mb-2">No items yet</h2>
             <p className="text-gray-500 text-sm max-w-xs">
-              The shop is being stocked up. Check back soon for exclusive Naija Ninja merch!
+              The shop is being stocked up. Check back soon for exclusive Naija Next merch!
             </p>
           </div>
         )}

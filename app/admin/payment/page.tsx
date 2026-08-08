@@ -69,7 +69,7 @@ export default function AdminPaymentManagementPage() {
         .eq('id', session.user.id)
         .single()
 
-      if (userError || userData?.role !== 'admin') {
+      if (userError || userData?.role !== 'admin' && userData?.role !== 'super_admin') {
         toast.error('Unauthorized access')
         window.location.href = '/login'
         return

@@ -8,9 +8,9 @@ const FAQS = [
   { q:'How do I apply?',                  a:'Click Apply, fill out your information, and submit. Our team reviews and responds within 3-5 business days.' },
   { q:'What are the age requirements?',    a:'You must be 18 years or older. Nigerian citizenship or residency is required to compete.' },
   { q:'How many competition stages?',      a:'Three stages: Zonal Elimination, Zone Finals, and the Grand Finale in Abuja. Only top performers advance.' },
-  { q:'Where can I train?',               a:'Visit our Training Centers page to find certified Ninja training locations near you across Nigeria.' },
+  { q:'Where can I train?',               a:'Visit our Training Centers page to find certified Warrior training locations near you across Nigeria.' },
   { q:'What if I get eliminated?',         a:'Eliminated participants are recognised on the leaderboard and can apply again for the next season.' },
-  { q:'Are there prizes?',                a:'Yes — cash prizes, life-changing endorsement deals, and the title of Naija Ninja Warrior Champion.' },
+  { q:'Are there prizes?',                a:'Yes - cash prizes, life-changing endorsement deals, and the title of Naija Next Warrior Champion.' },
 ]
 
 export default function FAQSection() {

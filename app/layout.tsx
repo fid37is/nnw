@@ -29,15 +29,15 @@ export const metadata: Metadata = {
   metadataBase: new URL(baseUrl),
 
   title: {
-    default:  "Naija Ninja Warrior - Nigeria's Ultimate Physical Challenge",
-    template: '%s | Naija Ninja Warrior',
+    default:  "Naija Next Warrior - Nigeria's Ultimate Physical Challenge",
+    template: '%s | Naija Next Warrior',
   },
 
   description:
-    "Think you have what it takes? Apply now to compete in Naija Ninja Warrior - Nigeria's premier obstacle course competition. Test your strength, speed, and determination on the toughest course in Africa.",
+    "Think you have what it takes? Apply now to compete in Naija Next Warrior - Nigeria's premier obstacle course competition. Test your strength, speed, and determination on the toughest course in Africa.",
 
   keywords: [
-    'Naija Ninja Warrior',
+    'Naija Next Warrior',
     'Nigeria obstacle course',
     'Nigerian competition',
     'ninja warrior Nigeria',
@@ -51,9 +51,9 @@ export const metadata: Metadata = {
     'Nigerian reality show',
   ],
 
-  authors:   [{ name: 'Naija Ninja Warrior Team' }],
-  creator:   'Naija Ninja Warrior',
-  publisher: 'Naija Ninja Warrior',
+  authors:   [{ name: 'Naija Next Warrior Team' }],
+  creator:   'Naija Next Warrior',
+  publisher: 'Naija Next Warrior',
 
   formatDetection: {
     email:      false,
@@ -66,23 +66,23 @@ export const metadata: Metadata = {
     locale:          'en_NG',
     alternateLocale: ['en_US', 'en_GB'],
     url:             baseUrl,
-    title:           "Naija Ninja Warrior - Nigeria's Ultimate Physical Challenge",
+    title:           "Naija Next Warrior - Nigeria's Ultimate Physical Challenge",
     description:
       "Think you have what it takes? Apply now to compete in Nigeria's premier obstacle course competition. Test your strength on the toughest course in Africa.",
-    siteName: 'Naija Ninja Warrior',
+    siteName: 'Naija Next Warrior',
     images: [
       {
         url:    ogImage,
         width:  1200,
         height: 630,
-        alt:    "Naija Ninja Warrior - Nigeria's Ultimate Challenge",
+        alt:    "Naija Next Warrior - Nigeria's Ultimate Challenge",
       },
     ],
   },
 
   twitter: {
     card:        'summary_large_image',
-    title:       "Naija Ninja Warrior - Nigeria's Ultimate Physical Challenge",
+    title:       "Naija Next Warrior - Nigeria's Ultimate Physical Challenge",
     description: "Think you have what it takes? Apply now to compete in Nigeria's premier obstacle course competition.",
     images:      [ogImage],
     creator:     '@naijaninja',
@@ -130,7 +130,7 @@ const jsonLd = {
     {
       '@type':       'SportsOrganization',
       '@id':         `${baseUrl}/#organization`,
-      name:          'Naija Ninja Warrior',
+      name:          'Naija Next Warrior',
       alternateName: 'NNW',
       url:           baseUrl,
       logo: {
@@ -159,8 +159,8 @@ const jsonLd = {
       // Update startDate / endDate once Season 1 dates are confirmed
       '@type':       'SportsEvent',
       '@id':         `${baseUrl}/#season1`,
-      name:          'Naija Ninja Warrior — Season 1',
-      description:   "Nigeria's first obstacle-course sports championship. Athletes compete through purpose-built courses for the title of Naija Ninja Warrior.",
+      name:          'Naija Next Warrior — Season 1',
+      description:   "Nigeria's first obstacle-course sports championship. Athletes compete through purpose-built courses for the title of Naija Next Warrior.",
       sport:         'Obstacle Course Racing',
       url:           baseUrl,
       image:         ogImage,

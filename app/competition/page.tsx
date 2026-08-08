@@ -22,7 +22,7 @@ export default function CompetitionPage() {
             <Trophy size={40} className="text-naija-green-600" />
             <h1 className="text-4xl md:text-5xl font-bold text-gray-900">Competition Format</h1>
           </div>
-          <p className="text-xl text-gray-600">How Naija Ninja Warrior Works</p>
+          <p className="text-xl text-gray-600">How Naija Next Warrior Works</p>
         </div>
 
         {/* Overview */}
@@ -31,7 +31,7 @@ export default function CompetitionPage() {
             Earn Recognition, Opportunity, and Rewards Through Strength, Strategy, and Resilience.
           </h2>
           <p className="text-lg text-green-50 leading-relaxed">
-            Naija Ninja Warrior is a multi-stage competition that tests athletes across speed, strength, agility, and mental toughness. Competitors face increasingly difficult obstacle courses, with only the best advancing to the Grand Finale in Abuja - and rewards that reflect excellence at every level.
+            Naija Next Warrior is a multi-stage competition that tests athletes across speed, strength, agility, and mental toughness. Competitors face increasingly difficult obstacle courses, with only the best advancing to the Grand Finale in Abuja - and rewards that reflect excellence at every level.
           </p>
         </div>
 

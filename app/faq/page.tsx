@@ -121,7 +121,7 @@ export default function FAQPage() {
     {
       category: 'Media',
       question: 'Will the competition be televised?',
-      answer: 'Yes, Naija Ninja Warrior will be broadcast on national TV, DSTV, and streamed on platforms like Netflix and YouTube. Specific broadcast schedules will be announced closer to competition dates.'
+      answer: 'Yes, Naija Next Warrior will be broadcast on national TV, DSTV, and streamed on platforms like Netflix and YouTube. Specific broadcast schedules will be announced closer to competition dates.'
     },
     {
       category: 'Media',
@@ -194,7 +194,7 @@ export default function FAQPage() {
             <HelpCircle size={40} className="text-naija-green-600" />
             <h1 className="text-4xl md:text-5xl font-bold text-gray-900">Frequently Asked Questions</h1>
           </div>
-          <p className="text-xl text-gray-600">Find answers to common questions about Naija Ninja Warrior</p>
+          <p className="text-xl text-gray-600">Find answers to common questions about Naija Next Warrior</p>
         </div>
 
         {/* Category Filter */}

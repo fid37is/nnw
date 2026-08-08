@@ -105,7 +105,7 @@ export default function AdminApplicationsPage() {
         return
       }
 
-      if (userData?.role !== 'admin') {
+      if (userData?.role !== 'admin' && userData?.role !== 'super_admin') {
         toast.error('Unauthorized access')
         window.location.href = '/login'
         return

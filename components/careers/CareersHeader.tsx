@@ -13,7 +13,7 @@ export default function CareersHeader() {
         <Briefcase size={40} className="text-naija-green-600" />
         <h1 className="text-4xl md:text-5xl font-bold text-gray-900">Join Our Team</h1>
       </div>
-      <p className="text-xl text-gray-600">Careers at WLA Entertainment Ltd - Home of Naija Ninja Warrior</p>
+      <p className="text-xl text-gray-600">Careers at WLA Entertainment Ltd - Home of Naija Next Warrior</p>
     </div>
   )
 }

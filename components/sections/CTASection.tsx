@@ -53,7 +53,7 @@ export default function CTASection({ champion, isApplicationOpen }: CTASectionPr
               </Link>
               <Link
                 href="/about"
-                aria-label="Learn more about Naija Ninja Warrior"
+                aria-label="Learn more about Naija Next Warrior"
                 className="inline-flex items-center justify-center gap-2 px-10 py-5 bg-white/5 hover:bg-white/10 border border-white/20 text-white font-bold text-lg rounded-full transition-all duration-300">
                 Learn More
               </Link>

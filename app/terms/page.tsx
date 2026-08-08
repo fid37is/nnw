@@ -67,21 +67,21 @@ export default function TermsPage() {
         <div className="prose prose-lg max-w-none">
           <div className="bg-amber-50 border border-amber-200 rounded-xl p-6 mb-8">
             <p className="text-gray-700 leading-relaxed m-0">
-              Please read these Terms and Conditions carefully before using our website or participating in Naija Ninja Warrior competitions operated by WLA Entertainment Ltd. By accessing our website or registering for the competition, you agree to be bound by these terms.
+              Please read these Terms and Conditions carefully before using our website or participating in Naija Next Warrior competitions operated by WLA Entertainment Ltd. By accessing our website or registering for the competition, you agree to be bound by these terms.
             </p>
           </div>
 
           <section className="mb-8">
             <h2 className="text-2xl font-bold text-gray-900 mb-4">1. Acceptance of Terms</h2>
             <p className="text-gray-700 leading-relaxed">
-              By accessing or using the Naija Ninja Warrior website, registering for competitions, or participating in any related activities organised by WLA Entertainment Ltd, you acknowledge that you have read, understood, and agree to be bound by these Terms and Conditions, as well as our Privacy Policy. If you do not agree with any part of these terms, you must not use our services.
+              By accessing or using the Naija Next Warrior website, registering for competitions, or participating in any related activities organised by WLA Entertainment Ltd, you acknowledge that you have read, understood, and agree to be bound by these Terms and Conditions, as well as our Privacy Policy. If you do not agree with any part of these terms, you must not use our services.
             </p>
           </section>
 
           <section className="mb-8">
             <h2 className="text-2xl font-bold text-gray-900 mb-4">2. About the Operator</h2>
             <p className="text-gray-700 leading-relaxed mb-4">
-              Naija Ninja Warrior is a competition series owned and operated by <strong>WLA Entertainment Ltd</strong> (Warrior League Africa), a private company limited by shares, duly registered with the Corporate Affairs Commission of Nigeria. Naija Ninja Warrior is a WLA Entertainment Company:
+              Naija Next Warrior is a competition series owned and operated by <strong>WLA Entertainment Ltd</strong> (Warrior League Africa), a private company limited by shares, duly registered with the Corporate Affairs Commission of Nigeria. Naija Next Warrior is a WLA Entertainment Company:
             </p>
             <ul className="space-y-2 text-gray-700">
               <li><strong>Company Name:</strong> WLA Entertainment Ltd</li>
@@ -158,12 +158,12 @@ export default function TermsPage() {
           <section className="mb-8">
             <h2 className="text-2xl font-bold text-gray-900 mb-4">6. Liability Waiver and Release</h2>
             <p className="text-gray-700 leading-relaxed mb-4">
-              <strong>IMPORTANT:</strong> By participating in Naija Ninja Warrior, you acknowledge and agree:
+              <strong>IMPORTANT:</strong> By participating in Naija Next Warrior, you acknowledge and agree:
             </p>
             <ul className="space-y-2 text-gray-700 mb-4">
               <li>Obstacle course competitions involve inherent risks including serious injury or death</li>
               <li>You voluntarily assume all risks associated with participation</li>
-              <li>You release WLA Entertainment Ltd, Naija Ninja Warrior, its organisers, sponsors, and partners from any liability</li>
+              <li>You release WLA Entertainment Ltd, Naija Next Warrior, its organisers, sponsors, and partners from any liability</li>
               <li>You waive any claims for injury, loss, or damage arising from participation</li>
               <li>This release extends to medical treatment provided at the event</li>
             </ul>
@@ -175,7 +175,7 @@ export default function TermsPage() {
           <section className="mb-8">
             <h2 className="text-2xl font-bold text-gray-900 mb-4">7. Media Rights and Publicity</h2>
             <p className="text-gray-700 leading-relaxed mb-4">
-              By participating, you grant WLA Entertainment Ltd and Naija Ninja Warrior:
+              By participating, you grant WLA Entertainment Ltd and Naija Next Warrior:
             </p>
             <ul className="space-y-2 text-gray-700">
               <li>Unrestricted rights to photograph, film, and record your participation</li>
@@ -237,7 +237,7 @@ export default function TermsPage() {
           <section className="mb-8">
             <h2 className="text-2xl font-bold text-gray-900 mb-4">11. Intellectual Property</h2>
             <p className="text-gray-700 leading-relaxed mb-4">
-              All content on the Naija Ninja Warrior website and competition materials - including the NNW brand, WLA brand, logos, text, graphics, videos, and software - are owned by WLA Entertainment Ltd and protected by copyright and trademark laws. You may not:
+              All content on the Naija Next Warrior website and competition materials - including the NNW brand, WLA brand, logos, text, graphics, videos, and software - are owned by WLA Entertainment Ltd and protected by copyright and trademark laws. You may not:
             </p>
             <ul className="space-y-2 text-gray-700">
               <li>Reproduce, distribute, or display content without permission</li>
@@ -334,7 +334,7 @@ export default function TermsPage() {
           <div className="bg-red-50 border border-red-200 rounded-xl p-6 mt-8">
             <p className="text-gray-900 font-semibold mb-2">⚠️ Important Notice</p>
             <p className="text-gray-700 m-0">
-              By registering for or participating in Naija Ninja Warrior, you acknowledge that you have read, understood, and agree to these Terms and Conditions in their entirety. These terms constitute a legally binding agreement with WLA Entertainment Ltd (RC No. 9529867). Naija Ninja Warrior is a WLA Entertainment Company.
+              By registering for or participating in Naija Next Warrior, you acknowledge that you have read, understood, and agree to these Terms and Conditions in their entirety. These terms constitute a legally binding agreement with WLA Entertainment Ltd (RC No. 9529867). Naija Next Warrior is a WLA Entertainment Company.
             </p>
           </div>
         </div>

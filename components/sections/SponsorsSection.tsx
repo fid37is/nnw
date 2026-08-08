@@ -56,7 +56,7 @@ export default function SponsorsSection({ sponsors }: SponsorsSectionProps) {
             <div className="flex items-center justify-center w-14 h-14 bg-naija-green-100 rounded-2xl mb-4 mx-auto"><Handshake size={28} className="text-naija-green-600"/></div>
             <h3 className="text-2xl font-black text-gray-900 mb-2">Become a Founding Sponsor</h3>
             <p className="text-gray-500 max-w-md mx-auto mb-8 text-sm leading-relaxed">
-              Partner with Naija Ninja Warrior and reach millions of passionate viewers across Nigeria and Africa.
+              Partner with Naija Next Warrior and reach millions of passionate viewers across Nigeria and Africa.
               First-mover sponsorship packages available now.
             </p>
             <Link href="/partners"

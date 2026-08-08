@@ -23,14 +23,18 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Check caller is admin
+    // Check caller is admin or super_admin — matches the check used
+    // elsewhere in the app (e.g. AdminInvestorsPage's init()), which already
+    // treats both roles as equally authorized. This endpoint was the one
+    // place still only accepting 'admin' literally, which is what blocked
+    // super_admin callers with a 403.
     const { data: callerData } = await supabaseAdmin
       .from('users')
       .select('role')
       .eq('id', callerUser.id)
       .single()
 
-    if (callerData?.role !== 'admin') {
+    if (callerData?.role !== 'admin' && callerData?.role !== 'super_admin') {
       return NextResponse.json({ error: 'Admin access required' }, { status: 403 })
     }
 
@@ -97,6 +101,7 @@ export async function POST(req: NextRequest) {
         full_name,
         phone:                phone || null,
         role:                 'investor',
+        investor_status:      'active',
         must_change_password: true,
         profile_completed:    true,
       })
