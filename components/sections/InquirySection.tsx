@@ -57,7 +57,7 @@ export default function InquirySection() {
         {/* Left Image Column */}
         <div className="relative w-full h-full min-h-[600px] rounded-3xl overflow-hidden shadow-2xl">
           <Image
-            src="/inquery-hero.png  "
+            src="/inquery-hero.png"
             alt="Contact Us"
             fill
             className="object-cover"
