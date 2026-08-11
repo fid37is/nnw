@@ -1,24 +1,27 @@
+// File: app/participants/page.tsx
 'use client'
 
-import { useEffect, useState } from 'react'
-import Link from 'next/link'
-import Image from 'next/image'
+import { useEffect, useMemo, useState } from 'react'
 import { supabase } from '@/lib/supabase/client'
-import { Search, ArrowLeft, User, Users as UsersIcon, X } from 'lucide-react'
-import Navbar from '../navbar'
-import Footer from '../footer'
+import { Search, User, X } from 'lucide-react'
+import styles from '@/components/sections/nnw/nnw.module.css'
+import subStyles from '@/components/module/subpage.module.css'
+import pStyles from '@/components/module/participants.module.css'
+import Ticker from '@/components/sections/nnw/Ticker'
+import Nav from '@/components/sections/nnw/Nav'
+import Footer from '@/components/sections/nnw/Footer'
 
 interface Participant {
   id: string
   user_id: string
   full_name: string
   preferred_name: string | null
-  status: string
-  photo_url?: string | null
+  photo_url: string | null
   age: number
   state: string
   geo_zone: string | null
   is_eliminated: boolean
+  eliminated_at: string | null
 }
 
 interface ParticipantStats {
@@ -38,31 +41,53 @@ interface Season {
   status: string
 }
 
+type DerivedStatus = 'active' | 'advancing' | 'eliminated'
+
+const TICKER_ITEMS = [
+  "NIGERIA'S NEXT WARRIOR · A WLA COMPANY",
+  'SIX ZONES · ONE ARENA',
+  'STATUS UPDATES AFTER EACH ZONE ROUND',
+]
+
+const ZONES = ['North Central', 'North East', 'North West', 'South East', 'South South', 'South West']
+
+const fmtTime = (sec: number | null) => {
+  if (sec === null || sec === undefined) return '—'
+  const m = Math.floor(sec / 60)
+  const s = (sec % 60).toFixed(1).padStart(4, '0')
+  return `${m}:${s}`
+}
+
 export default function ParticipantsPage() {
   const [participants, setParticipants] = useState<Participant[]>([])
-  const [filteredParticipants, setFilteredParticipants] = useState<Participant[]>([])
+  const [bestTimes, setBestTimes] = useState<Map<string, number>>(new Map())
   const [seasons, setSeasons] = useState<Season[]>([])
   const [selectedSeasonId, setSelectedSeasonId] = useState<string>('')
   const [searchTerm, setSearchTerm] = useState('')
-  const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'eliminated'>('all')
+  const [statusFilter, setStatusFilter] = useState<'All' | DerivedStatus>('All')
+  const [zoneFilter, setZoneFilter] = useState<string>('All')
+  const [sortBy, setSortBy] = useState<'time' | 'name'>('time')
   const [loading, setLoading] = useState(true)
   const [selectedParticipant, setSelectedParticipant] = useState<Participant | null>(null)
   const [participantStats, setParticipantStats] = useState<ParticipantStats | null>(null)
   const [modalLoading, setModalLoading] = useState(false)
+  const [syncClock, setSyncClock] = useState('00:00:00')
 
-  useEffect(() => {
-    loadSeasons()
-  }, [])
+  useEffect(() => { loadSeasons() }, [])
+  useEffect(() => { if (selectedSeasonId) loadParticipants() }, [selectedSeasonId])
 
+  // Live clock, same as the prototype's `tickClock()` — purely a "this page
+  // is live" indicator, not tied to any actual data refresh.
   useEffect(() => {
-    if (selectedSeasonId) {
-      loadParticipants()
+    const pad = (n: number) => String(n).padStart(2, '0')
+    const tick = () => {
+      const now = new Date()
+      setSyncClock(`${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`)
     }
-  }, [selectedSeasonId])
-
-  useEffect(() => {
-    filterParticipants()
-  }, [participants, searchTerm, statusFilter])
+    tick()
+    const id = setInterval(tick, 1000)
+    return () => clearInterval(id)
+  }, [])
 
   const loadSeasons = async () => {
     try {
@@ -73,9 +98,7 @@ export default function ParticipantsPage() {
 
       if (error) throw error
       setSeasons(data || [])
-      if (data && data.length > 0) {
-        setSelectedSeasonId(data[0].id)
-      }
+      if (data && data.length > 0) setSelectedSeasonId(data[0].id)
     } catch (err) {
       console.error('Failed to load seasons:', err)
     } finally {
@@ -88,7 +111,7 @@ export default function ParticipantsPage() {
     try {
       const { data: appsData, error: appsError } = await supabase
         .from('applications')
-        .select('id, user_id, status, photo_url, age, state, geo_zone, is_eliminated')
+        .select('id, user_id, status, photo_url, age, state, geo_zone, is_eliminated, eliminated_at')
         .eq('season_id', selectedSeasonId)
         .eq('status', 'approved')
 
@@ -96,6 +119,7 @@ export default function ParticipantsPage() {
 
       if (!appsData || appsData.length === 0) {
         setParticipants([])
+        setBestTimes(new Map())
         setLoading(false)
         return
       }
@@ -109,11 +133,9 @@ export default function ParticipantsPage() {
       if (usersError) throw usersError
 
       const usersMap = new Map()
-      usersData?.forEach((user: any) => {
-        usersMap.set(user.id, user)
-      })
+      usersData?.forEach((user: any) => usersMap.set(user.id, user))
 
-      const allParticipants = appsData.map((app: any) => {
+      const allParticipants: Participant[] = appsData.map((app: any) => {
         const user = usersMap.get(app.user_id)
         return {
           id: app.id,
@@ -121,39 +143,109 @@ export default function ParticipantsPage() {
           full_name: user?.full_name || 'Unknown',
           preferred_name: user?.preferred_name || null,
           photo_url: app.photo_url || null,
-          status: app.is_eliminated ? 'eliminated' : 'active',
           age: app.age,
           state: app.state,
           geo_zone: app.geo_zone || null,
-          is_eliminated: app.is_eliminated || false
+          is_eliminated: app.is_eliminated || false,
+          eliminated_at: app.eliminated_at || null,
         }
       })
 
       setParticipants(allParticipants)
+
+      // Bulk best-time fetch: same `stage_performances` table already used for
+      // the per-participant modal, just queried for every application in this
+      // season at once instead of one at a time. Powers the fastest-times
+      // strip, time sort, and the derived "advancing" status below — all real
+      // data, no new tables or schema.
+      const { data: perfData, error: perfError } = await supabase
+        .from('stage_performances')
+        .select('application_id, time_seconds, status')
+        .eq('status', 'completed')
+        .in('application_id', allParticipants.map(p => p.id))
+
+      if (perfError) {
+        console.error('Failed to load stage_performances for best times:', perfError)
+      } else {
+        const times = new Map<string, number>()
+        perfData?.forEach((perf: any) => {
+          if (perf.time_seconds == null) return
+          const current = times.get(perf.application_id)
+          if (current === undefined || perf.time_seconds < current) {
+            times.set(perf.application_id, perf.time_seconds)
+          }
+        })
+        setBestTimes(times)
+      }
     } catch (err) {
       console.error('Failed to load participants:', err)
       setParticipants([])
+      setBestTimes(new Map())
     } finally {
       setLoading(false)
     }
   }
 
-  const filterParticipants = () => {
-    let filtered = participants
+  // Derived status: eliminated participants keep that status. Among the rest,
+  // the top 3 fastest per zone (matching the "top 3 per zone advance" rule
+  // used across the rest of the site) are "advancing"; everyone else is
+  // "active". This replaces the prototype's fabricated advancing flag with
+  // something computed from real recorded times.
+  const statusByParticipant = useMemo(() => {
+    const map = new Map<string, DerivedStatus>()
+    const byZone = new Map<string, Participant[]>()
 
-    if (statusFilter !== 'all') {
-      filtered = filtered.filter(p => p.status === statusFilter)
-    }
+    participants.forEach(p => {
+      if (p.is_eliminated) { map.set(p.id, 'eliminated'); return }
+      const zone = p.geo_zone || 'Unassigned'
+      if (!byZone.has(zone)) byZone.set(zone, [])
+      byZone.get(zone)!.push(p)
+    })
 
-    if (searchTerm) {
-      filtered = filtered.filter(p => {
+    byZone.forEach(zoneParticipants => {
+      const timed = zoneParticipants
+        .filter(p => bestTimes.has(p.id))
+        .sort((a, b) => bestTimes.get(a.id)! - bestTimes.get(b.id)!)
+      const advancingIds = new Set(timed.slice(0, 3).map(p => p.id))
+      zoneParticipants.forEach(p => map.set(p.id, advancingIds.has(p.id) ? 'advancing' : 'active'))
+    })
+
+    return map
+  }, [participants, bestTimes])
+
+  const fastestSix = useMemo(() => {
+    return participants
+      .filter(p => bestTimes.has(p.id))
+      .sort((a, b) => bestTimes.get(a.id)! - bestTimes.get(b.id)!)
+      .slice(0, 6)
+  }, [participants, bestTimes])
+
+  const filteredParticipants = useMemo(() => {
+    let list = participants.filter(p => {
+      if (zoneFilter !== 'All' && p.geo_zone !== zoneFilter) return false
+      if (statusFilter !== 'All' && statusByParticipant.get(p.id) !== statusFilter) return false
+      if (searchTerm) {
         const displayName = p.preferred_name || p.full_name
-        return displayName.toLowerCase().includes(searchTerm.toLowerCase())
+        if (!displayName.toLowerCase().includes(searchTerm.toLowerCase())) return false
+      }
+      return true
+    })
+
+    if (sortBy === 'time') {
+      list = list.slice().sort((a, b) => {
+        const ta = bestTimes.get(a.id)
+        const tb = bestTimes.get(b.id)
+        if (ta === undefined && tb === undefined) return 0
+        if (ta === undefined) return 1
+        if (tb === undefined) return -1
+        return ta - tb
       })
+    } else {
+      list = list.slice().sort((a, b) => (a.preferred_name || a.full_name).localeCompare(b.preferred_name || b.full_name))
     }
 
-    setFilteredParticipants(filtered)
-  }
+    return list
+  }, [participants, zoneFilter, statusFilter, searchTerm, sortBy, bestTimes, statusByParticipant])
 
   const loadParticipantStats = async (participant: Participant) => {
     setModalLoading(true)
@@ -172,10 +264,8 @@ export default function ParticipantsPage() {
       const totalPoints = performances?.reduce((sum, p) => sum + (p.points || 0), 0) || 0
       const challengesCompleted = performances?.length || 0
       const challengesWon = performances?.filter(p => p.position === 1).length || 0
-
       const validTimes = performances?.filter(p => p.time_seconds).map(p => p.time_seconds) || []
       const bestTime = validTimes.length > 0 ? Math.min(...validTimes) : null
-
       const averagePoints = challengesCompleted > 0 ? Math.round(totalPoints / challengesCompleted) : 0
 
       const { data: allPerformances } = await supabase
@@ -189,22 +279,8 @@ export default function ParticipantsPage() {
         const current = scoreMap.get(perf.application_id) || 0
         scoreMap.set(perf.application_id, current + (perf.points || 0))
       })
-
-      const sortedScores = Array.from(scoreMap.entries())
-        .sort((a, b) => b[1] - a[1])
-
+      const sortedScores = Array.from(scoreMap.entries()).sort((a, b) => b[1] - a[1])
       const ranking = sortedScores.findIndex(([id]) => id === participant.id) + 1
-
-      let eliminationDate = null
-      if (participant.is_eliminated) {
-        const { data: appData } = await supabase
-          .from('applications')
-          .select('eliminated_at')
-          .eq('id', participant.id)
-          .single()
-
-        eliminationDate = appData?.eliminated_at || null
-      }
 
       setParticipantStats({
         ranking: ranking > 0 ? ranking : null,
@@ -213,341 +289,270 @@ export default function ParticipantsPage() {
         challenges_won: challengesWon,
         best_time: bestTime,
         average_points: averagePoints,
-        elimination_date: eliminationDate,
+        elimination_date: participant.eliminated_at,
       })
     } catch (err) {
       console.error('Failed to load participant stats:', err)
-      setParticipantStats({
-        ranking: null,
-        total_points: 0,
-        challenges_completed: 0,
-        challenges_won: 0,
-        best_time: null,
-        average_points: 0,
-      })
+      setParticipantStats({ ranking: null, total_points: 0, challenges_completed: 0, challenges_won: 0, best_time: null, average_points: 0 })
     } finally {
       setModalLoading(false)
     }
   }
 
-  const closeModal = () => {
-    setSelectedParticipant(null)
-    setParticipantStats(null)
-  }
+  const closeModal = () => { setSelectedParticipant(null); setParticipantStats(null) }
+  const getDisplayName = (p: Participant) => p.preferred_name || p.full_name
+  const initials = (name: string) => name.split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase()
 
-  const getDisplayName = (participant: Participant) => {
-    return participant.preferred_name || participant.full_name
-  }
-
-  const activeCount = participants.filter(p => !p.is_eliminated).length
+  const activeCount = participants.filter(p => statusByParticipant.get(p.id) === 'active').length
+  const advancingCount = participants.filter(p => statusByParticipant.get(p.id) === 'advancing').length
   const eliminatedCount = participants.filter(p => p.is_eliminated).length
 
   return (
-    <main className="min-h-screen bg-white overflow-x-hidden">
-      <Navbar />
+    <div className={styles.nnw}>
+      <Ticker items={TICKER_ITEMS} />
+      <Nav applyLabel="Get Notified" />
 
-      {loading ? (
-        <div className="flex items-center justify-center min-h-[calc(100vh-80px)]">
-          <div className="animate-spin w-8 h-8 border-4 border-naija-green-200 border-t-naija-green-600 rounded-full"></div>
-        </div>
-      ) : (
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12 mt-14">
-          <div className="mb-8">
-            <Link href="/" className="inline-flex items-center gap-2 text-naija-green-600 hover:text-naija-green-700 mb-6 font-medium transition group">
-              <ArrowLeft size={18} className="group-hover:-translate-x-1 transition-transform" />
-              <span className="text-sm">Back to Home</span>
-            </Link>
-            <div className="flex items-center gap-4 mb-3">
-              <UsersIcon size={40} className="text-naija-green-600" />
-              <h1 className="text-4xl md:text-5xl font-bold text-gray-900">Participants</h1>
-            </div>
-            <p className="text-gray-600">Browse all competitors</p>
+      <header className={subStyles.subhero} style={{ paddingTop: 200 }}>
+        <span className={styles['ghost-num']} style={{ fontSize: '24vw', top: '-6vw', right: '-6vw' }}>24</span>
+        <div className={styles.wrap}>
+          <div className={subStyles['subhero-badge']}>
+            <span className={styles.dot} />
+            <span className={styles.mono} style={{ fontSize: 11, letterSpacing: '0.2em', textTransform: 'uppercase', color: 'var(--gold)' }}>
+              {seasons.find(s => s.id === selectedSeasonId)?.name || 'Season 1'} · Live Roster
+            </span>
+          </div>
+          <h1 className={styles.display}>All Participants.</h1>
+          <p>Every confirmed warrior across all six zones — status and best run time, updated as each round happens.</p>
+          <div className={subStyles['sync-row']}>
+            <span className={styles.dot} style={{ width: 5, height: 5 }} />
+            <span>Last sync: <strong>{syncClock}</strong></span>
           </div>
 
           {seasons.length > 1 && (
-            <div className="mb-8 max-w-xs mx-auto">
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Select Season</label>
-              <select
-                value={selectedSeasonId}
-                onChange={(e) => setSelectedSeasonId(e.target.value)}
-                className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-naija-green-600 font-medium"
-              >
+            <div style={{ marginTop: 22, position: 'relative', zIndex: 2 }}>
+              <select className={subStyles['season-select']} value={selectedSeasonId} onChange={(e) => setSelectedSeasonId(e.target.value)}>
                 {seasons.map((season) => (
-                  <option key={season.id} value={season.id}>
-                    {season.name} ({season.year})
-                  </option>
+                  <option key={season.id} value={season.id}>{season.name} ({season.year})</option>
                 ))}
               </select>
             </div>
           )}
 
-          <div className="grid grid-cols-3 gap-4 mb-8">
-            <div className="p-4 bg-gray-50 rounded-lg border border-gray-200 text-center">
-              <div className="text-2xl md:text-3xl font-bold text-gray-900">{participants.length}</div>
-              <p className="text-xs text-gray-600 mt-1">Total</p>
+          <div className={subStyles['subhero-stats']} style={{ gridTemplateColumns: 'repeat(4, 1fr)', maxWidth: 720 }}>
+            <div>
+              <div className={subStyles['hstat-label']}>Total</div>
+              <div className={subStyles['hstat-value']}>{participants.length}</div>
             </div>
-            <div className="p-4 bg-green-50 rounded-lg border border-green-200 text-center">
-              <div className="text-2xl md:text-3xl font-bold text-green-700">{activeCount}</div>
-              <p className="text-xs text-green-600 mt-1">Active</p>
+            <div>
+              <div className={subStyles['hstat-label']}>Active</div>
+              <div className={`${subStyles['hstat-value']} ${subStyles.gold}`}>{activeCount}</div>
             </div>
-            <div className="p-4 bg-red-50 rounded-lg border border-red-200 text-center">
-              <div className="text-2xl md:text-3xl font-bold text-red-700">{eliminatedCount}</div>
-              <p className="text-xs text-red-600 mt-1">Eliminated</p>
+            <div>
+              <div className={subStyles['hstat-label']}>Advancing</div>
+              <div className={`${subStyles['hstat-value']} ${subStyles.green}`}>{advancingCount}</div>
+            </div>
+            <div>
+              <div className={subStyles['hstat-label']}>Eliminated</div>
+              <div className={`${subStyles['hstat-value']} ${subStyles.muted}`}>{eliminatedCount}</div>
             </div>
           </div>
+        </div>
+      </header>
 
-          {/* Search and Filters on Same Row */}
-          <div className="flex flex-col md:flex-row gap-4 mb-8 items-center justify-between">
-            <div className="relative flex-1 max-w-md w-full">
-              <Search size={20} className="absolute left-3 top-2.5 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Search name..."
-                value={searchTerm}
-                onChange={e => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-naija-green-600"
-              />
+      {fastestSix.length > 0 && (
+        <section className={pStyles['fastest-section']}>
+          <div className={styles.wrap}>
+            <div className={pStyles['fastest-title']}>
+              <span className={styles.dot} style={{ background: 'var(--bone)' }} />
+              <span className={styles.mono} style={{ fontSize: 11.5, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(var(--bone-rgb),0.85)' }}>Fastest Times — All Zones</span>
             </div>
+            <div className={pStyles['fastest-row']}>
+              {fastestSix.map((p, i) => (
+                <div key={p.id} className={`${pStyles['fastest-card']} ${i === 0 ? pStyles.rank1 : ''}`}>
+                  <div className={pStyles['fastest-rank']}>RANK {String(i + 1).padStart(2, '0')}</div>
+                  <div className={pStyles['fastest-name']}>{getDisplayName(p)}</div>
+                  <div className={pStyles['fastest-zone']}>{p.geo_zone || p.state}</div>
+                  <div className={pStyles['fastest-time']}>{fmtTime(bestTimes.get(p.id) ?? null)}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
-            <div className="flex gap-2 flex-wrap justify-center md:justify-end">
-              {(['all', 'active', 'eliminated'] as const).map(status => (
-                <button
-                  key={status}
-                  onClick={() => setStatusFilter(status)}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition ${statusFilter === status
-                    ? status === 'active' ? 'bg-green-600 text-white' : status === 'eliminated' ? 'bg-red-600 text-white' : 'bg-naija-green-600 text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                    }`}
-                >
-                  {status.charAt(0).toUpperCase() + status.slice(1)}
+      <div className={pStyles['p-controls']}>
+        <div className={styles.wrap}>
+          <div className={pStyles['p-controls-row']}>
+            <div className={pStyles['p-search-wrap']}>
+              <Search size={15} className={pStyles['p-search-icon']} />
+              <input type="text" placeholder="Search by name…" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
+            </div>
+            <select className={pStyles['sort-select']} value={sortBy} onChange={(e) => setSortBy(e.target.value as 'time' | 'name')}>
+              <option value="time">Sort: Best Time</option>
+              <option value="name">Sort: Name A–Z</option>
+            </select>
+          </div>
+          <div className={pStyles['p-controls-row']} style={{ marginTop: 12 }}>
+            <div className={pStyles['p-chip-row']}>
+              {['All', ...ZONES].map(z => (
+                <button key={z} onClick={() => setZoneFilter(z)} className={`${pStyles['p-chip']} ${zoneFilter === z ? pStyles.active : ''}`}>
+                  {z === 'All' ? 'All Zones' : z}
                 </button>
               ))}
             </div>
           </div>
+          <div className={pStyles['p-controls-row']} style={{ marginTop: 10 }}>
+            <div className={pStyles['p-chip-row']}>
+              {(['All', 'active', 'advancing', 'eliminated'] as const).map(status => (
+                <button key={status} onClick={() => setStatusFilter(status)} className={`${pStyles['p-chip']} ${statusFilter === status ? pStyles.active : ''}`}>
+                  {status === 'All' ? 'All Statuses' : status.charAt(0).toUpperCase() + status.slice(1)}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className={pStyles['p-result-count']}>Showing {filteredParticipants.length} of {participants.length} participants</div>
+        </div>
+      </div>
 
-          {filteredParticipants.length === 0 ? (
-            <div className="text-center py-12 bg-gray-50 rounded-lg border border-gray-200">
-              <p className="text-gray-600 font-medium">No participants found</p>
-              {participants.length === 0 && (
-                <p className="text-gray-500 text-sm mt-2">No approved participants for this season yet</p>
-              )}
+      <section style={{ padding: '40px 0 96px' }}>
+        <div className={styles.wrap}>
+          {loading ? (
+            <div style={{ display: 'flex', justifyContent: 'center', padding: '64px 0' }}>
+              <div className={styles.dot} style={{ width: 32, height: 32 }} />
+            </div>
+          ) : filteredParticipants.length === 0 ? (
+            <div className={pStyles['p-empty']}>
+              <Search size={30} style={{ opacity: 0.4 }} />
+              <p>{participants.length === 0 ? 'No approved participants for this season yet' : 'No participants match your filters'}</p>
             </div>
           ) : (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-              {filteredParticipants.map((participant) => (
-                <div
-                  key={participant.id}
-                  onClick={() => loadParticipantStats(participant)}
-                  className="group relative overflow-hidden rounded-2xl shadow-md hover:shadow-2xl transition-all duration-300 hover:scale-105 cursor-pointer"
-                >
-                  <div className="relative aspect-[3/4] overflow-hidden bg-gray-200">
-                    {participant.photo_url ? (
-                      <Image
-                        src={participant.photo_url}
-                        alt={getDisplayName(participant)}
-                        fill
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center bg-gray-300">
-                        <User size={64} className="text-gray-500" />
-                      </div>
-                    )}
-
-                    <div className="absolute top-3 right-3">
-                      <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold shadow-lg border border-white ${participant.status === 'active'
-                        ? 'bg-green-500 text-white'
-                        : 'bg-red-500 text-white'
-                        }`}>
-                        {participant.status === 'active' ? 'Active' : 'Eliminated'}
-                      </span>
+            <div className={pStyles['p-grid']}>
+              {filteredParticipants.map((p) => {
+                const status = statusByParticipant.get(p.id) || 'active'
+                const time = bestTimes.get(p.id) ?? null
+                return (
+                  <div
+                    key={p.id}
+                    onClick={() => loadParticipantStats(p)}
+                    className={`${pStyles['p-card']} ${pStyles.clickable} ${status === 'eliminated' ? pStyles.eliminated : ''}`}
+                  >
+                    <div className={`${pStyles['p-avatar']} ${pStyles[status]}`}>
+                      {p.photo_url ? <img src={p.photo_url} alt={getDisplayName(p)} /> : initials(getDisplayName(p))}
                     </div>
-
-                    <div className="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-black via-black/70 to-transparent"></div>
-
-                    <div className="absolute bottom-0 left-0 right-0 p-4">
-                      <p className="text-white font-bold text-base leading-tight line-clamp-2 mb-1">
-                        {getDisplayName(participant)}, {participant.age}
-                      </p>
-                      <p className="text-white/90 text-xs leading-tight">
-                        {participant.state}
-                        {participant.geo_zone && ` • ${participant.geo_zone}`}
-                      </p>
+                    <div className={pStyles['p-info']}>
+                      <div className={pStyles['p-top-row']}>
+                        <div>
+                          <div className={pStyles['p-name']}>{getDisplayName(p)}</div>
+                          <div className={pStyles['p-sub']}>Age {p.age} · {p.state}</div>
+                        </div>
+                        <span className={styles['status-pill']} style={{
+                          color: status === 'advancing' ? 'var(--status-advancing)' : status === 'eliminated' ? 'var(--status-eliminated)' : 'var(--status-pending)',
+                          background: status === 'advancing' ? 'var(--status-advancing-bg)' : status === 'eliminated' ? 'var(--status-eliminated-bg)' : 'var(--status-pending-bg)',
+                        }}>
+                          {status.charAt(0).toUpperCase() + status.slice(1)}
+                        </span>
+                      </div>
+                      <div className={pStyles['p-meta-row']}>
+                        <span className={pStyles['p-zone']}>{p.geo_zone || p.state}</span>
+                        <span className={`${pStyles['p-time']} ${time === null ? pStyles.dim : ''}`}>{fmtTime(time)}</span>
+                      </div>
+                      {p.is_eliminated && p.eliminated_at && (
+                        <div className={pStyles['p-elim-note']}>
+                          Eliminated {new Date(p.eliminated_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                        </div>
+                      )}
                     </div>
                   </div>
-                </div>
-              ))}
+                )
+              })}
             </div>
           )}
         </div>
-      )}
+      </section>
 
       {selectedParticipant && (
-        <div
-          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-          onClick={closeModal}
-        >
-          <div
-            className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl"
-            onClick={(e) => e.stopPropagation()}
-          >
+        <div className={pStyles['p-modal-backdrop']} onClick={closeModal}>
+          <div className={pStyles['p-modal']} onClick={(e) => e.stopPropagation()}>
             {modalLoading ? (
-              <div className="p-12 flex items-center justify-center">
-                <div className="animate-spin w-12 h-12 border-4 border-naija-green-200 border-t-naija-green-600 rounded-full"></div>
+              <div style={{ padding: 64, display: 'flex', justifyContent: 'center' }}>
+                <div className={styles.dot} style={{ width: 32, height: 32 }} />
               </div>
             ) : (
               <>
-                <div className="relative h-80 bg-gradient-to-br from-naija-green-500 to-naija-green-700">
+                <div className={pStyles['p-modal-photo']}>
                   {selectedParticipant.photo_url ? (
-                    <Image
-                      src={selectedParticipant.photo_url}
-                      alt={getDisplayName(selectedParticipant)}
-                      fill
-                      className="object-cover"
-                    />
+                    <img src={selectedParticipant.photo_url} alt={getDisplayName(selectedParticipant)} />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center">
-                      <User size={96} className="text-white/50" />
+                    <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <User size={80} color="rgba(var(--bone-rgb),0.5)" />
                     </div>
                   )}
-
-                  <button
-                    onClick={closeModal}
-                    className="absolute top-4 right-4 w-10 h-10 bg-black/50 hover:bg-black/70 rounded-full flex items-center justify-center text-white transition"
-                  >
-                    <X size={24} />
-                  </button>
-
-                  <div className="absolute top-4 left-4">
-                    <span className={`inline-flex items-center px-4 py-2 rounded-full text-sm font-bold shadow-lg ${selectedParticipant.status === 'active'
-                      ? 'bg-green-500 text-white'
-                      : 'bg-red-500 text-white'
-                      }`}>
-                      {selectedParticipant.status === 'active' ? 'Active' : 'Eliminated'}
-                    </span>
-                  </div>
-
-                  <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-black/80 to-transparent"></div>
-
-                  <div className="absolute bottom-0 left-0 right-0 p-6">
-                    <h2 className="text-3xl font-bold text-white mb-1">
-                      {getDisplayName(selectedParticipant)}
-                    </h2>
-                    <p className="text-white/90 text-lg">
-                      Age {selectedParticipant.age} • {selectedParticipant.state}
-                      {selectedParticipant.geo_zone && ` • ${selectedParticipant.geo_zone}`}
-                    </p>
+                  <button onClick={closeModal} className={pStyles['p-modal-close']}><X size={20} /></button>
+                  <div className={pStyles['p-modal-photo-info']}>
+                    <div className={pStyles['p-modal-name']}>{getDisplayName(selectedParticipant)}</div>
+                    <div className={pStyles['p-modal-meta']}>
+                      Age {selectedParticipant.age} · {selectedParticipant.state}
+                      {selectedParticipant.geo_zone && ` · ${selectedParticipant.geo_zone}`}
+                    </div>
                   </div>
                 </div>
 
-                <div className="p-6">
-                  <h3 className="text-lg font-bold text-gray-900 mb-3">Competition Statistics</h3>
+                <div className={pStyles['p-modal-body']}>
+                  <div className={pStyles['p-modal-title']}>Competition Statistics</div>
 
-                  <div className="grid grid-cols-3 gap-3 mb-4">
-                    <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-3 border border-blue-200 text-center">
-                      <div className="text-2xl font-bold text-blue-700">
-                        {participantStats?.ranking || 'N/A'}
-                      </div>
-                      <p className="text-xs text-blue-600 font-medium mt-1">Ranking</p>
+                  <div className={pStyles['p-stat-grid']}>
+                    <div className={pStyles['p-stat-box']}>
+                      <div className={pStyles['p-stat-box-value']}>{participantStats?.ranking || 'N/A'}</div>
+                      <div className={pStyles['p-stat-box-label']}>Ranking</div>
                     </div>
-
-                    <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-3 border border-green-200 text-center">
-                      <div className="text-2xl font-bold text-green-700">
-                        {participantStats?.total_points || 0}
-                      </div>
-                      <p className="text-xs text-green-600 font-medium mt-1">Total Points</p>
+                    <div className={pStyles['p-stat-box']}>
+                      <div className={pStyles['p-stat-box-value']}>{participantStats?.total_points || 0}</div>
+                      <div className={pStyles['p-stat-box-label']}>Total Points</div>
                     </div>
-
-                    <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg p-3 border border-purple-200 text-center">
-                      <div className="text-2xl font-bold text-purple-700">
-                        {participantStats?.average_points || 0}
-                      </div>
-                      <p className="text-xs text-purple-600 font-medium mt-1">Avg Points</p>
+                    <div className={pStyles['p-stat-box']}>
+                      <div className={pStyles['p-stat-box-value']}>{participantStats?.average_points || 0}</div>
+                      <div className={pStyles['p-stat-box-label']}>Avg Points</div>
                     </div>
                   </div>
-
-                  <div className="grid grid-cols-3 gap-3 mb-4">
-                    <div className="bg-gradient-to-br from-indigo-50 to-indigo-100 rounded-lg p-3 border border-indigo-200 text-center">
-                      <div className="text-2xl font-bold text-indigo-700">
-                        {participantStats?.challenges_completed || 0}
-                      </div>
-                      <p className="text-xs text-indigo-600 font-medium mt-1">Completed</p>
+                  <div className={pStyles['p-stat-grid']}>
+                    <div className={pStyles['p-stat-box']}>
+                      <div className={pStyles['p-stat-box-value']}>{participantStats?.challenges_completed || 0}</div>
+                      <div className={pStyles['p-stat-box-label']}>Completed</div>
                     </div>
-
-                    <div className="bg-gradient-to-br from-amber-50 to-amber-100 rounded-lg p-3 border border-amber-200 text-center">
-                      <div className="text-2xl font-bold text-amber-700">
-                        {participantStats?.challenges_won || 0}
-                      </div>
-                      <p className="text-xs text-amber-600 font-medium mt-1">Won</p>
+                    <div className={pStyles['p-stat-box']}>
+                      <div className={pStyles['p-stat-box-value']}>{participantStats?.challenges_won || 0}</div>
+                      <div className={pStyles['p-stat-box-label']}>Won</div>
                     </div>
-
-                    <div className="bg-gradient-to-br from-cyan-50 to-cyan-100 rounded-lg p-3 border border-cyan-200 text-center">
-                      <div className="text-xl font-bold text-cyan-700">
-                        {participantStats?.best_time
-                          ? `${Math.floor(participantStats.best_time / 60)}:${(participantStats.best_time % 60).toString().padStart(2, '0')}`
-                          : 'N/A'}
-                      </div>
-                      <p className="text-xs text-cyan-600 font-medium mt-1">Best Time</p>
+                    <div className={pStyles['p-stat-box']}>
+                      <div className={pStyles['p-stat-box-value']} style={{ fontSize: 18 }}>{fmtTime(participantStats?.best_time ?? null)}</div>
+                      <div className={pStyles['p-stat-box-label']}>Best Time</div>
                     </div>
                   </div>
 
                   {selectedParticipant.is_eliminated && participantStats?.elimination_date && (
-                    <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
-                      <h4 className="font-semibold text-red-900 text-sm mb-1">Elimination</h4>
-                      <p className="text-xs text-red-700">
-                        Eliminated on {new Date(participantStats.elimination_date).toLocaleDateString('en-US', {
-                          year: 'numeric',
-                          month: 'long',
-                          day: 'numeric'
-                        })}
-                      </p>
+                    <div className={pStyles['p-elim-box']}>
+                      Eliminated on {new Date(participantStats.elimination_date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
                     </div>
                   )}
 
-                  <div className="bg-gray-50 rounded-lg p-3 border border-gray-200">
-                    <h4 className="font-semibold text-gray-900 text-sm mb-2">Participant Details</h4>
-                    <div className="space-y-1.5 text-sm">
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Name:</span>
-                        <span className="font-medium text-gray-900">{getDisplayName(selectedParticipant)}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Age:</span>
-                        <span className="font-medium text-gray-900">{selectedParticipant.age}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">State:</span>
-                        <span className="font-medium text-gray-900">{selectedParticipant.state}</span>
-                      </div>
-                      {selectedParticipant.geo_zone && (
-                        <div className="flex justify-between">
-                          <span className="text-gray-600">Region:</span>
-                          <span className="font-medium text-gray-900">{selectedParticipant.geo_zone}</span>
-                        </div>
-                      )}
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Status:</span>
-                        <span className={`font-medium ${selectedParticipant.status === 'active' ? 'text-green-600' : 'text-red-600'
-                          }`}>
-                          {selectedParticipant.status === 'active' ? 'Active Competitor' : 'Eliminated'}
-                        </span>
-                      </div>
-                    </div>
+                  <div style={{ marginTop: 14 }}>
+                    <div className={pStyles['p-detail-row']}><span>Name</span><span>{getDisplayName(selectedParticipant)}</span></div>
+                    <div className={pStyles['p-detail-row']}><span>Age</span><span>{selectedParticipant.age}</span></div>
+                    <div className={pStyles['p-detail-row']}><span>State</span><span>{selectedParticipant.state}</span></div>
+                    {selectedParticipant.geo_zone && (
+                      <div className={pStyles['p-detail-row']}><span>Region</span><span>{selectedParticipant.geo_zone}</span></div>
+                    )}
                   </div>
 
-                  <button
-                    onClick={closeModal}
-                    className="w-full mt-4 px-6 py-2.5 bg-naija-green-600 text-white font-semibold rounded-lg hover:bg-naija-green-700 transition"
-                  >
-                    Close
-                  </button>
+                  <button onClick={closeModal} className={`${styles.btn} ${styles['btn-gold']} ${styles['form-submit']}`}>Close</button>
                 </div>
               </>
             )}
           </div>
         </div>
       )}
+
       <Footer />
-    </main>
+    </div>
   )
 }

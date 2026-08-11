@@ -2,11 +2,16 @@
 
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
+// File: app/(auth)/auth/reset-password/page.tsx
+
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { toast } from 'sonner'
 import { supabase } from '@/lib/supabase/client'
-import { Eye, EyeOff } from 'lucide-react'
+import { Eye, EyeOff, Lock, Check, X } from 'lucide-react'
+import styles from '@/components/sections/nnw/nnw.module.css'
+import aStyles from '@/components/module/auth.module.css'
+import { passwordStrength, STRENGTH_LABELS } from '@/components/sections/nnw/data'
 
 export default function ResetPasswordPage() {
   const [password, setPassword] = useState('')
@@ -70,138 +75,89 @@ export default function ResetPasswordPage() {
 
   if (error) {
     return (
-      <main className="min-h-screen bg-gradient-to-br from-white via-naija-green-50 to-white">
-        <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-naija-green-100">
-          <div className="max-w-6xl mx-auto px-4 py-4">
-            <Link href="/" className="flex items-center gap-2">
-              <div className="w-10 h-10 bg-gradient-to-br from-naija-green-600 to-naija-green-700 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold">NNW</span>
-              </div>
-              <span className="font-bold text-lg text-naija-green-900">Naija Ninja</span>
-            </Link>
-          </div>
-        </nav>
-        <div className="flex items-center justify-center min-h-[calc(100vh-80px)]">
-          <div className="text-center max-w-md px-4">
-            <div className="inline-block w-16 h-16 bg-red-100 rounded-full items-center justify-center mb-4">
-            </div>
-            <h1 className="text-2xl font-bold text-red-900 mb-2">Invalid Link</h1>
-            <p className="text-gray-600 mb-6">{error}</p>
-            <Link href="/forgot-password" className="inline-block px-6 py-2 bg-naija-green-600 text-white rounded-lg font-semibold hover:bg-naija-green-700">
-              Request New Link
-            </Link>
-          </div>
-        </div>
-      </main>
+      <div style={{ textAlign: 'center', padding: '32px 0' }}>
+        <div className={aStyles['error-icon']}><X size={26} color="var(--error)" strokeWidth={3} /></div>
+        <h1 className={`${styles.display} ${aStyles['form-title']}`} style={{ color: 'var(--error)' }}>Invalid link.</h1>
+        <p className={aStyles['form-sub']} style={{ margin: '0 auto 22px' }}>{error}</p>
+        <Link href="/forgot-password" className={`${styles.btn} ${styles['btn-gold']}`} style={{ width: '100%' }}>Request New Link</Link>
+      </div>
     )
   }
 
   if (success) {
     return (
-      <main className="min-h-screen bg-gradient-to-br from-white via-naija-green-50 to-white">
-        <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-naija-green-100">
-          <div className="max-w-6xl mx-auto px-4 py-4">
-            <Link href="/" className="flex items-center gap-2">
-              <div className="w-10 h-10 bg-gradient-to-br from-naija-green-600 to-naija-green-700 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold">NNW</span>
-              </div>
-              <span className="font-bold text-lg text-naija-green-900">Naija Ninja</span>
-            </Link>
-          </div>
-        </nav>
-        <div className="flex items-center justify-center min-h-[calc(100vh-80px)]">
-          <div className="text-center">
-            <div className="inline-block w-16 h-16 bg-naija-green-100 rounded-full items-center justify-center mb-4">
-              <span className="text-3xl">✓</span>
-            </div>
-            <h1 className="text-2xl font-bold text-naija-green-900 mb-2">Password Reset Successfully!</h1>
-            <p className="text-gray-600 mb-6">Redirecting you to login...</p>
-          </div>
+      <div style={{ textAlign: 'center', padding: '32px 0' }}>
+        <div className={aStyles['confirm-icon']} style={{ background: 'var(--green)' }}>
+          <Check size={26} color="var(--bone)" strokeWidth={3} />
         </div>
-      </main>
+        <h1 className={`${styles.display} ${aStyles['form-title']}`}>Password reset!</h1>
+        <p className={aStyles['form-sub']} style={{ margin: '0 auto' }}>Redirecting you to login…</p>
+      </div>
     )
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-white via-naija-green-50 to-white">
-      {/* Navbar */}
-      <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-naija-green-100">
-        <div className="max-w-6xl mx-auto px-4 py-4">
-          <Link href="/" className="flex items-center gap-2">
-            <div className="w-10 h-10 bg-gradient-to-br from-naija-green-600 to-naija-green-700 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold">NNW</span>
-            </div>
-            <span className="font-bold text-lg text-naija-green-900">Naija Ninja</span>
-          </Link>
-        </div>
-      </nav>
-
-      {/* Content */}
-      <div className="flex items-center justify-center min-h-[calc(100vh-80px)] px-4 py-8">
-        <div className="w-full max-w-md">
-          {/* Header */}
-          <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-naija-green-900 mb-2">Set New Password</h1>
-            <p className="text-gray-600">Create a strong password for your account</p>
-          </div>
-
-          {/* Form Card */}
-          <div className="bg-white rounded-2xl shadow-lg p-6 border border-naija-green-100">
-            <form onSubmit={handleSubmit} className="space-y-6">
-              {/* New Password */}
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">New Password</label>
-                <div className="relative">
-                  <input
-                    type={showPassword ? 'text' : 'password'}
-                    value={password}
-                    onChange={e => setPassword(e.target.value)}
-                    placeholder="At least 8 characters"
-                    className="w-full px-4 py-3 pr-12 rounded-lg border border-gray-300 focus:outline-none focus:border-naija-green-600 focus:ring-2 focus:ring-naija-green-100"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-600 hover:text-naija-green-600 transition"
-                  >
-                    {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                  </button>
-                </div>
-              </div>
-
-              {/* Confirm Password */}
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Confirm Password</label>
-                <div className="relative">
-                  <input
-                    type={showConfirmPassword ? 'text' : 'password'}
-                    value={confirmPassword}
-                    onChange={e => setConfirmPassword(e.target.value)}
-                    placeholder="Confirm your password"
-                    className="w-full px-4 py-3 pr-12 rounded-lg border border-gray-300 focus:outline-none focus:border-naija-green-600 focus:ring-2 focus:ring-naija-green-100"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-600 hover:text-naija-green-600 transition"
-                  >
-                    {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                  </button>
-                </div>
-              </div>
-
-              {/* Submit Button */}
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full px-4 py-3 rounded-lg bg-naija-green-600 text-white font-semibold hover:bg-naija-green-700 transition disabled:opacity-50 mt-8"
-              >
-                {loading ? 'Resetting...' : 'Reset Password'}
-              </button>
-            </form>
-          </div>
-        </div>
+    <div>
+      <div className={aStyles['form-badge']}>
+        <span className={styles.dot} style={{ background: 'var(--green)' }} />
+        <span className={aStyles['form-badge-text']}>New Password</span>
       </div>
-    </main>
+      <h2 className={`${styles.display} ${aStyles['form-title']}`}>Set new password.</h2>
+      <p className={aStyles['form-sub']}>Create a strong password for your account.</p>
+
+      <form onSubmit={handleSubmit}>
+        <div className={aStyles['a-group']}>
+          <label className={aStyles['a-label']}>New Password</label>
+          <div className={aStyles['input-wrap']}>
+            <span className={aStyles['input-icon']}><Lock size={15} /></span>
+            <input
+              type={showPassword ? 'text' : 'password'}
+              value={password}
+              onChange={e => setPassword(e.target.value)}
+              placeholder="At least 8 characters"
+              className={aStyles['a-input']}
+            />
+            <button type="button" onClick={() => setShowPassword(!showPassword)} className={aStyles['input-suffix-btn']}>
+              {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
+            </button>
+          </div>
+          {password && (
+            <div className={aStyles.strength}>
+              <div className={aStyles['strength-bars']}>
+                {[0, 1, 2, 3].map(i => {
+                  const s = passwordStrength(password)
+                  return <div key={i} className={`${aStyles['strength-bar']} ${i < s ? `${aStyles.filled} ${aStyles['s' + s]}` : ''}`} />
+                })}
+              </div>
+              <span className={aStyles['strength-label']}>{STRENGTH_LABELS[passwordStrength(password)]}</span>
+            </div>
+          )}
+        </div>
+
+        <div className={aStyles['a-group']}>
+          <label className={aStyles['a-label']}>Confirm Password</label>
+          <div className={aStyles['input-wrap']}>
+            <span className={aStyles['input-icon']}><Lock size={15} /></span>
+            <input
+              type={showConfirmPassword ? 'text' : 'password'}
+              value={confirmPassword}
+              onChange={e => setConfirmPassword(e.target.value)}
+              placeholder="Confirm your password"
+              className={aStyles['a-input']}
+            />
+            <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} className={aStyles['input-suffix-btn']}>
+              {showConfirmPassword ? <EyeOff size={15} /> : <Eye size={15} />}
+            </button>
+          </div>
+          {confirmPassword && password !== confirmPassword && (
+            <div className={`${aStyles['field-hint']} ${aStyles.bad}`}>Passwords do not match</div>
+          )}
+        </div>
+
+        <button type="submit" disabled={loading} className={`${styles.btn} ${styles['btn-gold']}`} style={{ width: '100%', marginTop: 8 }}>
+          {loading ? 'Resetting…' : 'Reset Password'}
+        </button>
+      </form>
+    </div>
   )
 }

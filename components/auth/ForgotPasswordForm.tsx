@@ -6,7 +6,9 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { toast } from 'sonner'
 import { supabase } from '@/lib/supabase/client'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, Mail } from 'lucide-react'
+import styles from '@/components/sections/nnw/nnw.module.css'
+import aStyles from '@/components/module/auth.module.css'
 
 export default function ForgotPasswordForm() {
   const [email, setEmail] = useState('')
@@ -45,63 +47,58 @@ export default function ForgotPasswordForm() {
 
   if (sent) {
     return (
-      <div className="text-center py-12 animate-fade-in">
-        <div className="inline-block w-16 h-16 bg-naija-green-100 rounded-full items-center justify-center mb-4">
-          <span className="text-3xl">📧</span>
-        </div>
-        <h2 className="text-2xl font-bold text-naija-green-900 mb-2">Check Your Email</h2>
-        <p className="text-gray-600 mb-4">We've sent a password reset link to:</p>
-        <p className="font-semibold text-gray-900 mb-6">{email}</p>
-        <p className="text-sm text-gray-500 mb-6">
-          Click the link in the email to reset your password. The link expires in 24 hours.
+      <div>
+        <div className={aStyles['confirm-icon']}><Mail size={24} color="var(--green)" /></div>
+        <h2 className={`${styles.display} ${aStyles['form-title']}`}>Check your email.</h2>
+        <p className={aStyles['form-sub']}>
+          If an account exists for <strong style={{ color: 'var(--navy)' }}>{email}</strong>, a password reset link
+          is on its way — click the link in that email to set a new password.
         </p>
-        <div className="space-y-3">
-          <p className="text-xs text-gray-600">
-            Didn't receive an email? Check your spam folder or{' '}
-            <button
-              onClick={() => setSent(false)}
-              className="text-naija-green-600 hover:text-naija-green-700 font-semibold"
-            >
-              try again
-            </button>
-          </p>
-          <Link href="/login" className="inline-block text-naija-green-600 font-semibold hover:text-naija-green-700">
-            Back to Login
-          </Link>
-        </div>
+        <p style={{ fontSize: 13.5, color: 'rgba(var(--navy-rgb),0.58)', marginBottom: 22 }}>
+          Didn&apos;t receive an email? Check your spam folder or{' '}
+          <button onClick={() => setSent(false)} className={aStyles['link-mono']} style={{ display: 'inline' }}>try again</button>
+        </p>
+        <Link href="/login" className={aStyles['back-link']} style={{ marginBottom: 0 }}>
+          <ArrowLeft size={13} /> Back to Login
+        </Link>
       </div>
     )
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6 animate-slide-up">
-      <div>
-        <label className="block text-sm font-semibold text-gray-700 mb-2">Email Address</label>
-        <input
-          type="email"
-          value={email}
-          onChange={e => setEmail(e.target.value)}
-          placeholder="your@email.com"
-          className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:border-naija-green-600 focus:ring-2 focus:ring-naija-green-100"
-        />
+    <div>
+      <div className={aStyles['form-badge']}>
+        <span className={styles.dot} style={{ background: 'var(--green)' }} />
+        <span className={aStyles['form-badge-text']}>Password Reset</span>
       </div>
+      <h2 className={`${styles.display} ${aStyles['form-title']}`}>Reset password.</h2>
+      <p className={aStyles['form-sub']}>Enter your email and we&apos;ll send you a link to reset your password.</p>
 
-      <p className="text-sm text-gray-600">
-        We'll send you a link to reset your password. Check your email for further instructions.
-      </p>
+      <form onSubmit={handleSubmit}>
+        <div className={aStyles['a-group']}>
+          <label className={aStyles['a-label']}>Email</label>
+          <div className={aStyles['input-wrap']}>
+            <span className={aStyles['input-icon']}><Mail size={15} /></span>
+            <input
+              type="email"
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+              placeholder="you@email.com"
+              className={aStyles['a-input']}
+            />
+          </div>
+        </div>
 
-      <button
-        type="submit"
-        disabled={loading}
-        className="w-full px-4 py-3 rounded-lg bg-naija-green-600 text-white font-semibold hover:bg-naija-green-700 transition disabled:opacity-50 mt-8"
-      >
-        {loading ? 'Sending...' : 'Send Reset Link'}
-      </button>
+        <button type="submit" disabled={loading} className={`${styles.btn} ${styles['btn-gold']}`} style={{ width: '100%', marginTop: 8 }}>
+          {loading ? 'Sending…' : 'Send Reset Link'}
+        </button>
 
-      <Link href="/login" className="flex items-center justify-center gap-2 text-naija-green-600 font-semibold hover:text-naija-green-700 transition">
-        <ArrowLeft size={16} />
-        Back to Login
-      </Link>
-    </form>
+        <div style={{ marginTop: 22, textAlign: 'center' }}>
+          <Link href="/login" className={aStyles['link-mono']} style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+            <ArrowLeft size={14} /> Back to Login
+          </Link>
+        </div>
+      </form>
+    </div>
   )
 }

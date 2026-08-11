@@ -8,6 +8,25 @@ export default {
   theme: {
     extend: {
       colors: {
+        // ============================================================
+        // NNW — Nigeria's Next Warrior design tokens.
+        // Canonical source of truth. Keep these hex values in sync with
+        // the CSS custom properties in components/sections/nnw/nnw.module.css
+        // (`.nnw` root block) — that stylesheet is what actually renders
+        // the NNW home page; this palette exists so the same tokens are
+        // discoverable/usable via Tailwind utilities elsewhere if needed.
+        // ============================================================
+        nnw: {
+          navy: '#0A1420',
+          green: '#0B5C2E',
+          'green-light': '#12793E',
+          gold: '#DBA423',
+          'gold-soft': '#F0C563',
+          bone: '#FEFEF5',
+          ash: '#8FA69B',
+          amber: '#a97a10',
+        },
+
         // Primary brand colors - Naija Green (from your original config)
         'naija-green': {
           50: '#f0fdf9',

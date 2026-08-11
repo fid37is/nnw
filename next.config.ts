@@ -17,6 +17,12 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: 'res.cloudinary.com',
       },
+      {
+        // Temporary — reference/stand-in photography for the NNW home page redesign.
+        // Remove once real event photos are hosted on Supabase storage or Cloudinary.
+        protocol: 'https',
+        hostname: 'images.unsplash.com',
+      },
     ],
   },
 
