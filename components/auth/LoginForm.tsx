@@ -2,9 +2,11 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { Eye, EyeOff } from 'lucide-react'
+import { Eye, EyeOff, Mail, Lock, ArrowRight, Check } from 'lucide-react'
 import { supabase } from '@/lib/supabase/client'
 import { toast } from 'sonner'
+import styles from '@/components/sections/nnw/nnw.module.css'
+import aStyles from '@/components/module/auth.module.css'
 
 export default function LoginForm() {
   const [formData, setFormData] = useState({
@@ -14,6 +16,7 @@ export default function LoginForm() {
 
   const [loading, setLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
+  const [remember, setRemember] = useState(true)
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
@@ -106,78 +109,73 @@ export default function LoginForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6 animate-slide-up">
-      {/* Email Field */}
-      <div>
-        <label className="block text-sm font-semibold text-gray-700 mb-2">Email Address</label>
-        <input
-          type="email"
-          name="email"
-          value={formData.email}
-          onChange={handleChange}
-          placeholder="your@email.com"
-          className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:border-naija-green-600 focus:ring-2 focus:ring-naija-green-100"
-        />
+    <div>
+      <div className={aStyles['form-badge']}>
+        <span className={styles.dot} style={{ background: 'var(--green)' }} />
+        <span className={aStyles['form-badge-text']}>Warrior Sign In</span>
       </div>
+      <h2 className={`${styles.display} ${aStyles['form-title']}`}>Welcome back.</h2>
+      <p className={aStyles['form-sub']}>Sign in to track your zone round, your standing, and your season.</p>
 
-      {/* Password Field */}
-      <div>
-        <div className="flex items-center justify-between mb-2">
-          <label className="block text-sm font-semibold text-gray-700">Password</label>
-          <Link
-            href="/forgot-password"
-            className="text-xs text-naija-green-600 hover:text-naija-green-700 font-semibold"
-          >
-            Forgot password?
-          </Link>
+      <form onSubmit={handleSubmit}>
+        <div className={aStyles['a-group']}>
+          <label className={aStyles['a-label']}>Email</label>
+          <div className={aStyles['input-wrap']}>
+            <span className={aStyles['input-icon']}><Mail size={15} /></span>
+            <input
+              type="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              placeholder="you@email.com"
+              className={aStyles['a-input']}
+            />
+          </div>
         </div>
-        <div className="relative">
-          <input
-            type={showPassword ? "text" : "password"}
-            name="password"
-            value={formData.password}
-            onChange={handleChange}
-            placeholder="Enter your password"
-            className="w-full px-4 py-3 pr-12 rounded-lg border border-gray-300 focus:outline-none focus:border-naija-green-600 focus:ring-2 focus:ring-naija-green-100"
-          />
-          <button
-            type="button"
-            onClick={() => setShowPassword(!showPassword)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-600 hover:text-naija-green-600 transition"
-          >
-            {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-          </button>
+
+        <div className={aStyles['a-group']}>
+          <label className={aStyles['a-label']}>Password</label>
+          <div className={aStyles['input-wrap']}>
+            <span className={aStyles['input-icon']}><Lock size={15} /></span>
+            <input
+              type={showPassword ? 'text' : 'password'}
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              placeholder="••••••••"
+              className={aStyles['a-input']}
+            />
+            <button type="button" onClick={() => setShowPassword(!showPassword)} className={aStyles['input-suffix-btn']}>
+              {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
+            </button>
+          </div>
         </div>
-      </div>
 
-      {/* Remember Me */}
-      <div className="flex items-center gap-2">
-        <input
-          type="checkbox"
-          id="remember"
-          className="w-4 h-4 rounded border-gray-300 text-naija-green-600"
-        />
-        <label htmlFor="remember" className="text-sm text-gray-700">
-          Remember me on this device
-        </label>
-      </div>
+        <div className={aStyles['row-between']}>
+          <div className={aStyles['remember-row']}>
+            <button
+              type="button"
+              onClick={() => setRemember(!remember)}
+              style={{
+                width: 19, height: 19, borderRadius: 4, border: `1.5px solid ${remember ? 'var(--green)' : 'var(--line)'}`,
+                background: remember ? 'var(--green)' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+              }}
+            >
+              {remember && <Check size={12} color="var(--bone)" strokeWidth={3} />}
+            </button>
+            <span onClick={() => setRemember(!remember)} style={{ cursor: 'pointer' }}>Remember me</span>
+          </div>
+          <Link href="/forgot-password" className={aStyles['link-mono']}>Forgot password?</Link>
+        </div>
 
-      {/* Submit Button */}
-      <button
-        type="submit"
-        disabled={loading}
-        className="w-full px-4 py-3 rounded-lg bg-naija-green-600 text-white font-semibold hover:bg-naija-green-700 transition disabled:opacity-50 mt-8"
-      >
-        {loading ? 'Logging in...' : 'Login'}
-      </button>
+        <button type="submit" disabled={loading} className={`${styles.btn} ${styles['btn-gold']}`} style={{ width: '100%' }}>
+          {loading ? 'Signing in…' : <>Sign In <ArrowRight size={16} /></>}
+        </button>
 
-      {/* Sign Up Link */}
-      <p className="text-center text-sm text-gray-600">
-        Don't have an account?{' '}
-        <Link href="/register" className="text-naija-green-600 font-semibold hover:text-naija-green-700">
-          Sign up here
-        </Link>
-      </p>
-    </form>
+        <div className={aStyles['switch-line']}>
+          New warrior?<Link href="/register">Apply for Season 1</Link>
+        </div>
+      </form>
+    </div>
   )
 }

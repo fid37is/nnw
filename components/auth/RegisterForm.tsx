@@ -2,9 +2,12 @@
 
 import { useState, useRef } from 'react'
 import Link from 'next/link'
-import { Eye, EyeOff, CheckCircle, XCircle, Loader2 } from 'lucide-react'
+import { Eye, EyeOff, CheckCircle, XCircle, Loader2, User, Mail, Lock, Phone, MapPin, Check } from 'lucide-react'
 import { supabase } from '@/lib/supabase/client'
 import { toast } from 'sonner'
+import styles from '@/components/sections/nnw/nnw.module.css'
+import aStyles from '@/components/module/auth.module.css'
+import { passwordStrength, STRENGTH_LABELS } from '@/components/sections/nnw/data'
 
 const NIGERIAN_STATES = [
   'Abia', 'Adamawa', 'Akwa Ibom', 'Anambra', 'Bauchi', 'Bayelsa', 'Benue',
@@ -43,17 +46,18 @@ const validateNigerianPhone = (phone: string): { isValid: boolean; message: stri
 type CheckStatus = 'idle' | 'checking' | 'available' | 'taken' | 'invalid'
 
 function StatusIcon({ status }: { status: CheckStatus }) {
-  if (status === 'checking')   return <Loader2    size={16} className="animate-spin text-gray-400" />
-  if (status === 'available')  return <CheckCircle size={16} className="text-naija-green-600" />
-  if (status === 'taken')      return <XCircle     size={16} className="text-red-500" />
+  if (status === 'checking')   return <Loader2 size={16} className="animate-spin" color="rgba(var(--navy-rgb),0.4)" />
+  if (status === 'available')  return <CheckCircle size={16} color="var(--green)" />
+  if (status === 'taken')      return <XCircle size={16} color="var(--error)" />
   return null
 }
 
-function fieldBorder(status: CheckStatus, touched = true) {
-  if (!touched) return 'border-gray-300 focus:border-naija-green-600 focus:ring-naija-green-100'
-  if (status === 'available') return 'border-naija-green-500 focus:border-naija-green-600 focus:ring-naija-green-100'
-  if (status === 'taken' || status === 'invalid') return 'border-red-500 focus:border-red-500 focus:ring-red-100'
-  return 'border-gray-300 focus:border-naija-green-600 focus:ring-naija-green-100'
+// Returns the CSS module modifier class (available/taken/invalid) for the input-wrap
+function fieldStatusClass(status: CheckStatus, touched = true): string {
+  if (!touched) return ''
+  if (status === 'available') return 'available'
+  if (status === 'taken' || status === 'invalid') return 'taken'
+  return ''
 }
 
 export default function RegisterForm() {
@@ -356,103 +360,93 @@ export default function RegisterForm() {
 
   if (success) {
     return (
-      <div className="text-center py-12">
-        <div className="inline-flex w-16 h-16 bg-naija-green-100 rounded-full items-center justify-center mb-4">
-          <CheckCircle size={32} className="text-naija-green-600" />
-        </div>
-        <h2 className="text-2xl font-bold text-naija-green-900 mb-2">Registration Successful!</h2>
-        <p className="text-gray-600 mb-4">Check your email to verify your account before logging in.</p>
-        <p className="text-sm text-gray-500 mb-6">You should receive a confirmation email shortly.</p>
-        <Link href="/login" className="text-naija-green-600 font-semibold hover:text-naija-green-700">
-          Go to Login
-        </Link>
+      <div style={{ textAlign: 'center', padding: '32px 0' }}>
+        <div className={aStyles['success-icon']}><CheckCircle size={32} color="var(--green)" /></div>
+        <h2 className={`${styles.display} ${aStyles['form-title']}`}>Registration successful!</h2>
+        <p className={aStyles['form-sub']} style={{ margin: '0 auto 8px' }}>Check your email to verify your account before logging in.</p>
+        <p style={{ fontSize: 13, color: 'rgba(var(--navy-rgb),0.5)', marginBottom: 22 }}>You should receive a confirmation email shortly.</p>
+        <Link href="/login" className={`${styles.btn} ${styles['btn-gold']}`} style={{ width: '100%' }}>Go to Login</Link>
       </div>
     )
   }
 
+  const checkboxRow = (checked: boolean, onClick: () => void, label: React.ReactNode) => (
+    <div className={aStyles['check-row']}>
+      <button type="button" onClick={onClick} className={`${aStyles['a-checkbox']} ${checked ? aStyles.checked : ''}`}>
+        {checked && <Check size={12} color="var(--bone)" strokeWidth={3} />}
+      </button>
+      <span onClick={onClick} className={aStyles['check-label']} style={{ cursor: 'pointer' }}>{label}</span>
+    </div>
+  )
+
   return (
-    <div className="space-y-6">
-      {/* Progress */}
-      <div className="flex gap-2 mb-8">
+    <div>
+      <div className={aStyles['form-badge']}>
+        <span className={styles.dot} style={{ background: 'var(--green)' }} />
+        <span className={aStyles['form-badge-text']}>Season 1 Registration</span>
+      </div>
+      <h2 className={`${styles.display} ${aStyles['form-title']}`}>Apply as a warrior.</h2>
+      <p className={aStyles['form-sub']}>Three quick steps: your account, your details, then a next-of-kin contact.</p>
+
+      <div className={aStyles['step-row']}>
         {[1, 2, 3].map(num => (
-          <div key={num}
-            className={`flex-1 h-2 rounded-full transition ${step >= num ? 'bg-naija-green-600' : 'bg-gray-300'}`}
-          />
+          <div key={num} className={`${aStyles['step-bar']} ${step >= num ? aStyles.done : ''}`} />
         ))}
       </div>
 
       {/* ── Step 1: Account Details ── */}
       {step === 1 && (
-        <div className="space-y-4 animate-slide-up">
-          <h2 className="text-xl font-bold text-naija-green-900 mb-6">Create Your Account</h2>
+        <div>
+          <div className={aStyles['step-heading']}>Create your account</div>
 
-          {/* Full name */}
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Full Name</label>
-            <input
-              type="text" name="fullName" value={formData.fullName}
-              onChange={handleChange} placeholder="Enter your full name"
-              className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:border-naija-green-600 focus:ring-2 focus:ring-naija-green-100"
-            />
+          <div className={aStyles['a-group']}>
+            <label className={aStyles['a-label']}>Full Name</label>
+            <div className={aStyles['input-wrap']}>
+              <span className={aStyles['input-icon']}><User size={15} /></span>
+              <input type="text" name="fullName" value={formData.fullName} onChange={handleChange} placeholder="Enter your full name" className={aStyles['a-input']} />
+            </div>
           </div>
 
-          {/* Email — with live uniqueness indicator */}
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Email</label>
-            <div className="relative">
-              <input
-                type="email" name="email" value={formData.email}
-                onChange={handleChange} placeholder="your@email.com"
-                className={`w-full px-4 py-3 pr-10 rounded-lg border focus:outline-none focus:ring-2 transition ${fieldBorder(emailStatus, formData.email.length > 0)}`}
-              />
-              <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                <StatusIcon status={emailStatus} />
+          <div className={aStyles['a-group']}>
+            <label className={aStyles['a-label']}>Email</label>
+            <div className={`${aStyles['input-wrap']} ${aStyles[fieldStatusClass(emailStatus, formData.email.length > 0)] || ''}`}>
+              <span className={aStyles['input-icon']}><Mail size={15} /></span>
+              <input type="email" name="email" value={formData.email} onChange={handleChange} placeholder="your@email.com" className={aStyles['a-input']} />
+              <span className={aStyles['status-icon']}><StatusIcon status={emailStatus} /></span>
+            </div>
+            {emailStatus === 'taken' && <div className={`${aStyles['field-hint']} ${aStyles.bad}`}><XCircle size={11} /> {emailMessage}</div>}
+            {emailStatus === 'available' && <div className={`${aStyles['field-hint']} ${aStyles.ok}`}>Email is available</div>}
+          </div>
+
+          <div className={aStyles['a-group']}>
+            <label className={aStyles['a-label']}>Password</label>
+            <div className={aStyles['input-wrap']}>
+              <span className={aStyles['input-icon']}><Lock size={15} /></span>
+              <input type={showPassword ? 'text' : 'password'} name="password" value={formData.password} onChange={handleChange} placeholder="At least 8 characters" className={aStyles['a-input']} />
+              <button type="button" onClick={() => setShowPassword(!showPassword)} className={aStyles['input-suffix-btn']}>{showPassword ? <EyeOff size={15} /> : <Eye size={15} />}</button>
+            </div>
+            {formData.password && (
+              <div className={aStyles.strength}>
+                <div className={aStyles['strength-bars']}>
+                  {[0, 1, 2, 3].map(i => {
+                    const s = passwordStrength(formData.password)
+                    return <div key={i} className={`${aStyles['strength-bar']} ${i < s ? `${aStyles.filled} ${aStyles['s' + s]}` : ''}`} />
+                  })}
+                </div>
+                <span className={aStyles['strength-label']}>{STRENGTH_LABELS[passwordStrength(formData.password)]}</span>
               </div>
-            </div>
-            {emailStatus === 'taken' && (
-              <p className="text-xs text-red-600 mt-1.5 flex items-center gap-1">
-                <XCircle size={11} /> {emailMessage}{' '}
-              </p>
-            )}
-            {emailStatus === 'available' && (
-              <p className="text-xs text-naija-green-600 mt-1.5">Email is available</p>
             )}
           </div>
 
-          {/* Password */}
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Password</label>
-            <div className="relative">
-              <input
-                type={showPassword ? 'text' : 'password'} name="password"
-                value={formData.password} onChange={handleChange}
-                placeholder="At least 8 characters"
-                className="w-full px-4 py-3 pr-12 rounded-lg border border-gray-300 focus:outline-none focus:border-naija-green-600 focus:ring-2 focus:ring-naija-green-100"
-              />
-              <button type="button" onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-600 hover:text-naija-green-600 transition">
-                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-              </button>
-            </div>
-          </div>
-
-          {/* Confirm password */}
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Confirm Password</label>
-            <div className="relative">
-              <input
-                type={showConfirmPassword ? 'text' : 'password'} name="confirmPassword"
-                value={formData.confirmPassword} onChange={handleChange}
-                placeholder="Confirm your password"
-                className="w-full px-4 py-3 pr-12 rounded-lg border border-gray-300 focus:outline-none focus:border-naija-green-600 focus:ring-2 focus:ring-naija-green-100"
-              />
-              <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-600 hover:text-naija-green-600 transition">
-                {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-              </button>
+          <div className={aStyles['a-group']}>
+            <label className={aStyles['a-label']}>Confirm Password</label>
+            <div className={aStyles['input-wrap']}>
+              <span className={aStyles['input-icon']}><Lock size={15} /></span>
+              <input type={showConfirmPassword ? 'text' : 'password'} name="confirmPassword" value={formData.confirmPassword} onChange={handleChange} placeholder="Confirm your password" className={aStyles['a-input']} />
+              <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} className={aStyles['input-suffix-btn']}>{showConfirmPassword ? <EyeOff size={15} /> : <Eye size={15} />}</button>
             </div>
             {formData.confirmPassword && formData.password !== formData.confirmPassword && (
-              <p className="text-xs text-red-600 mt-1.5">Passwords do not match</p>
+              <div className={`${aStyles['field-hint']} ${aStyles.bad}`}>Passwords do not match</div>
             )}
           </div>
         </div>
@@ -460,194 +454,133 @@ export default function RegisterForm() {
 
       {/* ── Step 2: Personal Details ── */}
       {step === 2 && (
-        <div className="space-y-4 animate-slide-up">
-          <h2 className="text-xl font-bold text-naija-green-900 mb-6">Personal Information</h2>
+        <div>
+          <div className={aStyles['step-heading']}>Personal information</div>
 
-          {/* Phone — with live uniqueness indicator */}
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
-              Phone Number <span className="text-xs font-normal text-gray-500">(WhatsApp preferred)</span>
-            </label>
-            <div className="relative">
+          <div className={aStyles['a-group']}>
+            <label className={aStyles['a-label']}>Phone Number <span style={{ textTransform: 'none', fontWeight: 400 }}>(WhatsApp preferred)</span></label>
+            <div className={`${aStyles['input-wrap']} ${aStyles[fieldStatusClass(phoneStatus, phoneTouched)] || ''}`}>
+              <span className={aStyles['input-icon']}><Phone size={15} /></span>
               <input
-                type="tel" name="phone" value={formData.phone}
-                onChange={handleChange}
-                onBlur={() => {
-                  setPhoneTouched(true)
-                  if (formData.phone) checkPhoneUniqueness(formData.phone)
-                }}
-                placeholder="08012345678"
-                className={`w-full px-4 py-3 pr-10 rounded-lg border focus:outline-none focus:ring-2 transition ${fieldBorder(phoneStatus, phoneTouched)}`}
+                type="tel" name="phone" value={formData.phone} onChange={handleChange}
+                onBlur={() => { setPhoneTouched(true); if (formData.phone) checkPhoneUniqueness(formData.phone) }}
+                placeholder="08012345678" className={aStyles['a-input']}
               />
-              <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                {phoneTouched && <StatusIcon status={phoneStatus} />}
-              </div>
+              <span className={aStyles['status-icon']}>{phoneTouched && <StatusIcon status={phoneStatus} />}</span>
             </div>
-            {phoneTouched && phoneStatus === 'taken' && (
-              <p className="text-xs text-red-600 mt-1.5 flex items-center gap-1">
-                <XCircle size={11} /> {phoneMessage}
-              </p>
-            )}
-            {phoneTouched && phoneStatus === 'invalid' && (
-              <p className="text-xs text-red-600 mt-1.5">{phoneMessage}</p>
-            )}
-            {phoneTouched && phoneStatus === 'available' && (
-              <p className="text-xs text-naija-green-600 mt-1.5">Phone number is available</p>
-            )}
-            {!phoneTouched && (
-              <p className="text-xs text-gray-500 mt-1.5">Your personal WhatsApp number for competition updates</p>
-            )}
+            {phoneTouched && phoneStatus === 'taken' && <div className={`${aStyles['field-hint']} ${aStyles.bad}`}><XCircle size={11} /> {phoneMessage}</div>}
+            {phoneTouched && phoneStatus === 'invalid' && <div className={`${aStyles['field-hint']} ${aStyles.bad}`}>{phoneMessage}</div>}
+            {phoneTouched && phoneStatus === 'available' && <div className={`${aStyles['field-hint']} ${aStyles.ok}`}>Phone number is available</div>}
+            {!phoneTouched && <div className={aStyles['field-hint']}>Your personal WhatsApp number for competition updates</div>}
           </div>
 
-          {/* Birth date */}
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Birth Date</label>
-            <input
-              type="date" name="birthDate" value={formData.birthDate}
-              onChange={handleChange}
-              className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:border-naija-green-600 focus:ring-2 focus:ring-naija-green-100"
-            />
+          <div className={aStyles['a-group']}>
+            <label className={aStyles['a-label']}>Birth Date</label>
+            <div className={aStyles['input-wrap']}>
+              <input type="date" name="birthDate" value={formData.birthDate} onChange={handleChange} className={aStyles['a-input']} style={{ paddingLeft: 14 }} />
+            </div>
             {formData.age && (
-              <p className={`text-sm mt-2 ${parseInt(formData.age) < 18 ? 'text-red-600' : 'text-gray-600'}`}>
+              <div className={`${aStyles['age-hint']} ${parseInt(formData.age) < 18 ? aStyles.bad : ''}`}>
                 Age: {formData.age} years {parseInt(formData.age) < 18 ? '— must be 18 or older' : ''}
-              </p>
+              </div>
             )}
           </div>
 
-          {/* State */}
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">State</label>
-            <select
-              name="state" value={formData.state} onChange={handleChange}
-              className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:border-naija-green-600 focus:ring-2 focus:ring-naija-green-100"
-            >
-              <option value="">Select your state</option>
-              {NIGERIAN_STATES.map(s => <option key={s} value={s}>{s}</option>)}
-            </select>
+          <div className={aStyles['a-group']}>
+            <label className={aStyles['a-label']}>State</label>
+            <div className={aStyles['input-wrap']}>
+              <span className={aStyles['input-icon']}><MapPin size={15} /></span>
+              <select name="state" value={formData.state} onChange={handleChange} className={aStyles['a-input']} style={{ appearance: 'none' }}>
+                <option value="">Select your state</option>
+                {NIGERIAN_STATES.map(s => <option key={s} value={s}>{s}</option>)}
+              </select>
+            </div>
           </div>
 
-          {/* Geo zone */}
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Geo-Political Zone</label>
-            <input
-              type="text" value={formData.geoZone} disabled
-              className="w-full px-4 py-3 rounded-lg border border-gray-300 bg-gray-50 text-gray-600"
-            />
-            <p className="text-xs text-gray-500 mt-1">Auto-populated based on your state</p>
+          <div className={aStyles['a-group']}>
+            <label className={aStyles['a-label']}>Geo-Political Zone</label>
+            <div className={aStyles['input-wrap']} style={{ background: 'rgba(var(--navy-rgb),0.03)' }}>
+              <input type="text" value={formData.geoZone} disabled className={aStyles['a-input']} style={{ color: 'rgba(var(--navy-rgb),0.5)' }} />
+            </div>
+            <div className={aStyles['field-hint']}>Auto-populated based on your state</div>
           </div>
 
-          {/* Fitness */}
-          <div className="flex items-center gap-3">
-            <input
-              type="checkbox" name="physicalFitness" id="fitness"
-              checked={formData.physicalFitness} onChange={handleChange}
-              className="w-5 h-5 rounded border-gray-300 text-naija-green-600"
-            />
-            <label htmlFor="fitness" className="text-sm text-gray-700">
-              I am physically fit and ready for this competition
-            </label>
-          </div>
+          {checkboxRow(formData.physicalFitness, () => setFormData(prev => ({ ...prev, physicalFitness: !prev.physicalFitness })), 'I am physically fit and ready for this competition')}
         </div>
       )}
 
       {/* ── Step 3: Emergency Contact & Waiver ── */}
       {step === 3 && (
-        <div className="space-y-4 animate-slide-up">
-          <h2 className="text-xl font-bold text-naija-green-900 mb-6">Emergency Contact & Waiver</h2>
+        <div>
+          <div className={aStyles['step-heading']}>Emergency contact & waiver</div>
 
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Emergency Contact Name</label>
-            <input
-              type="text" name="emergencyContact" value={formData.emergencyContact}
-              onChange={handleChange} placeholder="Full name"
-              className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:border-naija-green-600 focus:ring-2 focus:ring-naija-green-100"
-            />
+          <div className={aStyles['a-group']}>
+            <label className={aStyles['a-label']}>Emergency Contact Name</label>
+            <div className={aStyles['input-wrap']}>
+              <span className={aStyles['input-icon']}><User size={15} /></span>
+              <input type="text" name="emergencyContact" value={formData.emergencyContact} onChange={handleChange} placeholder="Full name" className={aStyles['a-input']} />
+            </div>
           </div>
 
-          {/* Emergency phone — format validated only, NOT checked for uniqueness */}
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
-              Emergency Contact Phone
-              <span className="text-xs font-normal text-gray-400 ml-2">(next of kin)</span>
-            </label>
-            <input
-              type="tel" name="emergencyPhone" value={formData.emergencyPhone}
-              onChange={handleChange}
-              onBlur={() => {
-                setEmergencyPhoneTouched(true)
-                const v = validateNigerianPhone(formData.emergencyPhone)
-                setEmergencyPhoneError(v.isValid ? '' : v.message)
-              }}
-              placeholder="08012345678"
-              className={`w-full px-4 py-3 rounded-lg border ${
-                emergencyPhoneTouched && emergencyPhoneError
-                  ? 'border-red-500 focus:border-red-500 focus:ring-red-100'
-                  : 'border-gray-300 focus:border-naija-green-600 focus:ring-naija-green-100'
-              } focus:outline-none focus:ring-2`}
-            />
-            {emergencyPhoneTouched && emergencyPhoneError && (
-              <p className="text-xs text-red-600 mt-1.5">{emergencyPhoneError}</p>
-            )}
-            <p className="text-xs text-gray-400 mt-1.5">
-              Multiple contestants can share the same next-of-kin number
-            </p>
+          <div className={aStyles['a-group']}>
+            <label className={aStyles['a-label']}>Emergency Contact Phone <span style={{ textTransform: 'none', fontWeight: 400 }}>(next of kin)</span></label>
+            <div className={`${aStyles['input-wrap']} ${emergencyPhoneTouched && emergencyPhoneError ? aStyles.taken : ''}`}>
+              <span className={aStyles['input-icon']}><Phone size={15} /></span>
+              <input
+                type="tel" name="emergencyPhone" value={formData.emergencyPhone} onChange={handleChange}
+                onBlur={() => { setEmergencyPhoneTouched(true); const v = validateNigerianPhone(formData.emergencyPhone); setEmergencyPhoneError(v.isValid ? '' : v.message) }}
+                placeholder="08012345678" className={aStyles['a-input']}
+              />
+            </div>
+            {emergencyPhoneTouched && emergencyPhoneError && <div className={`${aStyles['field-hint']} ${aStyles.bad}`}>{emergencyPhoneError}</div>}
+            <div className={aStyles['field-hint']}>Multiple contestants can share the same next-of-kin number</div>
           </div>
 
-          {/* Waiver */}
-          <div className="bg-naija-green-50 border border-naija-green-200 rounded-lg p-4">
-            <h3 className="font-semibold text-sm text-naija-green-900 mb-2">Waiver & Terms</h3>
-            <p className="text-xs text-gray-700 leading-relaxed mb-4">
-              I understand that participation in Naija Next Warrior involves physical exertion and inherent risks.
+          <div className={aStyles['waiver-box']}>
+            <div className={aStyles['waiver-title']}>Waiver &amp; Terms</div>
+            <p className={aStyles['waiver-text']}>
+              I understand that participation in Nigeria&apos;s Next Warrior involves physical exertion and inherent risks.
               I hereby assume all risks associated with participation and waive any claims against the organizers.
             </p>
-            <div className="flex items-start gap-3">
-              <input
-                type="checkbox" name="waiver" id="waiver"
-                checked={formData.waiver} onChange={handleChange}
-                className="w-5 h-5 rounded border-gray-300 text-naija-green-600 mt-0.5"
-              />
-              <label htmlFor="waiver" className="text-xs text-gray-700">
-                I accept the waiver and terms of participation
-              </label>
-            </div>
+            {checkboxRow(formData.waiver, () => setFormData(prev => ({ ...prev, waiver: !prev.waiver })), 'I accept the waiver and terms of participation')}
           </div>
         </div>
       )}
 
       {/* Buttons */}
-      <div className="flex gap-3 pt-6">
+      <div className={aStyles['step-btn-row']}>
         {step > 1 && (
-          <button type="button" onClick={() => setStep(s => s - 1)}
-            className="flex-1 px-4 py-3 rounded-lg border border-naija-green-600 text-naija-green-600 font-semibold hover:bg-naija-green-50 transition">
+          <button type="button" onClick={() => setStep(s => s - 1)} className={`${styles.btn} ${styles['btn-ghost-dark']}`} style={{ flex: 1 }}>
             Back
           </button>
         )}
         {step < 3 ? (
-          <button type="button" onClick={handleNext}
+          <button
+            type="button" onClick={handleNext}
             disabled={
               (step === 1 && emailStatus === 'taken') ||
               (step === 1 && emailStatus === 'checking') ||
               (step === 2 && phoneStatus === 'taken') ||
               (step === 2 && phoneStatus === 'checking')
             }
-            className="flex-1 px-4 py-3 rounded-lg bg-naija-green-600 text-white font-semibold hover:bg-naija-green-700 transition disabled:opacity-50 disabled:cursor-not-allowed">
+            className={`${styles.btn} ${styles['btn-gold']}`} style={{ flex: 1 }}
+          >
             Next
           </button>
         ) : (
-          <button onClick={handleSubmit}
+          <button
+            onClick={handleSubmit}
             disabled={loading || !formData.waiver || (emergencyPhoneTouched && !!emergencyPhoneError)}
-            className="flex-1 px-4 py-3 rounded-lg bg-naija-green-600 text-white font-semibold hover:bg-naija-green-700 transition disabled:opacity-50 disabled:cursor-not-allowed">
-            {loading ? 'Registering...' : 'Register'}
+            className={`${styles.btn} ${styles['btn-gold']}`} style={{ flex: 1 }}
+          >
+            {loading ? 'Registering…' : 'Register'}
           </button>
         )}
       </div>
 
-      <p className="text-center text-sm text-gray-600">
-        Already have an account?{' '}
-        <Link href="/login" className="text-naija-green-600 font-semibold hover:text-naija-green-700">
-          Login here
-        </Link>
-      </p>
+      <div className={aStyles['switch-line']}>
+        Already have an account?<Link href="/login">Login here</Link>
+      </div>
     </div>
   )
 }

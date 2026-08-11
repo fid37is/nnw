@@ -1,0 +1,23 @@
+/* File: components/sections/nnw/subpage.module.css
+   Shared "sub-page hero" chrome for secondary pages (Participants, Merch, etc.)
+   Relies on the CSS custom properties defined by .nnw in nnw.module.css —
+   those inherit through the DOM regardless of which CSS module a rule lives
+   in, so this file doesn't need to redeclare or import them. Any page using
+   this module must still render its root wrapped in nnw.module.css's `.nnw`
+   class (via Nav/Ticker/Footer's shared page shell) so the tokens exist. */
+
+.subhero { position: relative; overflow: hidden; background: linear-gradient(160deg, var(--navy) 0%, var(--navy) 55%, var(--green) 130%); padding: 96px 0 64px; }
+.subhero-badge { display: flex; align-items: center; gap: 9px; margin-bottom: 22px; position: relative; z-index: 2; }
+.subhero h1 { font-size: clamp(34px, 6vw, 60px); line-height: 0.92; color: var(--bone); max-width: 720px; position: relative; z-index: 2; }
+.subhero p { color: var(--ash); font-size: 15px; line-height: 1.6; max-width: 520px; margin-top: 22px; position: relative; z-index: 2; }
+.sync-row { display: flex; align-items: center; gap: 8px; margin-top: 26px; position: relative; z-index: 2; }
+.sync-row span { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--ash); letter-spacing: 0.05em; }
+.sync-row strong { color: var(--bone); font-weight: 600; }
+.subhero-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-top: 44px; padding-top: 32px; border-top: 1px solid var(--line-dark); position: relative; z-index: 2; max-width: 560px; }
+.hstat-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ash); margin-bottom: 6px; }
+.hstat-value { font-family: 'Anton', sans-serif; font-size: clamp(22px, 3vw, 30px); color: var(--bone); }
+.hstat-value.green { color: var(--green-light); }
+.hstat-value.gold { color: var(--gold); }
+.hstat-value.muted { color: var(--ash); }
+
+.season-select { padding: 10px 32px 10px 14px; border: 1.5px solid var(--line); border-radius: 3px; font-family: 'JetBrains Mono', monospace; font-size: 11.5px; letter-spacing: 0.06em; text-transform: uppercase; background: var(--bone); color: var(--navy); appearance: none; cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230A1420' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; background-size: 13px; }

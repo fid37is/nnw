@@ -1,12 +1,16 @@
+// File: app/merch/page.tsx
 'use client'
 
 import { useState, useEffect } from 'react'
-import Link from 'next/link'
-import { Heart, ShoppingBag, ArrowLeft, Loader2, X, Mail } from 'lucide-react'
+import { Heart, ShoppingBag, Loader2, X, Mail } from 'lucide-react'
 import { toast } from 'sonner'
 import { supabase } from '@/lib/supabase/client'
-import Navbar from '../navbar'
-import Footer from '../footer'
+import styles from '@/components/sections/nnw/nnw.module.css'
+import mStyles from '@/components/module/merch.module.css'
+import Ticker from '@/components/sections/nnw/Ticker'
+import Nav from '@/components/sections/nnw/Nav'
+import Footer from '@/components/sections/nnw/Footer'
+import { MERCH_HERO_IMG } from '@/components/sections/nnw/data'
 
 interface MerchItem {
   id: string
@@ -29,6 +33,12 @@ interface CheckoutForm {
   city: string
   paymentMethod: 'pickup' | 'delivery' | 'card'
 }
+
+const TICKER_ITEMS = [
+  "NIGERIA'S NEXT WARRIOR · A WLA COMPANY",
+  'SEASON 1 MERCH · NOW AVAILABLE',
+  'DEMO STOREFRONT — CHECKOUT SUBMITS A REAL ORDER',
+]
 
 export default function MerchPage() {
   const [merchItems, setMerchItems] = useState<MerchItem[]>([])
@@ -92,14 +102,12 @@ export default function MerchPage() {
         return
       }
 
-      // data is an empty array when table has no rows — that's fine
       setMerchItems(data ?? [])
     } catch (err) {
       const message = err instanceof Error ? err.message : JSON.stringify(err)
       console.error('Unexpected error loading merch items:', message)
       toast.error('Failed to load items. Please try again.')
     } finally {
-      // Always clear loading, even on empty result
       setLoading(false)
     }
   }
@@ -210,197 +218,150 @@ export default function MerchPage() {
   }
 
   return (
-    <main className="min-h-screen bg-white overflow-x-hidden">
-      <Navbar />
+    <div className={styles.nnw}>
+      <Ticker items={TICKER_ITEMS} />
+      <Nav applyLabel="Get Notified" />
 
-      {/* Cart button */}
-      <div className="fixed top-20 right-4 z-40">
-        <button
-          onClick={() => setCartDrawerOpen(true)}
-          className="relative p-3 bg-white rounded-full shadow-lg hover:shadow-xl transition border border-gray-200 hover:border-naija-green-300"
-        >
-          <ShoppingBag size={24} className="text-naija-green-600" />
-          {cartCount > 0 && (
-            <span className="absolute -top-1 -right-1 bg-red-600 text-white text-xs font-bold w-6 h-6 rounded-full flex items-center justify-center animate-pulse">
-              {cartCount}
-            </span>
-          )}
-        </button>
-      </div>
+      <button onClick={() => setCartDrawerOpen(true)} className={mStyles['cart-fab']}>
+        <ShoppingBag size={18} color="var(--navy)" />
+        <span className={styles.mono} style={{ fontSize: 11.5, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--navy)' }}>Cart</span>
+        {cartCount > 0 && <span className={mStyles['cart-fab-count']}>{cartCount}</span>}
+      </button>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12 mt-14">
-        {/* Header */}
-        <div className="mb-8">
-          <Link href="/" className="flex items-center gap-2 text-naija-green-600 hover:text-naija-green-700 mb-4 w-fit">
-            <ArrowLeft size={18} />
-            <span className="text-sm font-medium">Back to Home</span>
-          </Link>
-          <div className="flex items-center gap-4 mb-3">
-            <ShoppingBag size={40} className="text-naija-green-600" />
-            <h1 className="text-4xl md:text-5xl font-bold text-gray-900">Shop</h1>
-          </div>
-          <p className="text-gray-600">Exclusive Naija Next branded apparel</p>
+      <header className={mStyles['m-hero']} style={{ paddingTop: 200 }}>
+        <div className={mStyles['m-hero-photo']}>
+          <img src={MERCH_HERO_IMG} alt="Jerseys and apparel displayed on shelves and racks" />
         </div>
-
-        {/* Loading */}
-        {loading && (
-          <div className="flex flex-col items-center justify-center py-32 gap-4">
-            <Loader2 size={40} className="animate-spin text-naija-green-600" />
-            <p className="text-gray-500 text-sm">Loading items...</p>
+        <span className={styles['ghost-num']} style={{ fontSize: '26vw', bottom: '-9vw', right: '-6vw' }}>NNW</span>
+        <div className={`${styles.wrap} ${mStyles['m-hero-content']}`}>
+          <div className={styles['hero-badge']}>
+            <span className={styles.dot} />
+            <span className={styles.mono} style={{ fontSize: 11, letterSpacing: '0.2em', textTransform: 'uppercase', color: 'var(--gold)' }}>Season 1 Merch — Now Available</span>
           </div>
-        )}
+          <h1 className={styles.display} style={{ fontSize: 'clamp(38px, 7vw, 76px)', lineHeight: 0.9, color: 'var(--bone)', maxWidth: 720 }}>Wear the<br />colors.</h1>
+          <p style={{ color: 'var(--ash)', fontSize: 15.5, lineHeight: 1.6, maxWidth: 480, marginTop: 18 }}>
+            Official NNW gear for warriors and supporters. Zone jerseys, training kit, and everyday pieces - green, gold, and navy, done right.
+          </p>
+        </div>
+      </header>
 
-        {/* Empty state — table exists but has no rows */}
-        {!loading && merchItems.length === 0 && (
-          <div className="flex flex-col items-center justify-center py-32 text-center">
-            <ShoppingBag size={64} className="text-gray-200 mb-4" />
-            <h2 className="text-xl font-bold text-gray-700 mb-2">No items yet</h2>
-            <p className="text-gray-500 text-sm max-w-xs">
-              The shop is being stocked up. Check back soon for exclusive Naija Next merch!
-            </p>
+      {!loading && merchItems.length > 0 && (
+        <div className={mStyles['m-filter-bar']}>
+          <div className={`${styles.wrap} ${mStyles['m-filter-row']}`}>
+            {categories.map(cat => (
+              <button
+                key={cat}
+                onClick={() => setFilterCategory(cat)}
+                className={`${mStyles['m-chip']} ${filterCategory === cat ? mStyles.active : ''}`}
+              >
+                {cat.charAt(0).toUpperCase() + cat.slice(1)}
+              </button>
+            ))}
           </div>
-        )}
+        </div>
+      )}
 
-        {/* Products */}
-        {!loading && merchItems.length > 0 && (
-          <>
-            {/* Category Filter */}
-            <div className="mb-8 flex overflow-x-auto gap-2 pb-2">
-              {categories.map(cat => (
-                <button
-                  key={cat}
-                  onClick={() => setFilterCategory(cat)}
-                  className={`px-4 py-2 rounded-lg font-medium text-sm whitespace-nowrap transition ${
-                    filterCategory === cat
-                      ? 'bg-naija-green-600 text-white'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }`}
-                >
-                  {cat.charAt(0).toUpperCase() + cat.slice(1)}
-                </button>
-              ))}
+      <section style={{ padding: '48px 0 96px' }}>
+        <div className={styles.wrap}>
+          {loading && (
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '128px 0', gap: 16 }}>
+              <Loader2 size={36} className="animate-spin" color="var(--green)" />
+              <span className={styles.mono} style={{ fontSize: 12, color: 'rgba(var(--navy-rgb),0.5)' }}>Loading items…</span>
             </div>
+          )}
 
-            {/* Filtered empty state */}
-            {filteredProducts.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-20">
-                <ShoppingBag size={64} className="text-gray-300 mb-4" />
-                <p className="text-gray-600 text-lg">No items in this category</p>
-                <button
-                  onClick={() => setFilterCategory('all')}
-                  className="mt-4 px-4 py-2 text-naija-green-600 font-semibold hover:text-naija-green-700"
-                >
-                  View All Items
-                </button>
+          {!loading && merchItems.length === 0 && (
+            <div className={mStyles['m-empty']}>
+              <ShoppingBag size={48} style={{ opacity: 0.3 }} />
+              <p>The shop is being stocked up — check back soon</p>
+            </div>
+          )}
+
+          {!loading && merchItems.length > 0 && (
+            filteredProducts.length === 0 ? (
+              <div className={mStyles['m-empty']}>
+                <ShoppingBag size={48} style={{ opacity: 0.3 }} />
+                <p>No items in this category</p>
+                <button onClick={() => setFilterCategory('all')} className={`${styles.btn} ${styles['btn-ghost-dark']}`} style={{ marginTop: 20, width: 'fit-content' }}>View All Items</button>
               </div>
             ) : (
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              <div className={mStyles['m-grid']}>
                 {filteredProducts.map(product => (
-                  <div key={product.id} className="bg-gray-50 rounded-lg border border-gray-200 overflow-hidden hover:border-gray-300 transition">
-                    <div className="relative bg-gradient-to-br from-gray-200 to-gray-300 aspect-square flex items-center justify-center">
-                      {product.image_url ? (
-                        <img src={product.image_url} alt={product.name} className="w-full h-full object-cover" />
-                      ) : (
-                        <span className="text-4xl opacity-40">📦</span>
-                      )}
-                      <button
-                        onClick={() => toggleLike(product.id)}
-                        className="absolute top-2 right-2 p-2 bg-white rounded-full shadow hover:shadow-lg transition"
-                      >
-                        <Heart size={18} className={liked.includes(product.id) ? 'fill-red-500 text-red-500' : 'text-gray-400'} />
+                  <div key={product.id} className={mStyles['m-card']}>
+                    <div className={mStyles['m-card-photo']}>
+                      {product.image_url && <img src={product.image_url} alt={product.name} />}
+                      <button onClick={() => toggleLike(product.id)} className={mStyles['m-like-btn']}>
+                        <Heart size={15} color={liked.includes(product.id) ? 'var(--error)' : 'var(--navy)'} fill={liked.includes(product.id) ? 'var(--error)' : 'none'} />
                       </button>
                     </div>
-
-                    <div className="p-4">
-                      <p className="text-xs font-bold text-naija-green-600 uppercase mb-1">{product.category}</p>
-                      <h3 className="font-bold text-gray-900 mb-2 text-sm line-clamp-2">{product.name}</h3>
-                      <div className="flex items-center gap-1 mb-3">
-                        <div className="flex text-yellow-400">
-                          {[...Array(5)].map((_, i) => (
-                            <span key={i} className="text-xs">{i < Math.floor(product.rating) ? '★' : '☆'}</span>
-                          ))}
-                        </div>
-                        <span className="text-xs text-gray-600">{product.rating}</span>
+                    <div className={mStyles['m-card-body']}>
+                      <div className={mStyles['m-card-cat']}>{product.category}</div>
+                      <div className={mStyles['m-card-name']}>{product.name}</div>
+                      <div className={mStyles['m-card-rating']}>
+                        {[...Array(5)].map((_, i) => (
+                          <span key={i} style={{ color: 'var(--gold)', fontSize: 11 }}>{i < Math.floor(product.rating) ? '★' : '☆'}</span>
+                        ))}
+                        <span>{product.rating}</span>
                       </div>
-                      <div className="flex items-center justify-between gap-2">
-                        <p className="font-bold text-gray-900">₦{product.price.toLocaleString()}</p>
-                        <button
-                          onClick={() => addToCart(product)}
-                          disabled={loadingProductId === product.id}
-                          className="px-3 py-1 rounded text-sm font-semibold transition bg-naija-green-600 text-white hover:bg-naija-green-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
-                        >
-                          {loadingProductId === product.id ? <Loader2 size={14} className="animate-spin" /> : 'Add'}
+                      <div className={mStyles['m-card-bottom']}>
+                        <span className={mStyles['m-card-price']}>₦{product.price.toLocaleString()}</span>
+                        <button onClick={() => addToCart(product)} disabled={loadingProductId === product.id} className={mStyles['m-add-btn']}>
+                          {loadingProductId === product.id ? <Loader2 size={13} className="animate-spin" /> : 'Add'}
                         </button>
                       </div>
                     </div>
                   </div>
                 ))}
               </div>
-            )}
-          </>
-        )}
-      </div>
+            )
+          )}
+        </div>
+      </section>
 
-      {/* Cart Drawer */}
       {cartDrawerOpen && (
         <>
-          <div className="fixed inset-0 bg-black/50 z-40" onClick={() => setCartDrawerOpen(false)} />
-          <div className="fixed right-0 top-0 h-full w-full max-w-md bg-white z-50 shadow-2xl flex flex-col">
-            <div className="border-b border-gray-200 p-6 flex items-center justify-between">
-              <h2 className="text-2xl font-bold text-gray-900">Shopping Cart</h2>
-              <button onClick={() => setCartDrawerOpen(false)} className="p-2 hover:bg-gray-100 rounded-lg transition">
-                <X size={24} />
-              </button>
+          <div className={mStyles['cart-overlay']} onClick={() => setCartDrawerOpen(false)} />
+          <div className={mStyles['cart-drawer']}>
+            <div className={mStyles['cart-header']}>
+              <h2>Your Cart</h2>
+              <button onClick={() => setCartDrawerOpen(false)} className={mStyles['cart-close']}><X size={20} /></button>
             </div>
 
-            <div className="flex-1 overflow-y-auto">
+            <div className={mStyles['cart-items']}>
               {cart.length === 0 ? (
-                <div className="h-full flex flex-col items-center justify-center p-6">
-                  <ShoppingBag size={64} className="text-gray-300 mb-4" />
-                  <p className="text-gray-600 text-center">Your cart is empty</p>
-                  <p className="text-gray-500 text-sm text-center mt-2">Add items to get started</p>
+                <div className={mStyles['cart-empty']}>
+                  <ShoppingBag size={40} style={{ opacity: 0.4 }} />
+                  <span className={styles.mono} style={{ fontSize: 12, letterSpacing: '0.05em', textTransform: 'uppercase' }}>Your cart is empty</span>
                 </div>
               ) : (
-                <div className="space-y-3 p-6">
-                  {cart.map(item => (
-                    <div key={item.id} className="flex gap-3 p-4 bg-gray-50 rounded-lg border border-gray-200 hover:border-naija-green-300 transition">
-                      <div className="flex-1">
-                        <h4 className="font-semibold text-gray-900 text-sm mb-1">{item.name}</h4>
-                        <p className="text-xs text-naija-green-600 font-semibold mb-2">₦{item.price.toLocaleString()}</p>
-                        <div className="flex items-center gap-2">
-                          <button onClick={() => updateQuantity(item.id, item.quantity - 1)} className="px-2 py-1 border border-gray-300 rounded hover:bg-white transition text-sm">−</button>
-                          <span className="text-sm font-semibold w-6 text-center">{item.quantity}</span>
-                          <button onClick={() => updateQuantity(item.id, item.quantity + 1)} className="px-2 py-1 border border-gray-300 rounded hover:bg-white transition text-sm">+</button>
-                          <button onClick={() => removeFromCart(item.id)} className="ml-auto text-red-600 hover:text-red-700 hover:bg-red-50 p-1 rounded transition">
-                            <X size={16} />
-                          </button>
+                cart.map(item => (
+                  <div key={item.id} className={mStyles['cart-line']}>
+                    <div style={{ flex: 1 }}>
+                      <div className={mStyles['cart-line-name']}>{item.name}</div>
+                      <div className={mStyles['cart-line-price']}>₦{item.price.toLocaleString()}</div>
+                      <div className={mStyles['cart-line-controls']}>
+                        <div className={mStyles['cart-line-qty']}>
+                          <button onClick={() => updateQuantity(item.id, item.quantity - 1)}>−</button>
+                          <span className={styles.mono}>{item.quantity}</span>
+                          <button onClick={() => updateQuantity(item.id, item.quantity + 1)}>+</button>
                         </div>
+                        <button onClick={() => removeFromCart(item.id)} className={mStyles['cart-remove']}><X size={16} /></button>
                       </div>
                     </div>
-                  ))}
-                </div>
+                  </div>
+                ))
               )}
             </div>
 
             {cart.length > 0 && (
-              <div className="border-t border-gray-200 bg-gray-50 p-6 space-y-4">
-                <div className="space-y-2">
-                  <div className="flex justify-between items-center text-sm">
-                    <span className="text-gray-600">Subtotal:</span>
-                    <span className="text-gray-900 font-semibold">₦{cartTotal.toLocaleString()}</span>
-                  </div>
-                  <div className="flex justify-between items-center text-sm">
-                    <span className="text-gray-600">Delivery:</span>
-                    <span className="text-gray-900 font-semibold">TBD</span>
-                  </div>
-                </div>
-                <div className="border-t border-gray-200 pt-4 flex justify-between items-center">
-                  <span className="font-semibold text-gray-900">Total:</span>
-                  <span className="text-2xl font-bold text-naija-green-600">₦{cartTotal.toLocaleString()}</span>
-                </div>
+              <div className={mStyles['cart-footer']}>
+                <div className={mStyles['cart-row']}><span>Subtotal</span><span>₦{cartTotal.toLocaleString()}</span></div>
+                <div className={mStyles['cart-row']}><span>Delivery</span><span>TBD</span></div>
+                <div className={mStyles['cart-total-row']}><span>Total</span><span className={mStyles['cart-total-val']}>₦{cartTotal.toLocaleString()}</span></div>
                 <button
                   onClick={() => { setCartDrawerOpen(false); setCheckoutOpen(true) }}
-                  className="w-full px-4 py-3 bg-naija-green-600 text-white font-semibold rounded-lg hover:bg-naija-green-700 transition shadow-md hover:shadow-lg"
+                  className={`${styles.btn} ${styles['btn-gold']}`}
+                  style={{ width: '100%' }}
                 >
                   Proceed to Checkout
                 </button>
@@ -410,33 +371,23 @@ export default function MerchPage() {
         </>
       )}
 
-      {/* Checkout Dialog */}
       {checkoutOpen && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg shadow-lg max-w-md w-full p-6 max-h-[90vh] overflow-y-auto">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-2xl font-bold text-gray-900">Checkout</h2>
-              <button onClick={() => setCheckoutOpen(false)} className="p-1 hover:bg-gray-100 rounded transition">
-                <X size={20} />
-              </button>
+        <div className={mStyles['checkout-backdrop']}>
+          <div className={mStyles['checkout-modal']}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18 }}>
+              <div className={styles.display} style={{ fontSize: 22 }}>Checkout</div>
+              <button onClick={() => setCheckoutOpen(false)} className={mStyles['cart-close']}><X size={20} /></button>
             </div>
 
-            <form onSubmit={handleCheckout} className="space-y-4">
-              {/* Order Summary */}
-              <div className="bg-gray-50 p-4 rounded-lg">
-                <h3 className="font-semibold text-gray-900 mb-2">Order Summary</h3>
-                <div className="space-y-2 mb-3">
-                  {cart.map(item => (
-                    <div key={item.id} className="flex justify-between text-sm text-gray-600">
-                      <span>{item.name} x{item.quantity}</span>
-                      <span>₦{(item.price * item.quantity).toLocaleString()}</span>
-                    </div>
-                  ))}
-                </div>
-                <div className="border-t border-gray-200 pt-2 flex justify-between font-bold text-gray-900">
-                  <span>Total:</span>
-                  <span>₦{cartTotal.toLocaleString()}</span>
-                </div>
+            <form onSubmit={handleCheckout}>
+              <div className={mStyles['checkout-summary']}>
+                {cart.map(item => (
+                  <div key={item.id} className={mStyles['checkout-summary-row']}>
+                    <span>{item.name} ×{item.quantity}</span>
+                    <span>₦{(item.price * item.quantity).toLocaleString()}</span>
+                  </div>
+                ))}
+                <div className={mStyles['checkout-summary-total']}><span>Total</span><span>₦{cartTotal.toLocaleString()}</span></div>
               </div>
 
               {[
@@ -446,55 +397,43 @@ export default function MerchPage() {
                 { label: 'Address', key: 'address', type: 'text', placeholder: '123 Main Street' },
                 { label: 'City', key: 'city', type: 'text', placeholder: 'Lagos' },
               ].map(({ label, key, type, placeholder }) => (
-                <div key={key}>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">{label}</label>
+                <div key={key} className={styles['form-field']}>
+                  <label>{label}</label>
                   <input
                     type={type}
                     value={checkoutForm[key as keyof CheckoutForm]}
                     onChange={e => setCheckoutForm({ ...checkoutForm, [key]: e.target.value })}
                     placeholder={placeholder}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-naija-green-600 text-sm"
                   />
                 </div>
               ))}
 
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Payment Method</label>
-                <div className="space-y-2">
-                  {[
-                    { value: 'pickup', label: 'Pay on Pickup' },
-                    { value: 'delivery', label: 'Pay on Delivery' },
-                    { value: 'card', label: 'Card Payment' },
-                  ].map(method => (
-                    <label key={method.value} className="flex items-center gap-2 cursor-pointer">
-                      <input
-                        type="radio"
-                        name="paymentMethod"
-                        value={method.value}
-                        checked={checkoutForm.paymentMethod === method.value}
-                        onChange={e => setCheckoutForm({ ...checkoutForm, paymentMethod: e.target.value as CheckoutForm['paymentMethod'] })}
-                      />
-                      <span className="text-sm text-gray-700">{method.label}</span>
-                    </label>
-                  ))}
-                </div>
+              <div className={styles['form-field']}>
+                <label>Payment Method</label>
+                {[
+                  { value: 'pickup', label: 'Pay on Pickup' },
+                  { value: 'delivery', label: 'Pay on Delivery' },
+                  { value: 'card', label: 'Card Payment' },
+                ].map(method => (
+                  <label key={method.value} className={mStyles['pay-option']}>
+                    <input
+                      type="radio"
+                      name="paymentMethod"
+                      value={method.value}
+                      checked={checkoutForm.paymentMethod === method.value}
+                      onChange={e => setCheckoutForm({ ...checkoutForm, paymentMethod: e.target.value as CheckoutForm['paymentMethod'] })}
+                    />
+                    <span>{method.label}</span>
+                  </label>
+                ))}
               </div>
 
-              <div className="flex gap-3 pt-2">
-                <button
-                  type="button"
-                  onClick={() => setCheckoutOpen(false)}
-                  disabled={checkoutLoading}
-                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition font-semibold disabled:opacity-50"
-                >
+              <div style={{ display: 'flex', gap: 12, marginTop: 18 }}>
+                <button type="button" onClick={() => setCheckoutOpen(false)} disabled={checkoutLoading} className={`${styles.btn} ${styles['btn-ghost-dark']}`} style={{ flex: 1 }}>
                   Cancel
                 </button>
-                <button
-                  type="submit"
-                  disabled={checkoutLoading}
-                  className="flex-1 px-4 py-2 bg-naija-green-600 text-white rounded-lg hover:bg-naija-green-700 transition font-semibold disabled:opacity-50 flex items-center justify-center gap-2"
-                >
-                  {checkoutLoading ? <><Loader2 size={16} className="animate-spin" /> Processing...</> : <><Mail size={16} /> Place Order</>}
+                <button type="submit" disabled={checkoutLoading} className={`${styles.btn} ${styles['btn-gold']}`} style={{ flex: 1 }}>
+                  {checkoutLoading ? <><Loader2 size={15} className="animate-spin" /> Processing…</> : <><Mail size={15} /> Place Order</>}
                 </button>
               </div>
             </form>
@@ -503,6 +442,6 @@ export default function MerchPage() {
       )}
 
       <Footer />
-    </main>
+    </div>
   )
 }
