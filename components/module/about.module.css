@@ -1,0 +1,58 @@
+/* File: components/sections/nnw/about.module.css
+   Styles used only on the About page. Relies on CSS custom properties from
+   nnw.module.css's `.nnw` root class — see subpage.module.css header
+   comment for why that's safe without an import. Reuses .cta-card etc.
+   from nnw.module.css directly rather than duplicating them. */
+
+   .back-link { display: inline-flex; align-items: center; gap: 7px; font-family: 'JetBrains Mono', monospace; font-size: 11.5px; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(var(--bone-rgb),0.6); margin-bottom: 20px; position: relative; z-index: 2; transition: color 0.2s ease; }
+   .back-link:hover { color: var(--bone); }
+   
+   .a-section { padding: 72px 0; }
+   .a-section-title { font-size: clamp(26px, 4vw, 38px); line-height: 1; margin-bottom: 28px; }
+   
+   /* ---------- statement banner ---------- */
+   .statement { background: linear-gradient(150deg, var(--navy), var(--green)); border-radius: 4px; padding: 44px; margin-bottom: 8px; }
+   .statement h2 { font-family: 'Anton', sans-serif; font-size: clamp(26px, 4vw, 38px); text-transform: uppercase; color: var(--bone); margin: 0 0 16px; line-height: 1; }
+   .statement p { color: rgba(var(--bone-rgb),0.85); font-size: 15.5px; line-height: 1.7; max-width: 720px; }
+   
+   /* ---------- generic two/three column cards ---------- */
+   .a-grid-2 { display: grid; grid-template-columns: 1fr; gap: 20px; }
+   @media (min-width: 768px) { .a-grid-2 { grid-template-columns: 1fr 1fr; } }
+   .a-grid-3 { display: grid; grid-template-columns: 1fr; gap: 18px; }
+   @media (min-width: 768px) { .a-grid-3 { grid-template-columns: repeat(3, 1fr); } }
+   
+   .a-card { background: var(--bone); border: 1px solid var(--line); border-radius: 4px; padding: 28px; }
+   .a-card-icon { width: 46px; height: 46px; border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-bottom: 18px; }
+   .a-card-icon.green { background: rgba(var(--green-rgb),0.1); color: var(--green); }
+   .a-card-icon.gold { background: rgba(var(--gold-rgb),0.14); color: var(--amber); }
+   .a-card-icon.ash { background: rgba(var(--ash-rgb),0.14); color: var(--navy); }
+   .a-card h3 { font-family: 'Anton', sans-serif; font-size: 19px; text-transform: uppercase; margin: 0 0 10px; }
+   .a-card p { color: rgba(var(--navy-rgb),0.62); font-size: 14px; line-height: 1.65; margin: 0; }
+   
+   /* ---------- differentiators panel ---------- */
+   .differentiators { background: rgba(var(--green-rgb),0.04); border: 1px solid rgba(var(--green-rgb),0.15); border-radius: 4px; padding: 36px; }
+   .differentiators h3 { font-family: 'Anton', sans-serif; font-size: 16px; text-transform: uppercase; margin: 0 0 10px; color: var(--bone); }
+   .differentiators p { color: var(--ash); font-size: 14px; line-height: 1.65; margin: 0; }
+   
+   /* ---------- WLA banner card ---------- */
+   .wla-header { display: flex; align-items: center; gap: 12px; margin-bottom: 28px; }
+   .wla-banner { border-radius: 4px; overflow: hidden; border: 1px solid var(--line-dark); margin-bottom: 24px; }
+   .wla-top { background: var(--navy); padding: 36px; display: flex; flex-direction: column; align-items: center; gap: 28px; text-align: center; }
+   @media (min-width: 640px) { .wla-top { flex-direction: row; text-align: left; } }
+   .wla-logo-box { flex-shrink: 0; width: 100px; height: 100px; border-radius: 12px; overflow: hidden; background: rgba(var(--bone-rgb),0.06); border: 1px solid var(--line-dark); display: flex; align-items: center; justify-content: center; }
+   .wla-eyebrow { font-family: 'JetBrains Mono', monospace; font-size: 10.5px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: var(--gold); margin-bottom: 6px; }
+   .wla-name { font-family: 'Anton', sans-serif; font-size: 26px; color: var(--bone); text-transform: uppercase; margin-bottom: 4px; line-height: 1; }
+   .wla-tag { color: var(--ash); font-size: 13px; margin-bottom: 14px; }
+   .wla-badge-row { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+   @media (min-width: 640px) { .wla-badge-row { justify-content: flex-start; } }
+   .wla-badge { display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: 20px; font-family: 'JetBrains Mono', monospace; font-size: 10.5px; font-weight: 600; }
+   .wla-badge.gold { background: rgba(var(--gold-rgb),0.1); border: 1px solid rgba(var(--gold-rgb),0.3); color: var(--gold-soft); }
+   .wla-badge.green { background: rgba(var(--green-rgb),0.14); border: 1px solid rgba(var(--green-rgb),0.35); color: var(--green-light); }
+   
+   .wla-strip { background: rgba(var(--navy-rgb),0.96); padding: 28px 36px; display: grid; grid-template-columns: 1fr; gap: 22px; border-top: 1px solid var(--line-dark); }
+   @media (min-width: 768px) { .wla-strip { grid-template-columns: repeat(3, 1fr); } }
+   .wla-strip-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: rgba(var(--bone-rgb),0.4); margin-bottom: 8px; }
+   .wla-strip-row { display: flex; align-items: flex-start; gap: 8px; }
+   .wla-strip-text { color: rgba(var(--bone-rgb),0.85); font-size: 13.5px; line-height: 1.5; }
+   .wla-strip a.wla-strip-text { display: flex; align-items: center; gap: 8px; transition: color 0.2s ease; }
+   .wla-strip a.wla-strip-text:hover { color: var(--gold); }
