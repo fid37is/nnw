@@ -1,12 +1,17 @@
 'use client'
 
+// File: app/leaderboard/page.tsx
+
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import Image from 'next/image'
 import { supabase } from '@/lib/supabase/client'
-import { Trophy, ArrowLeft, User, Crown } from 'lucide-react'
-import Navbar from '../navbar'
-import Footer from '../footer'
+import { Trophy, User, Crown } from 'lucide-react'
+import styles from '@/components/sections/nnw/nnw.module.css'
+import subStyles from '@/components/module/subpage.module.css'
+import lStyles from '@/components/module/leaderboard.module.css'
+import Ticker from '@/components/sections/nnw/Ticker'
+import Nav from '@/components/sections/nnw/Nav'
+import Footer from '@/components/sections/nnw/Footer'
 
 interface LeaderboardEntry {
   rank: number
@@ -24,6 +29,26 @@ interface Season {
   name: string
   year: number
   status: string
+}
+
+const TICKER_ITEMS = [
+  "NIGERIA'S NEXT WARRIOR · A WLA COMPANY",
+  'LIVE RANKINGS · ACTIVE COMPETITORS ONLY',
+  'UPDATED AFTER EACH COMPLETED STAGE',
+]
+
+const rankBadgeClass = (rank: number) => {
+  if (rank === 1) return 'gold'
+  if (rank === 2) return 'silver'
+  if (rank === 3) return 'bronze'
+  return 'default'
+}
+
+const getMedalEmoji = (rank: number) => {
+  if (rank === 1) return '🥇'
+  if (rank === 2) return '🥈'
+  if (rank === 3) return '🥉'
+  return null
 }
 
 export default function LeaderboardPage() {
@@ -165,151 +190,104 @@ export default function LeaderboardPage() {
     return entry.preferred_name || entry.full_name
   }
 
-  const getMedalEmoji = (rank: number) => {
-    if (rank === 1) return '🥇'
-    if (rank === 2) return '🥈'
-    if (rank === 3) return '🥉'
-    return null
-  }
-
-  const getRankGradient = (rank: number) => {
-    if (rank === 1) return 'from-yellow-400 to-yellow-500'
-    if (rank === 2) return 'from-gray-300 to-gray-400'
-    if (rank === 3) return 'from-orange-400 to-orange-500'
-    return 'from-green-400 to-green-500'
-  }
-
   const currentSeason = seasons.find(s => s.id === selectedSeasonId)
   const isSeasonEnded = currentSeason?.status === 'completed' || currentSeason?.status === 'ended'
 
   return (
-    <main className="min-h-screen bg-white">
-      <Navbar />
+    <div className={styles.nnw}>
+      <Ticker items={TICKER_ITEMS} />
+      <Nav applyLabel="Get Notified" />
 
-      {loading ? (
-        <div className="flex items-center justify-center min-h-[calc(100vh-80px)]">
-          <div className="animate-spin w-12 h-12 border-4 border-green-200 border-t-green-600 rounded-full"></div>
-        </div>
-      ) : (
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12 mt-14">
-          {/* Header */}
-          <div className="mb-10">
-            <Link href="/" className="inline-flex items-center gap-2 text-green-600 hover:text-green-700 mb-6 font-medium transition group">
-              <ArrowLeft size={18} className="group-hover:-translate-x-1 transition-transform" />
-              <span className="text-sm">Back to Home</span>
-            </Link>
-            <div className="flex items-center gap-4 mb-3">
-              <Trophy size={40} className="text-green-600" />
-              <h1 className="text-4xl md:text-5xl font-bold text-gray-900">Leaderboard</h1>
-            </div>
-            <p className="text-lg text-gray-600">Live rankings - Active competitors only</p>
+      <header className={subStyles.subhero} style={{ paddingTop: 200 }}>
+        <span className={styles['ghost-num']} style={{ fontSize: '24vw', top: '-6vw', right: '-6vw' }}>01</span>
+        <div className={styles.wrap}>
+          <div className={subStyles['subhero-badge']}>
+            <Trophy size={16} color="var(--gold)" />
+            <span className={styles.mono} style={{ fontSize: 11, letterSpacing: '0.2em', textTransform: 'uppercase', color: 'var(--gold)' }}>
+              {currentSeason ? `${currentSeason.name} ${currentSeason.year}` : 'Season 1'} · Live Rankings
+            </span>
           </div>
+          <h1 className={styles.display}>Leaderboard.</h1>
+          <p>Live rankings — active competitors only, updated after every completed stage.</p>
+        </div>
+      </header>
 
-          {/* Season Ended Banner */}
-          {isSeasonEnded && (
-            <div className="mb-8 bg-gradient-to-r from-yellow-50 to-amber-50 border-2 border-yellow-400 rounded-2xl p-8 shadow-lg text-center">
-              <div className="flex items-center justify-center gap-3 mb-4">
-                <Crown size={48} className="text-yellow-600" />
-                <h2 className="text-3xl font-bold text-gray-900">Season Concluded!</h2>
-                <Crown size={48} className="text-yellow-600" />
-              </div>
-              <p className="text-gray-700 text-lg mb-6">
-                {currentSeason?.name} {currentSeason?.year} has ended. The competition is complete!
-              </p>
-              <Link 
-                href="/hall-of-fame"
-                className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-yellow-500 to-amber-500 text-white font-bold rounded-full hover:from-yellow-600 hover:to-amber-600 transition shadow-lg hover:shadow-xl transform hover:scale-105"
-              >
-                <Trophy size={24} />
-                <span>View Hall of Fame</span>
-              </Link>
-              <p className="text-gray-600 text-sm mt-4">See the champions and final standings from all completed seasons</p>
+      <section style={{ padding: '48px 0 96px' }}>
+        <div className={styles.wrap}>
+          {loading ? (
+            <div style={{ display: 'flex', justifyContent: 'center', padding: '96px 0' }}>
+              <div className={styles.dot} style={{ width: 32, height: 32 }} />
             </div>
-          )}
-
-          {/* Season Selector */}
-          {seasons.length > 1 && !isSeasonEnded && (
-            <div className="mb-10 max-w-xs">
-              <label className="block text-sm font-semibold text-gray-900 mb-2">Season</label>
-              <select
-                value={selectedSeasonId}
-                onChange={e => setSelectedSeasonId(e.target.value)}
-                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-green-600 font-medium transition"
-              >
-                {seasons.map(s => (
-                  <option key={s.id} value={s.id}>
-                    {s.name} {s.year} {(s.status === 'completed' || s.status === 'ended') && '(Ended)'}
-                  </option>
-                ))}
-              </select>
-            </div>
-          )}
-
-          {/* Leaderboard Cards - Only show if season is NOT ended */}
-          {!isSeasonEnded && (
+          ) : (
             <>
-              {leaderboard.length === 0 ? (
-                <div className="bg-white rounded-2xl shadow-md p-12 text-center border border-gray-200">
-                  <Trophy size={64} className="mx-auto mb-4 text-gray-300" />
-                  <p className="text-xl text-gray-600 font-semibold">No active competitors yet</p>
-                  <p className="text-gray-500 mt-2">Check back soon for rankings!</p>
+              {isSeasonEnded && (
+                <div className={lStyles['ended-banner']}>
+                  <div className={lStyles['ended-crown-row']}>
+                    <Crown size={32} color="var(--gold)" />
+                    <h2 className={`${styles.display} ${lStyles['ended-title']}`}>Season Concluded!</h2>
+                    <Crown size={32} color="var(--gold)" />
+                  </div>
+                  <p className={lStyles['ended-sub']}>
+                    {currentSeason?.name} {currentSeason?.year} has ended. The competition is complete!
+                  </p>
+                  <Link href="/hall-of-fame" className={`${styles.btn} ${styles['btn-gold']}`}>
+                    <Trophy size={16} /> View Hall of Fame
+                  </Link>
+                  <div className={lStyles['ended-note']}>See the champions and final standings from all completed seasons</div>
                 </div>
-              ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-                  {leaderboard.map((entry) => (
-                    <div
-                      key={entry.application_id}
-                      className="group relative overflow-hidden rounded-2xl shadow-md hover:shadow-2xl transition-all duration-300 hover:scale-105 cursor-pointer"
-                    >
-                      {/* Card Image Container - 3:4 Aspect Ratio */}
-                      <div className="relative aspect-[3/4] overflow-hidden bg-gray-200">
+              )}
+
+              {seasons.length > 1 && !isSeasonEnded && (
+                <div style={{ marginBottom: 32 }}>
+                  <select className={subStyles['season-select']} value={selectedSeasonId} onChange={e => setSelectedSeasonId(e.target.value)}>
+                    {seasons.map(s => (
+                      <option key={s.id} value={s.id}>
+                        {s.name} {s.year} {(s.status === 'completed' || s.status === 'ended') && '(Ended)'}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
+              {!isSeasonEnded && (
+                leaderboard.length === 0 ? (
+                  <div className={lStyles['l-empty']}>
+                    <Trophy size={40} style={{ opacity: 0.3 }} />
+                    <p>No active competitors yet — check back soon for rankings</p>
+                  </div>
+                ) : (
+                  <div className={lStyles['l-grid']}>
+                    {leaderboard.map((entry) => (
+                      <div key={entry.application_id} className={lStyles['l-card']}>
                         {entry.profile_photo ? (
-                          <Image
-                            src={entry.profile_photo}
-                            alt={getDisplayName(entry)}
-                            fill
-                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                          />
+                          <img src={entry.profile_photo} alt={getDisplayName(entry)} />
                         ) : (
-                          <div className="w-full h-full flex items-center justify-center bg-gray-300">
-                            <User size={48} className="text-gray-500" />
-                          </div>
+                          <div className={lStyles['l-card-noimg']}><User size={40} color="rgba(var(--bone-rgb),0.5)" /></div>
                         )}
 
-                        {/* Rank Badge */}
-                        <div
-                          className={`absolute top-3 left-3 w-12 h-12 rounded-full bg-gradient-to-br ${getRankGradient(
-                            entry.rank
-                          )} flex items-center justify-center text-2xl font-bold shadow-lg border-2 border-white`}
-                        >
+                        <div className={`${lStyles['rank-badge']} ${lStyles[rankBadgeClass(entry.rank)]}`}>
                           {getMedalEmoji(entry.rank) || entry.rank}
                         </div>
 
-                        {/* Points Badge */}
-                        <div className="absolute top-3 right-3 bg-white rounded-full px-3 py-1 shadow-lg">
-                          <p className="text-xs font-bold text-gray-700">{entry.total_points} pts</p>
+                        <div className={lStyles['points-badge']}>
+                          <span>{entry.total_points} pts</span>
                         </div>
 
-                        {/* Gradient Overlay */}
-                        <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-black via-black/50 to-transparent"></div>
-
-                        {/* Name and Stats */}
-                        <div className="absolute bottom-0 left-0 right-0 p-4">
-                          <p className="text-white font-black text-2xl leading-tight line-clamp-3">
-                            {getDisplayName(entry)}
-                          </p>
-                          <p className="text-white/80 text-sm mt-1">{entry.stages_completed} stages</p>
+                        <div className={lStyles['l-card-info']}>
+                          <div className={lStyles['l-card-name']}>{getDisplayName(entry)}</div>
+                          <div className={lStyles['l-card-stages']}>{entry.stages_completed} stages</div>
                         </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                )
               )}
             </>
           )}
         </div>
-      )}
+      </section>
+
       <Footer />
-    </main>
+    </div>
   )
 }

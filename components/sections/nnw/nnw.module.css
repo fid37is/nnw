@@ -15,6 +15,7 @@
           --ash-rgb: 143,166,155;
           --amber: #a97a10;
           --error: #B4432E;
+          --error-rgb: 180,67,46;
           --amber-rgb: 169,122,16;
           --line: rgba(var(--navy-rgb), 0.1);
           --line-dark: rgba(var(--bone-rgb), 0.12);
@@ -32,7 +33,7 @@
           box-sizing: border-box;
         }
         .nnw *, .nnw *::before, .nnw *::after { box-sizing: border-box; }
-        .nnw a { text-decoration: none; color: inherit; }
+        :where(.nnw a) { text-decoration: none; color: inherit; }
         .nnw button { font-family: inherit; cursor: pointer; border: none; }
 
         .display { font-family: 'Anton', sans-serif; font-weight: 400; letter-spacing: 0.005em; text-transform: uppercase; margin: 0; }
@@ -258,6 +259,14 @@
         .footer-bottom { display: flex; flex-direction: column; gap: 12px; align-items: center; padding-top: 28px; }
         @media (min-width: 640px) { .footer-bottom { flex-direction: row; justify-content: space-between; } }
         .footer-bottom span { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: rgba(var(--ash-rgb),0.6); }
+        .footer-desc-col { max-width: 320px; }
+        .footer-social-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 18px; }
+        .footer-social-icon { width: 34px; height: 34px; border-radius: 50%; background: rgba(var(--bone-rgb),0.06); display: flex; align-items: center; justify-content: center; transition: background 0.2s ease; }
+        .footer-social-icon:hover { background: var(--green); }
+        .footer-social-icon svg { transition: fill 0.2s ease; }
+        .footer-contact { display: flex; flex-direction: column; gap: 10px; margin-top: 14px; }
+        .footer-contact a { display: flex; align-items: center; gap: 8px; color: rgba(var(--bone-rgb),0.8); font-size: 13.5px; }
+        .footer-contact a:hover { color: var(--gold); }
 
         /* ---------- waitlist ---------- */
         .waitlist { position: relative; overflow: hidden; background: linear-gradient(135deg, var(--navy) 0%, var(--green) 100%); padding: 96px 0; }
