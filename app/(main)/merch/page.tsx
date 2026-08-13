@@ -217,7 +217,7 @@ export default function MerchPage() {
         {cartCount > 0 && <span className={mStyles['cart-fab-count']}>{cartCount}</span>}
       </button>
 
-      <header className={mStyles['m-hero']}>
+      <header className={mStyles['m-hero']} >
         <div className={mStyles['m-hero-photo']}>
           <img src={MERCH_HERO_IMG} alt="Jerseys and apparel displayed on shelves and racks" />
         </div>

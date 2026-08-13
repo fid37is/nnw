@@ -301,7 +301,7 @@ export default function ParticipantsPage() {
   return (
     <>
 
-      <header className={subStyles.subhero} style={{ paddingTop: 132 }}>
+      <header className={subStyles.subhero} style={{ paddingTop: 150 }}>
         <span className={styles['ghost-num']} style={{ fontSize: '24vw', top: '-6vw', right: '-6vw' }}>24</span>
         <div className={styles.wrap}>
           <div className={subStyles['subhero-badge']}>
