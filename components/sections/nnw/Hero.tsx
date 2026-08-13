@@ -59,7 +59,7 @@ export default function Hero({ season, applicationOpen, countdownTarget, warrior
           <Reveal>
             <div className={styles['hero-badge']}>
               <span className={styles.dot} />
-              <span className={styles.mono} style={{ fontSize: 12, letterSpacing: '0.25em', color: 'var(--hero-sub)', textTransform: 'uppercase' }}>
+              <span className={styles.mono} style={{ fontSize: 12, letterSpacing: '0.25em', color: 'var(--gold)', textTransform: 'uppercase' }}>
                 {season ? `${season.name} · ${season.year} · Applications ${applicationOpen ? 'Open' : 'Closed'}` : "Nigeria's Next Warrior · Details Coming Soon"}
               </span>
             </div>
