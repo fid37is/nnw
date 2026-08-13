@@ -81,7 +81,7 @@ export default function WaitlistSection({ waitingCount }: WaitlistSectionProps) 
     <section className={styles.waitlist}>
       <div className={styles.wrap}>
         <div className={styles['waitlist-grid']}>
-          {/* Left — copy */}
+          {/* Left - copy */}
           <Reveal>
             <div>
               <div className={styles['hero-badge']}>
@@ -91,7 +91,7 @@ export default function WaitlistSection({ waitingCount }: WaitlistSectionProps) 
               <h2 className={styles['waitlist-title']}>Be First in Line.<br /><span>Join the Waiting List.</span></h2>
               <p className={styles['waitlist-sub']}>
                 Season 1 applications are not open yet. Join the waiting list and get
-                notified the moment they do — before anyone else.
+                notified the moment they do - before anyone else.
               </p>
 
               <div className={styles['stat-row']}>
@@ -122,7 +122,7 @@ export default function WaitlistSection({ waitingCount }: WaitlistSectionProps) 
             </div>
           </Reveal>
 
-          {/* Right — form */}
+          {/* Right - form */}
           <Reveal delay={100}>
             <div className={styles['form-card']}>
               {success ? (
@@ -130,7 +130,7 @@ export default function WaitlistSection({ waitingCount }: WaitlistSectionProps) 
                   <div className={styles['form-success-icon']}><CheckCircle size={32} color="var(--green)" /></div>
                   <div className={styles['form-success-title']}>You&apos;re on the list!</div>
                   <p className={styles['form-success-sub']}>
-                    We&apos;ll send you an email the moment Season 1 applications open. Stay ready — the competition is coming.
+                    We&apos;ll send you an email the moment Season 1 applications open. Stay ready - the competition is coming.
                   </p>
                 </div>
               ) : (

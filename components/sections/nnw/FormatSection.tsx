@@ -23,7 +23,7 @@ export default function FormatSection() {
           <p style={{ marginTop: 24, maxWidth: 560, color: 'rgba(var(--navy-rgb),0.7)', lineHeight: 1.65 }}>
             Nigeria&apos;s six geopolitical zones compete one at a time, in order, at a single
             fixed venue. Each zone round sends its top 3 forward - six rounds, eighteen
-            warriors, narrowed down to a Grand Finale Top 10.
+            warriors, narrowed down to a Grand Finale Top 18.
           </p>
         </Reveal>
 
@@ -45,7 +45,7 @@ export default function FormatSection() {
             <div className={styles.node} style={{ width: 140 }}>
               <Trophy size={20} color="var(--gold)" style={{ marginBottom: 14 }} />
               <div className={`${styles['node-round']} ${styles.mono}`} style={{ color: 'var(--gold)' }}>Finale</div>
-              <div className={styles['node-zone']} style={{ color: 'var(--green)' }}>Top 10</div>
+              <div className={styles['node-zone']} style={{ color: 'var(--green)' }}>Top 18</div>
             </div>
           </Reveal>
         </div>
@@ -69,7 +69,7 @@ export default function FormatSection() {
             <Trophy size={16} color="var(--gold)" style={{ marginTop: 2 }} />
             <Reveal>
               <div className={`${styles['node-round']} ${styles.mono}`} style={{ color: 'var(--gold)' }}>Grand Finale</div>
-              <div className={styles['node-zone']} style={{ color: 'var(--green)', fontSize: 19 }}>Top 10</div>
+              <div className={styles['node-zone']} style={{ color: 'var(--green)', fontSize: 19 }}>Top 18</div>
             </Reveal>
           </div>
         </div>

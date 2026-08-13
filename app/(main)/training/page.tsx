@@ -26,7 +26,7 @@ export default function TrainingPage() {
         <div className="bg-naija-green-600 text-white rounded-xl p-8 md:p-12 mb-16">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">Train Like a Warrior</h2>
           <p className="text-lg text-green-50 leading-relaxed mb-8">
-            NNW is building a nationwide network of certified training centers — purpose-built for ninja-style competition prep, strength development, and athletic excellence. Each facility will feature competition-grade obstacles, professional coaching, and structured programs for all levels.
+            NNW is building a nationwide network of certified training centers - purpose-built for ninja-style competition prep, strength development, and athletic excellence. Each facility will feature competition-grade obstacles, professional coaching, and structured programs for all levels.
           </p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="bg-white/10 rounded-lg p-4">
@@ -47,7 +47,7 @@ export default function TrainingPage() {
           </div>
         </div>
 
-        {/* Centers — coming soon */}
+        {/* Centers - coming soon */}
         <div className="mb-16">
           <h2 className="text-3xl font-bold text-gray-900 mb-8">Find a Center Near You</h2>
           <div className="bg-gray-50 border border-gray-200 rounded-2xl p-12 text-center">

@@ -4,7 +4,7 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
-import { ArrowLeft, Target, Globe, Award, Users, Building2, ShieldCheck, MapPin, Mail, Phone, ArrowUpRight } from 'lucide-react'
+import { Target, Globe, Award, Users, Building2, ShieldCheck, MapPin, Mail, Phone, ArrowUpRight } from 'lucide-react'
 import styles from '@/components/sections/nnw/nnw.module.css'
 import subStyles from '@/components/module/subpage.module.css'
 import aStyles from '@/components/module/about.module.css'
@@ -26,7 +26,7 @@ const CORE_VALUES = [
     icon: <Users size={22} />,
     color: 'ash',
     title: 'Resilience',
-    desc: 'The spirit of the warrior is to get back up. We celebrate grit, perseverance, and the courage to keep going — on the course and in life.',
+    desc: 'The spirit of the warrior is to get back up. We celebrate grit, perseverance, and the courage to keep going - on the course and in life.',
   },
 ]
 
@@ -56,15 +56,15 @@ const WLA_CARDS = [
   },
   {
     title: 'NNW as the First Franchise',
-    desc: "Naija Next Warrior is the flagship competition under WLA's umbrella — the first in a planned network of regional warrior leagues. NNW sets the gold standard that future franchises across Africa will be built upon.",
+    desc: "Naija Next Warrior is the flagship competition under WLA's umbrella - the first in a planned network of regional warrior leagues. NNW sets the gold standard that future franchises across Africa will be built upon.",
   },
   {
     title: 'The Road to Pan-African',
-    desc: "WLA's long-term vision is a continental league — with Nigeria (NNW) as the anchor, and future regional competitions like Ghana Next Warrior (GNW) and others expanding across Africa under the WLA banner.",
+    desc: "WLA's long-term vision is a continental league - with Nigeria (NNW) as the anchor, and future regional competitions like Ghana Next Warrior (GNW) and others expanding across Africa under the WLA banner.",
   },
   {
     title: 'Legally Backed, Fully Committed',
-    desc: 'With an active CAC registration and a principal business scope spanning sports entertainment, media production, broadcasting, and franchise licensing — WLA Entertainment Ltd is built for the long game.',
+    desc: 'With an active CAC registration and a principal business scope spanning sports entertainment, media production, broadcasting, and franchise licensing - WLA Entertainment Ltd is built for the long game.',
   },
 ]
 
@@ -75,13 +75,12 @@ export default function AboutPage() {
       <header className={subStyles.subhero} style={{ paddingTop: 132 }}>
         <span className={styles['ghost-num']} style={{ fontSize: '24vw', top: '-6vw', right: '-6vw' }}>NNW</span>
         <div className={styles.wrap}>
-          <Link href="/" className={aStyles['back-link']}><ArrowLeft size={14} /> Back to Home</Link>
           <div className={subStyles['subhero-badge']}>
             <span className={styles.dot} />
             <span className={styles.mono} style={{ fontSize: 11, letterSpacing: '0.2em', textTransform: 'uppercase', color: 'var(--gold)' }}>A WLA Company</span>
           </div>
           <h1 className={styles.display}>About Nigeria&apos;s<br />Next Warrior.</h1>
-          <p>Africa&apos;s first ninja competition series — a WLA Entertainment Ltd company.</p>
+          <p>Africa&apos;s first ninja competition series - a WLA Entertainment Ltd company.</p>
         </div>
       </header>
 
@@ -113,7 +112,7 @@ export default function AboutPage() {
           <p style={{ color: 'rgba(var(--navy-rgb),0.65)', fontSize: 15, lineHeight: 1.75, maxWidth: 760 }}>
             The global success of Ninja Warrior franchises worldwide proved that audiences crave authentic displays
             of human determination and athletic excellence. We&apos;re bringing that same excitement to Nigeria while
-            celebrating our unique culture, diversity, and indomitable spirit — under the umbrella of WLA
+            celebrating our unique culture, diversity, and indomitable spirit - under the umbrella of WLA
             Entertainment Ltd, the company built to take this vision continental.
           </p>
         </div>
@@ -137,7 +136,7 @@ export default function AboutPage() {
               <h3>Our Vision</h3>
               <p>
                 To build a movement of elite athletes who inspire millions, break barriers, and represent Nigeria on
-                the world stage. Through WLA Entertainment Ltd, we envision expanding across Africa — from Nigeria&apos;s
+                the world stage. Through WLA Entertainment Ltd, we envision expanding across Africa - from Nigeria&apos;s
                 NNW to a pan-continental league of warrior competitions.
               </p>
             </div>
@@ -194,7 +193,7 @@ export default function AboutPage() {
               <div>
                 <div className={aStyles['wla-eyebrow']}>Umbrella Company</div>
                 <div className={aStyles['wla-name']}>WLA Entertainment Ltd</div>
-                <div className={aStyles['wla-tag']}>Warrior League Africa — Building Africa&apos;s Sports Entertainment Future</div>
+                <div className={aStyles['wla-tag']}>Warrior League Africa - Building Africa&apos;s Sports Entertainment Future</div>
                 <div className={aStyles['wla-badge-row']}>
                   <span className={`${aStyles['wla-badge']} ${aStyles.gold}`}><ShieldCheck size={12} /> CAC Registered · RC No. 9529867</span>
                   <span className={`${aStyles['wla-badge']} ${aStyles.green}`}><span className={styles.dot} style={{ width: 6, height: 6 }} /> Active · Est. May 2026</span>
@@ -235,7 +234,7 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* CTA — reuses the same .cta-card component as the home page */}
+      {/* CTA - reuses the same .cta-card component as the home page */}
       <section className={styles.section} style={{ background: 'var(--bone)' }}>
         <div className={styles.wrap}>
           <div className={styles['cta-card']}>
@@ -244,7 +243,7 @@ export default function AboutPage() {
               <div className={styles['cta-title']}>Join the Movement</div>
               <p className={styles['cta-sub']}>
                 Whether you&apos;re an aspiring competitor, a fitness enthusiast, or someone looking to support
-                Nigerian excellence, there&apos;s a place for you in the Naija Next Warrior community — powered by
+                Nigerian excellence, there&apos;s a place for you in the Naija Next Warrior community - powered by
                 WLA Entertainment Ltd.
               </p>
             </div>

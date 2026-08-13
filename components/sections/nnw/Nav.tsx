@@ -9,7 +9,7 @@ import { Menu, X } from 'lucide-react'
 import styles from './nnw.module.css'
 import { useLogoConfig } from '@/components/context/LogoContext'
 
-// Real site pages — same destinations as app/navbar.tsx, so nothing is lost
+// Real site pages - same destinations as app/navbar.tsx, so nothing is lost
 // by using this restyled nav on the home page instead of the shared one.
 const SITE_LINKS = [
   { href: '/leaderboard', label: 'Leaderboard' },
@@ -34,7 +34,7 @@ export default function Nav({ applyLabel = 'Apply Now', sticky = false }: { appl
 
   // Text color is set inline (not just via the CSS module class) so it can
   // never render invisible against the dark nav background if a class
-  // lookup fails to resolve — belt-and-suspenders after the earlier
+  // lookup fails to resolve - belt-and-suspenders after the earlier
   // build-cache issues that caused exactly that symptom.
   const linkStyle = (active: boolean): React.CSSProperties => ({ color: active ? 'var(--gold)' : 'var(--bone)' })
   const loginStyle: React.CSSProperties = { color: 'rgba(var(--bone-rgb),0.75)' }
