@@ -69,7 +69,7 @@ export default function Hero({ season, applicationOpen, countdownTarget, warrior
           </Reveal>
           <Reveal delay={160}>
             <p className={styles['hero-sub']}>
-              Six geopolitical zones. One fixed arena. Every zone battles it out in turn —
+              Six geopolitical zones. One fixed arena. Every zone battles it out in turn -
               only their best three move forward, until a nation&apos;s worth of warriors
               becomes a Grand Finale Top 10.
             </p>

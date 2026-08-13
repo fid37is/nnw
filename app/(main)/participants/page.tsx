@@ -43,7 +43,7 @@ type DerivedStatus = 'active' | 'advancing' | 'eliminated'
 const ZONES = ['North Central', 'North East', 'North West', 'South East', 'South South', 'South West']
 
 const fmtTime = (sec: number | null) => {
-  if (sec === null || sec === undefined) return '—'
+  if (sec === null || sec === undefined) return '-'
   const m = Math.floor(sec / 60)
   const s = (sec % 60).toFixed(1).padStart(4, '0')
   return `${m}:${s}`
@@ -67,7 +67,7 @@ export default function ParticipantsPage() {
   useEffect(() => { loadSeasons() }, [])
   useEffect(() => { if (selectedSeasonId) loadParticipants() }, [selectedSeasonId])
 
-  // Live clock, same as the prototype's `tickClock()` — purely a "this page
+  // Live clock, same as the prototype's `tickClock()` - purely a "this page
   // is live" indicator, not tied to any actual data refresh.
   useEffect(() => {
     const pad = (n: number) => String(n).padStart(2, '0')
@@ -147,7 +147,7 @@ export default function ParticipantsPage() {
       // Bulk best-time fetch: same `stage_performances` table already used for
       // the per-participant modal, just queried for every application in this
       // season at once instead of one at a time. Powers the fastest-times
-      // strip, time sort, and the derived "advancing" status below — all real
+      // strip, time sort, and the derived "advancing" status below - all real
       // data, no new tables or schema.
       const { data: perfData, error: perfError } = await supabase
         .from('stage_performances')
@@ -311,7 +311,7 @@ export default function ParticipantsPage() {
             </span>
           </div>
           <h1 className={styles.display}>All Participants.</h1>
-          <p>Every confirmed warrior across all six zones — status and best run time, updated as each round happens.</p>
+          <p>Every confirmed warrior across all six zones - status and best run time, updated as each round happens.</p>
           <div className={subStyles['sync-row']}>
             <span className={styles.dot} style={{ width: 5, height: 5 }} />
             <span>Last sync: <strong>{syncClock}</strong></span>
@@ -353,7 +353,7 @@ export default function ParticipantsPage() {
           <div className={styles.wrap}>
             <div className={pStyles['fastest-title']}>
               <span className={styles.dot} style={{ background: 'var(--bone)' }} />
-              <span className={styles.mono} style={{ fontSize: 11.5, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(var(--bone-rgb),0.85)' }}>Fastest Times — All Zones</span>
+              <span className={styles.mono} style={{ fontSize: 11.5, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(var(--bone-rgb),0.85)' }}>Fastest Times - All Zones</span>
             </div>
             <div className={pStyles['fastest-row']}>
               {fastestSix.map((p, i) => (
