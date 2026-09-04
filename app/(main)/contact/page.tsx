@@ -1,10 +1,21 @@
 'use client'
 
+// File: app/(main)/contact/page.tsx
+
 import { useState } from 'react'
 import Link from 'next/link'
 import { ArrowLeft, Mail, Phone, MapPin, Send, MessageSquare } from 'lucide-react'
 import { supabase } from '@/lib/supabase/client'
 import { toast } from 'sonner'
+
+const DEPARTMENTS = [
+  { dept: 'Competitor Relations', email: 'support@naijaninja.net', desc: 'Registration, eligibility, and competition questions' },
+  { dept: 'Partnerships & Sponsorship', email: 'support@naijaninja.net', desc: 'Corporate partnerships and brand collaborations' },
+  { dept: 'Media & Broadcasting', email: 'support@naijaninja.net', desc: 'Press inquiries and media partnerships' },
+  { dept: 'Training Centers', email: 'support@naijaninja.net', desc: 'Certified training facility information' },
+  { dept: 'Human Resources', email: 'support@naijaninja.net', desc: 'Career opportunities and employment' },
+  { dept: 'General Inquiries', email: 'support@naijaninja.net', desc: 'All other questions and feedback' },
+]
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
@@ -55,84 +66,74 @@ export default function ContactPage() {
   }
 
   return (
-    <main className="min-h-screen bg-white overflow-x-hidden pt-32">
-
-      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12 mt-14">
-        {/* Header */}
-        <div className="mb-12">
-          <Link href="/" className="flex items-center gap-2 text-naija-green-600 hover:text-naija-green-700 mb-4 w-fit">
-            <ArrowLeft size={18} />
-            <span className="text-sm font-medium">Back to Home</span>
-          </Link>
+    <>
+      {/* Hero */}
+      <header className="relative overflow-hidden bg-gradient-to-br from-nnw-navy via-nnw-navy to-nnw-green pt-32 pb-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-4 mb-3">
-            <MessageSquare size={40} className="text-naija-green-600" />
-            <h1 className="text-4xl md:text-5xl font-bold text-gray-900">Contact Us</h1>
+            <MessageSquare size={36} className="text-nnw-gold" />
+            <h1 className="font-display uppercase text-4xl md:text-6xl text-nnw-bone leading-none">Contact Us.</h1>
           </div>
-          <p className="text-xl text-gray-600">Get in Touch With Our Team</p>
+          <p className="text-nnw-ash text-lg max-w-xl">Get in touch with our team - competition, partnerships, media, or general questions.</p>
         </div>
+      </header>
 
+      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         {/* Contact Info Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
-          <div className="bg-gradient-to-br from-naija-green-600 to-naija-green-700 text-white rounded-xl p-6">
-            <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center mb-4">
-              <Mail size={24} />
+          <div className="bg-gradient-to-br from-nnw-green to-nnw-green-light text-nnw-bone rounded-lg p-6 border border-nnw-green">
+            <div className="w-12 h-12 bg-white/15 rounded-lg flex items-center justify-center mb-4">
+              <Mail size={22} />
             </div>
-            <h3 className="font-bold text-lg mb-2">Email Us</h3>
-            <a href="mailto:support@naijaninja.net" className="text-green-50 hover:text-white transition">
+            <h3 className="font-display uppercase text-lg mb-2">Email Us</h3>
+            <a href="mailto:support@naijaninja.net" className="text-nnw-bone/80 hover:text-nnw-bone transition text-sm">
               support@naijaninja.net
             </a>
           </div>
 
-          <div className="bg-gradient-to-br from-naija-green-700 to-naija-green-800 text-white rounded-xl p-6">
-            <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center mb-4">
-              <Phone size={24} />
+          <div className="bg-nnw-navy text-nnw-bone rounded-lg p-6 border border-nnw-navy">
+            <div className="w-12 h-12 bg-white/10 rounded-lg flex items-center justify-center mb-4">
+              <Phone size={22} />
             </div>
-            <h3 className="font-bold text-lg mb-2">Call Us</h3>
-            <a href="tel:+2348085952266" className="text-green-50 hover:text-white transition">
+            <h3 className="font-display uppercase text-lg mb-2">Call Us</h3>
+            <a href="tel:+2348085952266" className="text-nnw-bone/80 hover:text-nnw-bone transition text-sm">
               +234 808 595 2266
             </a>
           </div>
 
-          <div className="bg-gradient-to-br from-gray-700 to-gray-800 text-white rounded-xl p-6">
-            <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center mb-4">
-              <MapPin size={24} />
+          <div className="bg-white text-nnw-navy rounded-lg p-6 border-2 border-nnw-navy/10">
+            <div className="w-12 h-12 bg-nnw-navy/5 rounded-lg flex items-center justify-center mb-4">
+              <MapPin size={22} className="text-nnw-green" />
             </div>
-            <h3 className="font-bold text-lg mb-2">Location</h3>
-            <p className="text-gray-50">
-              Calabar & Abuja<br />Nigeria
-            </p>
+            <h3 className="font-display uppercase text-lg mb-2">Location</h3>
+            <p className="text-nnw-navy/60 text-sm">Calabar &amp; Abuja<br />Nigeria</p>
           </div>
         </div>
 
-        {/* Contact Form & Info */}
+        {/* Contact Form & Sidebar */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-16">
-          {/* Form */}
           <div className="lg:col-span-2">
-            <div className="bg-gray-50 rounded-xl p-8 border border-gray-200">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">Send Us a Message</h2>
+            <div className="bg-white rounded-lg p-8 border border-nnw-navy/10">
+              <h2 className="font-display uppercase text-2xl text-nnw-navy mb-6">Send Us a Message</h2>
               <div className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">
-                      Full Name *
-                    </label>
+                    <label className="block font-mono text-xs tracking-widest uppercase text-nnw-navy/60 mb-2">Full Name *</label>
                     <input
                       type="text"
                       value={formData.name}
-                      onChange={(e) => setFormData({...formData, name: e.target.value})}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-naija-green-500"
+                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                      className="w-full px-4 py-3 border border-nnw-navy/15 rounded focus:outline-none focus:ring-2 focus:ring-nnw-green"
                       placeholder="John Doe"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">
-                      Email Address *
-                    </label>
+                    <label className="block font-mono text-xs tracking-widest uppercase text-nnw-navy/60 mb-2">Email Address *</label>
                     <input
                       type="email"
                       value={formData.email}
-                      onChange={(e) => setFormData({...formData, email: e.target.value})}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-naija-green-500"
+                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                      className="w-full px-4 py-3 border border-nnw-navy/15 rounded focus:outline-none focus:ring-2 focus:ring-nnw-green"
                       placeholder="john@example.com"
                     />
                   </div>
@@ -140,25 +141,21 @@ export default function ContactPage() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">
-                      Phone Number
-                    </label>
+                    <label className="block font-mono text-xs tracking-widest uppercase text-nnw-navy/60 mb-2">Phone Number</label>
                     <input
                       type="tel"
                       value={formData.phone}
-                      onChange={(e) => setFormData({...formData, phone: e.target.value})}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-naija-green-500"
+                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                      className="w-full px-4 py-3 border border-nnw-navy/15 rounded focus:outline-none focus:ring-2 focus:ring-nnw-green"
                       placeholder="+234 800 000 0000"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">
-                      Subject *
-                    </label>
+                    <label className="block font-mono text-xs tracking-widest uppercase text-nnw-navy/60 mb-2">Subject *</label>
                     <select
                       value={formData.subject}
-                      onChange={(e) => setFormData({...formData, subject: e.target.value})}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-naija-green-500"
+                      onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
+                      className="w-full px-4 py-3 border border-nnw-navy/15 rounded focus:outline-none focus:ring-2 focus:ring-nnw-green"
                     >
                       <option value="">Select a subject</option>
                       <option value="Competition Inquiry">Competition Inquiry</option>
@@ -172,14 +169,12 @@ export default function ContactPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Message *
-                  </label>
+                  <label className="block font-mono text-xs tracking-widest uppercase text-nnw-navy/60 mb-2">Message *</label>
                   <textarea
                     value={formData.message}
-                    onChange={(e) => setFormData({...formData, message: e.target.value})}
+                    onChange={(e) => setFormData({ ...formData, message: e.target.value })}
                     rows={6}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-naija-green-500"
+                    className="w-full px-4 py-3 border border-nnw-navy/15 rounded focus:outline-none focus:ring-2 focus:ring-nnw-green"
                     placeholder="Tell us how we can help..."
                   />
                 </div>
@@ -187,17 +182,16 @@ export default function ContactPage() {
                 <button
                   onClick={handleSubmit}
                   disabled={submitting}
-                  className="w-full md:w-auto px-8 py-3 bg-naija-green-600 text-white font-bold rounded-full hover:bg-naija-green-700 transition flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full md:w-auto px-8 py-3 bg-nnw-gold text-nnw-navy font-mono text-sm tracking-wider uppercase font-bold rounded hover:bg-nnw-gold-soft transition flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {submitting ? (
                     <>
-                      <div className="animate-spin w-5 h-5 border-3 border-white border-t-transparent rounded-full"></div>
+                      <div className="animate-spin w-4 h-4 border-2 border-nnw-navy border-t-transparent rounded-full" />
                       Sending...
                     </>
                   ) : (
                     <>
-                      <Send size={18} />
-                      Send Message
+                      <Send size={16} /> Send Message
                     </>
                   )}
                 </button>
@@ -205,51 +199,31 @@ export default function ContactPage() {
             </div>
           </div>
 
-          {/* Contact Info Sidebar */}
+          {/* Sidebar */}
           <div className="space-y-6">
-            <div className="bg-white rounded-xl p-6 border-2 border-gray-200">
-              <h3 className="font-bold text-gray-900 mb-4 text-lg">Office Hours</h3>
-              <div className="space-y-3 text-sm text-gray-600">
-                <div className="flex justify-between">
-                  <span className="font-medium">Monday - Friday</span>
-                  <span>9:00 AM - 6:00 PM</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="font-medium">Saturday</span>
-                  <span>10:00 AM - 4:00 PM</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="font-medium">Sunday</span>
-                  <span>Closed</span>
-                </div>
+            <div className="bg-white rounded-lg p-6 border border-nnw-navy/10">
+              <h3 className="font-display uppercase text-nnw-navy mb-4 text-base">Office Hours</h3>
+              <div className="space-y-3 text-sm text-nnw-navy/60">
+                <div className="flex justify-between"><span className="font-medium">Monday - Friday</span><span>9:00 AM - 6:00 PM</span></div>
+                <div className="flex justify-between"><span className="font-medium">Saturday</span><span>10:00 AM - 4:00 PM</span></div>
+                <div className="flex justify-between"><span className="font-medium">Sunday</span><span>Closed</span></div>
               </div>
             </div>
 
-            <div className="bg-naija-green-50 rounded-xl p-6 border border-naija-green-200">
-              <h3 className="font-bold text-gray-900 mb-4 text-lg">Quick Links</h3>
+            <div className="bg-nnw-green/5 rounded-lg p-6 border border-nnw-green/20">
+              <h3 className="font-display uppercase text-nnw-navy mb-4 text-base">Quick Links</h3>
               <div className="space-y-3">
-                <Link href="/register" className="block text-naija-green-700 hover:text-naija-green-800 font-medium">
-                  → Register for Competition
-                </Link>
-                <Link href="/training" className="block text-naija-green-700 hover:text-naija-green-800 font-medium">
-                  → Find Training Centers
-                </Link>
-                <Link href="/partners" className="block text-naija-green-700 hover:text-naija-green-800 font-medium">
-                  → Partnership Opportunities
-                </Link>
-                <Link href="/faq" className="block text-naija-green-700 hover:text-naija-green-800 font-medium">
-                  → Frequently Asked Questions
-                </Link>
+                <Link href="/register" className="block text-nnw-green hover:text-nnw-green-light font-medium text-sm">→ Register for Competition</Link>
+                <Link href="/training" className="block text-nnw-green hover:text-nnw-green-light font-medium text-sm">→ Find Training Centers</Link>
+                <Link href="/partners" className="block text-nnw-green hover:text-nnw-green-light font-medium text-sm">→ Partnership Opportunities</Link>
+                <Link href="/faq" className="block text-nnw-green hover:text-nnw-green-light font-medium text-sm">→ Frequently Asked Questions</Link>
               </div>
             </div>
 
-            <div className="bg-gray-50 rounded-xl p-6 border border-gray-200">
-              <h3 className="font-bold text-gray-900 mb-4 text-lg">Media Inquiries</h3>
-              <p className="text-sm text-gray-600 mb-3">
-                For press, media partnerships, and broadcasting opportunities:
-              </p>
-              <a href="mailto:support@naijaninja.net?subject=Media Inquiry" 
-                 className="text-naija-green-600 hover:text-naija-green-700 font-semibold text-sm">
+            <div className="bg-white rounded-lg p-6 border border-nnw-navy/10">
+              <h3 className="font-display uppercase text-nnw-navy mb-4 text-base">Media Inquiries</h3>
+              <p className="text-sm text-nnw-navy/60 mb-3">For press, media partnerships, and broadcasting opportunities:</p>
+              <a href="mailto:support@naijaninja.net?subject=Media Inquiry" className="text-nnw-green hover:text-nnw-green-light font-semibold text-sm">
                 Contact Media Relations →
               </a>
             </div>
@@ -258,23 +232,14 @@ export default function ContactPage() {
 
         {/* Department Contacts */}
         <div className="mb-16">
-          <h2 className="text-3xl font-bold text-gray-900 mb-8">Department Contacts</h2>
+          <h2 className="font-display uppercase text-3xl text-nnw-navy mb-8">Department Contacts</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[
-              { dept: 'Competitor Relations', email: 'support@naijaninja.net', desc: 'Registration, eligibility, and competition questions' },
-              { dept: 'Partnerships & Sponsorship', email: 'support@naijaninja.net', desc: 'Corporate partnerships and brand collaborations' },
-              { dept: 'Media & Broadcasting', email: 'support@naijaninja.net', desc: 'Press inquiries and media partnerships' },
-              { dept: 'Training Centers', email: 'support@naijaninja.net', desc: 'Certified training facility information' },
-              { dept: 'Human Resources', email: 'support@naijaninja.net', desc: 'Career opportunities and employment' },
-              { dept: 'General Inquiries', email: 'support@naijaninja.net', desc: 'All other questions and feedback' },
-            ].map((contact, i) => (
-              <div key={i} className="bg-gray-50 rounded-lg p-6 border border-gray-200">
-                <h3 className="font-bold text-gray-900 mb-2">{contact.dept}</h3>
-                <p className="text-sm text-gray-600 mb-3">{contact.desc}</p>
-                <a href={`mailto:${contact.email}?subject=${contact.dept} Inquiry`} 
-                   className="text-naija-green-600 hover:text-naija-green-700 font-medium text-sm flex items-center gap-1">
-                  <Mail size={14} />
-                  Contact Department
+            {DEPARTMENTS.map((contact, i) => (
+              <div key={i} className="bg-white rounded-lg p-6 border border-nnw-navy/10">
+                <h3 className="font-display uppercase text-nnw-navy mb-2 text-base">{contact.dept}</h3>
+                <p className="text-sm text-nnw-navy/60 mb-3">{contact.desc}</p>
+                <a href={`mailto:${contact.email}?subject=${contact.dept} Inquiry`} className="text-nnw-green hover:text-nnw-green-light font-medium text-sm flex items-center gap-1">
+                  <Mail size={13} /> Contact Department
                 </a>
               </div>
             ))}
@@ -282,18 +247,18 @@ export default function ContactPage() {
         </div>
 
         {/* FAQ Prompt */}
-        <div className="bg-gradient-to-br from-gray-900 to-gray-800 text-white rounded-xl p-8 md:p-12">
+        <div className="bg-gradient-to-br from-nnw-navy to-nnw-green text-nnw-bone rounded-lg p-8 md:p-12">
           <div className="max-w-3xl mx-auto text-center">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">Have Questions?</h2>
-            <p className="text-lg text-gray-300 mb-8">
+            <h2 className="font-display uppercase text-3xl md:text-4xl mb-4">Have Questions?</h2>
+            <p className="text-lg text-nnw-ash mb-8">
               Check out our FAQ section for quick answers to common questions about registration, competition format, training, and more.
             </p>
-            <Link href="/faq" className="inline-block px-8 py-3 bg-naija-green-600 text-white font-bold rounded-full hover:bg-naija-green-700 transition">
+            <Link href="/faq" className="inline-block px-8 py-3 bg-nnw-gold text-nnw-navy font-mono text-sm tracking-wider uppercase font-bold rounded hover:bg-nnw-gold-soft transition">
               View FAQ
             </Link>
           </div>
         </div>
       </div>
-    </main>
+    </>
   )
 }

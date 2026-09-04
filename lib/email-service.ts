@@ -1,6 +1,6 @@
 export const emailTemplates = {
     applicationApproved: (name: string) => ({
-      subject: 'Your Naija Ninja Warrior Application is Approved! 🎉',
+      subject: 'Your Naija Next Warrior Application is Approved! 🎉',
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
           <div style="background: linear-gradient(135deg, #007a5e 0%, #10c084 100%); color: white; padding: 30px; border-radius: 8px; text-align: center; margin-bottom: 20px;">
@@ -13,7 +13,7 @@ export const emailTemplates = {
               Hi ${name},
             </p>
             <p style="color: #666; font-size: 14px; line-height: 1.6;">
-              Great news! Your application for <strong>Naija Ninja Warrior</strong> has been <strong style="color: #007a5e;">APPROVED</strong>! 
+              Great news! Your application for <strong>Naija Next Warrior</strong> has been <strong style="color: #007a5e;">APPROVED</strong>! 
             </p>
             <p style="color: #666; font-size: 14px; line-height: 1.6;">
               You are now eligible to compete in the challenge. Get ready to test your strength, agility, and determination against other competitors from across Nigeria.
@@ -30,14 +30,14 @@ export const emailTemplates = {
   
           <div style="border-top: 1px solid #eee; padding-top: 20px; color: #666; font-size: 12px;">
             <p style="margin: 5px 0;">Questions? Contact us at support@naijaninja.com</p>
-            <p style="margin: 5px 0;">© 2025 Naija Ninja Warrior. All rights reserved.</p>
+            <p style="margin: 5px 0;">© 2025 Naija Next Warrior. All rights reserved.</p>
           </div>
         </div>
       `,
     }),
   
     applicationRejected: (name: string, feedback: string = '') => ({
-      subject: 'Naija Ninja Warrior Application Update',
+      subject: 'Naija Next Warrior Application Update',
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
           <div style="background: #f9f9f9; padding: 30px; border-radius: 8px; text-align: center; margin-bottom: 20px;">
@@ -50,7 +50,7 @@ export const emailTemplates = {
               Hi ${name},
             </p>
             <p style="color: #666; font-size: 14px; line-height: 1.6;">
-              Thank you for submitting your application to Naija Ninja Warrior. After careful review, we regret to inform you that your application was not selected for this season.
+              Thank you for submitting your application to Naija Next Warrior. After careful review, we regret to inform you that your application was not selected for this season.
             </p>
             ${feedback ? `
               <div style="background: white; padding: 15px; border-radius: 4px; margin-top: 15px;">
@@ -65,7 +65,7 @@ export const emailTemplates = {
   
           <div style="border-top: 1px solid #eee; padding-top: 20px; color: #666; font-size: 12px;">
             <p style="margin: 5px 0;">Questions? Contact us at support@naijaninja.com</p>
-            <p style="margin: 5px 0;">© 2025 Naija Ninja Warrior. All rights reserved.</p>
+            <p style="margin: 5px 0;">© 2025 Naija Next Warrior. All rights reserved.</p>
           </div>
         </div>
       `,

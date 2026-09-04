@@ -28,34 +28,36 @@ const iconMap = {
   'trending-up': TrendingUp,
 }
 
+// Keys match the real `color` values stored in the job_categories table —
+// only the resulting classes changed, not the mapping itself.
 const colorMap = {
   blue: {
-    bg: 'bg-blue-50',
-    border: 'border-blue-200',
-    selectedBorder: 'border-blue-500',
-    icon: 'bg-blue-100 text-blue-600',
-    badge: 'bg-blue-100 text-blue-700'
+    bg: 'bg-nnw-navy/[0.04]',
+    border: 'border-nnw-navy/15',
+    selectedBorder: 'border-nnw-navy',
+    icon: 'bg-nnw-navy/10 text-nnw-navy',
+    badge: 'bg-nnw-navy/10 text-nnw-navy'
   },
   purple: {
-    bg: 'bg-purple-50',
-    border: 'border-purple-200',
-    selectedBorder: 'border-purple-500',
-    icon: 'bg-purple-100 text-purple-600',
-    badge: 'bg-purple-100 text-purple-700'
+    bg: 'bg-nnw-ash/10',
+    border: 'border-nnw-ash/30',
+    selectedBorder: 'border-nnw-ash',
+    icon: 'bg-nnw-ash/20 text-nnw-navy',
+    badge: 'bg-nnw-ash/20 text-nnw-navy'
   },
   orange: {
-    bg: 'bg-orange-50',
-    border: 'border-orange-200',
-    selectedBorder: 'border-orange-500',
-    icon: 'bg-orange-100 text-orange-600',
-    badge: 'bg-orange-100 text-orange-700'
+    bg: 'bg-nnw-amber/10',
+    border: 'border-nnw-amber/30',
+    selectedBorder: 'border-nnw-amber',
+    icon: 'bg-nnw-amber/15 text-nnw-amber',
+    badge: 'bg-nnw-amber/15 text-nnw-amber'
   },
   green: {
-    bg: 'bg-green-50',
-    border: 'border-green-200',
-    selectedBorder: 'border-green-500',
-    icon: 'bg-green-100 text-green-600',
-    badge: 'bg-green-100 text-green-700'
+    bg: 'bg-nnw-green/5',
+    border: 'border-nnw-green/25',
+    selectedBorder: 'border-nnw-green',
+    icon: 'bg-nnw-green/10 text-nnw-green',
+    badge: 'bg-nnw-green/10 text-nnw-green'
   }
 }
 
@@ -66,7 +68,7 @@ export default function CategoryCard({ category, jobCount, isSelected, onClick }
   return (
     <div
       onClick={onClick}
-      className={`${colors.bg} rounded-xl p-4 sm:p-6 border-2 cursor-pointer transition-all hover:shadow-lg ${
+      className={`${colors.bg} rounded-lg p-4 sm:p-6 border-2 cursor-pointer transition-all hover:shadow-lg ${
         isSelected ? colors.selectedBorder + ' shadow-lg' : colors.border
       }`}
     >
@@ -78,11 +80,11 @@ export default function CategoryCard({ category, jobCount, isSelected, onClick }
           {jobCount} {jobCount === 1 ? 'Position' : 'Positions'}
         </span>
       </div>
-      
-      <h3 className="font-bold text-gray-900 text-base sm:text-lg mb-2">{category.name}</h3>
-      <p className="text-xs sm:text-sm text-gray-600 leading-relaxed mb-3 sm:mb-4">{category.description}</p>
-      
-      <div className="flex items-center text-xs sm:text-sm font-semibold text-gray-700">
+
+      <h3 className="font-display uppercase text-nnw-navy text-base sm:text-lg mb-2">{category.name}</h3>
+      <p className="text-xs sm:text-sm text-nnw-navy/60 leading-relaxed mb-3 sm:mb-4">{category.description}</p>
+
+      <div className="flex items-center text-xs sm:text-sm font-semibold text-nnw-navy/70">
         <span>{isSelected ? 'Hide positions' : 'View positions'}</span>
         <ChevronRight size={14} className="sm:w-4 sm:h-4 ml-1" />
       </div>

@@ -51,7 +51,7 @@ export default function InquiriesManagement({ inquiries, onInquiriesChange }: In
           html: `
             <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
               <div style="background-color: #f5f5f5; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
-                <h2 style="color: #1a7346; margin: 0 0 10px 0;">Naija Ninja Warrior</h2>
+                <h2 style="color: #1a7346; margin: 0 0 10px 0;">Naija Next Warrior</h2>
                 <p style="color: #666; margin: 0; font-size: 14px;">We've received your inquiry and our team has responded</p>
               </div>
 
@@ -71,7 +71,7 @@ export default function InquiriesManagement({ inquiries, onInquiriesChange }: In
               </div>
 
               <div style="border-top: 1px solid #eee; padding-top: 20px; color: #666; font-size: 12px;">
-                <p style="margin: 5px 0;">Best regards,<br/>Naija Ninja Warrior Team</p>
+                <p style="margin: 5px 0;">Best regards,<br/>Naija Next Warrior Team</p>
                 <p style="margin: 5px 0; color: #999;">If you have further questions, please reply to this email.</p>
               </div>
             </div>

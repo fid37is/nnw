@@ -100,6 +100,7 @@ function HomeClientContent() {
   return (
     <>
       <Hero season={season} applicationOpen={applicationOpen} countdownTarget={countdownTarget} warriorsTotal={stats.total} />
+      {!applicationOpen && <WaitlistSection waitingCount={waitingCount} />}
       <FormatSection />
       <ScheduleSection />
       <GallerySection />
@@ -108,7 +109,6 @@ function HomeClientContent() {
       <RosterSection champion={champion} runners={runners} />
       <StandingsSection />
       <RewardsSection />
-      {!applicationOpen && <WaitlistSection waitingCount={waitingCount} />}
       {sponsors.length > 0 && <SponsorsSection sponsors={sponsors} />}
       <InquirySection />
       <SocialMediaSection />

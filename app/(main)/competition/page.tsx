@@ -28,7 +28,7 @@ export default function CompetitionPage() {
             Earn Recognition, Opportunity, and Rewards Through Strength, Strategy, and Resilience.
           </h2>
           <p className="text-lg text-green-50 leading-relaxed">
-            Naija Next Warrior is a multi-stage competition that tests athletes across speed, strength, agility, and mental toughness. Competitors face increasingly difficult obstacle courses, with only the best advancing to the Grand Finale in Abuja - and rewards that reflect excellence at every level.
+            Naija Next Warrior is a multi-stage competition that tests athletes across speed, strength, agility, and mental toughness. Competitors face increasingly difficult obstacle courses, with only the best advancing to the Grand Finale - and rewards that reflect excellence at every level.
           </p>
         </div>
 

@@ -79,7 +79,7 @@ export default function AdminLoginForm() {
               <Shield size={18} className="text-naija-green-400" />
               <h1 className="text-2xl font-bold text-white">Admin Portal</h1>
             </div>
-            <p className="text-gray-400 text-sm">Naija Ninja Warrior</p>
+            <p className="text-gray-400 text-sm">Naija Next Warrior</p>
           </div>
           <div className="px-8 py-8">
             <p className="text-gray-500 text-sm text-center mb-6">Restricted access — authorised personnel only.</p>
@@ -120,7 +120,7 @@ export default function AdminLoginForm() {
           </div>
         </div>
         <p className="text-center text-gray-500 text-xs mt-6">
-          © {new Date().getFullYear()} Naija Ninja Warrior · NNW Entertainment Limited
+          © {new Date().getFullYear()} Naija Next Warrior · NNW Entertainment Limited
         </p>
       </div>
     </main>

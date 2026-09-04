@@ -219,16 +219,16 @@ export default function AdminMessagingPage() {
                   html: `
                     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
                       <div style="background: linear-gradient(135deg, #1a7346 0%, #0d5a33 100%); padding: 30px; border-radius: 10px 10px 0 0; text-align: center;">
-                        <h1 style="color: white; margin: 0;">Naija Ninja Warrior</h1>
+                        <h1 style="color: white; margin: 0;">Naija Next Warrior</h1>
                       </div>
                       <div style="background: white; padding: 30px; border: 1px solid #e0e0e0; border-top: none; border-radius: 0 0 10px 10px;">
                         <h2 style="color: #333; margin-top: 0;">${formData.title}</h2>
                         <div style="color: #666; line-height: 1.6; white-space: pre-wrap;">${formData.content.replace(/\n/g, '<br>')}</div>
                         <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;" />
-                        <p style="color: #666; font-size: 14px;">Best regards,<br/><strong>Naija Ninja Warrior Team</strong></p>
+                        <p style="color: #666; font-size: 14px;">Best regards,<br/><strong>Naija Next Warrior Team</strong></p>
                       </div>
                       <div style="text-align: center; padding: 20px; color: #999; font-size: 12px;">
-                        <p>© 2024 Naija Ninja Warrior. All rights reserved.</p>
+                        <p>© 2024 Naija Next Warrior. All rights reserved.</p>
                       </div>
                     </div>
                   `,
@@ -344,7 +344,7 @@ export default function AdminMessagingPage() {
                         <div className="w-6 h-6 rounded-full bg-naija-green-600 flex items-center justify-center shrink-0">
                           <span className="text-white text-[9px] font-bold">NNW</span>
                         </div>
-                        <span className="text-sm text-gray-700 font-medium whitespace-nowrap">Naija Ninja Warrior</span>
+                        <span className="text-sm text-gray-700 font-medium whitespace-nowrap">Naija Next Warrior</span>
                       </div>
                       <span className="text-xs text-gray-400 truncate">&lt;noreply@naijaninja.net&gt;</span>
                     </div>

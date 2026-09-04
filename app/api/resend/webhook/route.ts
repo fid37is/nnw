@@ -121,13 +121,13 @@ export async function POST(request: NextRequest) {
 
       // Send auto-reply email
       const autoReply = await resend.emails.send({
-        from: 'Naija Ninja Support <support@naijaninja.net>',
+        from: 'Naija Next Support <support@naijaninja.net>',
         to: senderEmail,
         subject: `Re: ${subject}`,
         html: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
             <div style="background: linear-gradient(135deg, #1a7346 0%, #0d5a33 100%); padding: 30px; border-radius: 10px 10px 0 0; text-align: center;">
-              <h1 style="color: white; margin: 0;">Naija Ninja Warrior</h1>
+              <h1 style="color: white; margin: 0;">Naija Next Warrior</h1>
               <p style="color: rgba(255,255,255,0.9); margin: 10px 0 0 0;">Support Team</p>
             </div>
             
@@ -150,13 +150,13 @@ export async function POST(request: NextRequest) {
               
               <p style="color: #666; margin-top: 30px;">
                 Best regards,<br/>
-                <strong>The Naija Ninja Team</strong>
+                <strong>The WLA / NNW Team</strong>
               </p>
             </div>
             
             <div style="text-align: center; padding: 20px; color: #999; font-size: 12px;">
               <p style="margin: 5px 0;">Support Ticket ID: ${inquiry.id}</p>
-              <p style="margin: 5px 0;">© 2024 Naija Ninja Warrior. All rights reserved.</p>
+              <p style="margin: 5px 0;">© 2024 Naija Next Warrior. All rights reserved.</p>
             </div>
           </div>
         `

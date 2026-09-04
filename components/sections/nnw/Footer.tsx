@@ -21,7 +21,7 @@ export default function Footer() {
               <span className={styles['logo-tag']} style={{ color: 'var(--gold)' }}>Naija Next Warrior®</span>
             </div>
             <p className={styles['footer-desc']}>
-              Africa&apos;s first ninja competition series. Test your strength, speed, and spirit.
+              Africa&apos;s first Next competition series. Test your strength, speed, and spirit.
             </p>
             <div className={styles['footer-social-row']}>
               {SOCIAL.map((s) => (
@@ -46,8 +46,8 @@ export default function Footer() {
             <div>
               <div className={styles['footer-col-title']}>Company</div>
               <div className={styles['footer-links']}>
-                <Link href="/partners">Partners &amp; Sponsors</Link>
                 <Link href="/investors">Investor Relations</Link>
+                <Link href="/partners">Partners &amp; Sponsors</Link>
                 <Link href="/careers">Careers</Link>
                 <Link href="/contact">Contact Us</Link>
               </div>

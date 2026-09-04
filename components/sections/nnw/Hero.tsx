@@ -76,8 +76,8 @@ export default function Hero({ season, applicationOpen, countdownTarget, warrior
           </Reveal>
           <Reveal delay={240}>
             <div className={styles['hero-ctas']}>
-              <Link href="/register" className={`${styles.btn} ${styles['btn-gold']}`}>
-                {applicationOpen ? 'Apply as a Warrior' : 'Register for Updates'} <ArrowRight size={16} />
+              <Link href="/#waitlist" className={`${styles.btn} ${styles['btn-gold']}`}>
+                {applicationOpen ? 'Apply as a Warrior' : 'Join the Waitlist'} <ArrowRight size={16} />
               </Link>
               <a href="#stream" className={`${styles.btn} ${styles['btn-ghost']}`} style={{ color: 'var(--bone)' }}>
                 <Play size={14} color="var(--bone)" /> Watch Live
