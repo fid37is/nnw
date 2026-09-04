@@ -14,7 +14,7 @@ export async function POST(request: Request) {
 
     // Now using your verified domain!
     const result = await resend.emails.send({
-      from: 'Naija Ninja Warrior <noreply@naijaninja.net>',
+      from: 'Naija Next Warrior <noreply@naijaninja.net>',
       to: to, // Can now send to any email address
       subject: subject,
       html: html,

@@ -1,0 +1,50 @@
+/* File: components/sections/nnw/partners.module.css
+   Styles used only on the Partners page. Reuses about.module.css directly
+   for the WLA banner, icon cards, and statement box rather than duplicating
+   them — see subpage.module.css header comment for why cross-module var()
+   references are safe without an import. */
+
+/* ---------- stat grid inside the statement banner ---------- */
+.stat-grid { display: grid; grid-template-columns: 1fr; gap: 14px; margin-top: 28px; }
+@media (min-width: 640px) { .stat-grid { grid-template-columns: repeat(3, 1fr); } }
+.stat-box { background: rgba(var(--bone-rgb),0.1); border: 1px solid rgba(var(--bone-rgb),0.2); border-radius: 4px; padding: 18px; }
+.stat-box-value { font-family: 'Anton', sans-serif; font-size: 30px; color: var(--bone); line-height: 1; margin-bottom: 6px; }
+.stat-box-label { color: rgba(var(--bone-rgb),0.8); font-size: 13px; }
+
+/* ---------- checklist ---------- */
+.checklist { display: flex; flex-direction: column; gap: 12px; }
+.checklist li { display: flex; gap: 10px; align-items: flex-start; color: rgba(var(--navy-rgb),0.68); font-size: 14px; line-height: 1.55; }
+.checklist li svg { flex-shrink: 0; margin-top: 2px; }
+.highlight-box { background: rgba(var(--green-rgb),0.05); border: 1px solid rgba(var(--green-rgb),0.18); border-radius: 4px; padding: 16px; margin-top: 16px; }
+.highlight-box p:first-child { font-weight: 700; font-size: 13.5px; margin-bottom: 4px; }
+.highlight-box p:last-child { color: rgba(var(--navy-rgb),0.55); font-size: 12.5px; }
+
+/* ---------- pricing tiers ---------- */
+.tier-card { border-radius: 4px; overflow: hidden; border: 1.5px solid var(--line); }
+.tier-card.highlight { border-color: var(--green); }
+.tier-head { padding: 22px 24px; background: var(--bone); }
+.tier-card.highlight .tier-head { background: var(--green); }
+.tier-head h3 { font-family: 'Anton', sans-serif; font-size: 22px; text-transform: uppercase; margin: 0 0 4px; }
+.tier-card.highlight .tier-head h3 { color: var(--bone); }
+.tier-head span { font-size: 13px; color: rgba(var(--navy-rgb),0.5); }
+.tier-card.highlight .tier-head span { color: rgba(var(--bone-rgb),0.85); }
+.tier-body { padding: 22px 24px; background: var(--bone); }
+.tier-body ul { display: flex; flex-direction: column; gap: 10px; }
+.tier-body li { display: flex; gap: 8px; align-items: flex-start; font-size: 13px; color: rgba(var(--navy-rgb),0.62); }
+.tier-body li svg { flex-shrink: 0; margin-top: 2px; }
+
+/* ---------- execution phases ---------- */
+.phase-grid { display: grid; grid-template-columns: 1fr; gap: 16px; }
+@media (min-width: 640px) { .phase-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (min-width: 960px) { .phase-grid { grid-template-columns: repeat(4, 1fr); } }
+.phase-card { background: rgba(var(--navy-rgb),0.03); border: 1px solid var(--line); border-radius: 4px; padding: 20px; }
+.phase-label { font-family: 'JetBrains Mono', monospace; font-size: 10.5px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--green); margin-bottom: 8px; }
+.phase-title { font-family: 'Anton', sans-serif; font-size: 16px; text-transform: uppercase; margin-bottom: 12px; }
+.phase-items { display: flex; flex-direction: column; gap: 7px; }
+.phase-items li { display: flex; align-items: center; gap: 8px; font-size: 13px; color: rgba(var(--navy-rgb),0.6); }
+.phase-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--green); flex-shrink: 0; }
+
+/* ---------- CTA contact block (extends .cta-card) ---------- */
+.cta-contact { margin-top: 24px; padding-top: 20px; border-top: 1px solid rgba(var(--bone-rgb),0.15); }
+.cta-contact p { color: rgba(var(--bone-rgb),0.75); font-size: 13px; margin-bottom: 4px; }
+.cta-contact strong { color: var(--bone); font-size: 16px; }

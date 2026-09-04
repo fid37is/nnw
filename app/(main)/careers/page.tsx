@@ -1,5 +1,5 @@
 // ==========================================
-// FILE: app/careers/page.tsx
+// FILE: app/(main)/careers/page.tsx
 // MAIN PAGE - Imports all components
 // ==========================================
 
@@ -13,15 +13,12 @@ import CareersCTA from '@/components/careers/CareersCTA'
 
 export default function CareersPage() {
   return (
-    <main className="min-h-screen bg-white overflow-x-hidden pt-32">
-
-      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12 mt-20">
-        <CareersHeader />
-        <CareersHero />
-        <JobsList />
-        <WhyJoinSection />
-        <CareersCTA />
-      </div>
-    </main>
+    <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12 pt-32">
+      <CareersHeader />
+      <CareersHero />
+      <JobsList />
+      <WhyJoinSection />
+      <CareersCTA />
+    </div>
   )
 }

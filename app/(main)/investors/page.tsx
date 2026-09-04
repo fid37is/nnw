@@ -15,10 +15,6 @@ export default function InvestorRelationsPage() {
 
         {/* Header */}
         <div className="mb-12">
-          <Link href="/" className="flex items-center gap-2 text-naija-green-600 hover:text-naija-green-700 mb-4 w-fit transition-colors">
-            <ArrowLeft size={18} />
-            <span className="text-sm font-medium">Back to Home</span>
-          </Link>
           <div className="flex items-center gap-4 mb-3">
             <TrendingUp size={40} className="text-naija-green-600" />
             <h1 className="text-4xl md:text-5xl font-bold text-gray-900">Investor Relations</h1>
@@ -52,7 +48,7 @@ export default function InvestorRelationsPage() {
           </p>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {[
-              { value: '₦600M',   label: 'Series A Target' },
+              { value: '₦800M',   label: 'Series A Target' },
               { value: '220M+',   label: 'Addressable Audience' },
               { value: '70%',     label: 'Population Under 30' },
               { value: 'Q4 2026', label: 'Season 1 Launch' },
@@ -620,7 +616,7 @@ export default function InvestorRelationsPage() {
               <p className="text-green-100 mb-1">Investor Relations - WLA Entertainment Ltd</p>
               <p className="font-bold text-lg mb-1">Fidelis Agba - Founder & CEO</p>
               <p className="text-green-100">
-                legal@naijaninja.net &nbsp;|&nbsp; +234 808 595 2266
+                fidelis@warriorsleague.africa &nbsp;|&nbsp; +234 808 595 2266
               </p>
             </div>
           </div>
