@@ -12,6 +12,11 @@ const INVESTOR_SUB   = 'investor'
 const ADMIN_PUBLIC_PATHS    = ['/login']
 const INVESTOR_PUBLIC_PATHS = ['/login', '/change-password']
 
+// Helper: matches exact path or path + '/' — avoids '/investor' matching '/investors'
+function matchesPrefix(pathname: string, prefix: string): boolean {
+  return pathname === prefix || pathname.startsWith(prefix + '/')
+}
+
 async function getSessionRole(req: NextRequest): Promise<string | null> {
   try {
     const supabase = createServerClient(
@@ -57,9 +62,10 @@ export async function proxy(req: NextRequest) {
       if (parts[0] === INVESTOR_SUB) subdomain = INVESTOR_SUB
     }
     // Fallback: path-based detection for plain localhost
+    // FIX: use matchesPrefix so '/investors' does not falsely match '/investor'
     if (!subdomain) {
-      if (url.pathname.startsWith('/admin'))    subdomain = ADMIN_SUB
-      if (url.pathname.startsWith('/investor')) subdomain = INVESTOR_SUB
+      if (matchesPrefix(url.pathname, '/admin'))    subdomain = ADMIN_SUB
+      if (matchesPrefix(url.pathname, '/investor')) subdomain = INVESTOR_SUB
     }
   } else {
     if (hostname.endsWith(`.${PUBLIC_DOMAIN}`)) {
@@ -71,7 +77,7 @@ export async function proxy(req: NextRequest) {
   if (subdomain === ADMIN_SUB) {
 
     // 1. Strip /admin/ prefix if someone navigates with it — redirect to clean URL
-    if (url.pathname.startsWith('/admin/') || url.pathname === '/admin') {
+    if (matchesPrefix(url.pathname, '/admin')) {
       const cleanUrl = req.nextUrl.clone()
       cleanUrl.pathname = url.pathname.replace(/^\/admin/, '') || '/'
       return NextResponse.redirect(cleanUrl)
@@ -98,9 +104,7 @@ export async function proxy(req: NextRequest) {
     }
 
     // 5. Auth — skip for public paths
-    const isPublic = ADMIN_PUBLIC_PATHS.some(p =>
-      url.pathname === p || url.pathname.startsWith(p + '/')
-    )
+    const isPublic = ADMIN_PUBLIC_PATHS.some(p => matchesPrefix(url.pathname, p))
 
     if (!isPublic) {
       const role = await getSessionRole(req)
@@ -120,7 +124,7 @@ export async function proxy(req: NextRequest) {
   if (subdomain === INVESTOR_SUB) {
 
     // 1. Strip /investor/ prefix
-    if (url.pathname.startsWith('/investor/') || url.pathname === '/investor') {
+    if (matchesPrefix(url.pathname, '/investor')) {
       const cleanUrl = req.nextUrl.clone()
       cleanUrl.pathname = url.pathname.replace(/^\/investor/, '') || '/'
       return NextResponse.redirect(cleanUrl)
@@ -147,9 +151,7 @@ export async function proxy(req: NextRequest) {
     }
 
     // 5. Auth — skip for public paths
-    const isPublic = INVESTOR_PUBLIC_PATHS.some(p =>
-      url.pathname === p || url.pathname.startsWith(p + '/')
-    )
+    const isPublic = INVESTOR_PUBLIC_PATHS.some(p => matchesPrefix(url.pathname, p))
 
     if (!isPublic) {
       const role = await getSessionRole(req)
@@ -168,14 +170,17 @@ export async function proxy(req: NextRequest) {
   // ── Main domain ────────────────────────────────────────────────────────────
   if (!isLocalDev) {
     // Redirect /admin/* to admin subdomain
-    if (url.pathname.startsWith('/admin')) {
+    // FIX: matchesPrefix prevents this from ever firing on a page like '/administration'
+    if (matchesPrefix(url.pathname, '/admin')) {
       const redirect = url.clone()
       redirect.host     = `${ADMIN_SUB}.${PUBLIC_DOMAIN}`
       redirect.pathname = url.pathname.replace(/^\/admin/, '') || '/'
       return NextResponse.redirect(redirect)
     }
     // Redirect /investor/* to investor subdomain
-    if (url.pathname.startsWith('/investor')) {
+    // FIX: matchesPrefix prevents '/investors' (public marketing page) from
+    // being caught by the '/investor' (portal) check — this was the 404 bug.
+    if (matchesPrefix(url.pathname, '/investor')) {
       const redirect = url.clone()
       redirect.host     = `${INVESTOR_SUB}.${PUBLIC_DOMAIN}`
       redirect.pathname = url.pathname.replace(/^\/investor/, '') || '/'
