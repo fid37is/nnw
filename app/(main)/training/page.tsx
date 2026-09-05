@@ -1,117 +1,133 @@
 'use client'
 
+// File: app/training/page.tsx
+
 import Link from 'next/link'
-import { ArrowLeft, Dumbbell, Users, Award, Mail } from '@/components/ui/icons'
+import { Dumbbell, Users, Award, Mail, ArrowUpRight, CheckCircle } from 'lucide-react'
+import styles from '@/components/sections/nnw/nnw.module.css'
+import subStyles from '@/components/module/subpage.module.css'
+import aStyles from '@/components/module/about.module.css'
+
+const FEATURES = [
+  { icon: <Users size={22} />, color: 'green', title: 'Expert Coaches', desc: 'Certified trainers with competition experience.' },
+  { icon: <Dumbbell size={22} />, color: 'gold', title: 'Full Equipment', desc: 'Competition-grade obstacles and training gear.' },
+  { icon: <Award size={22} />, color: 'ash', title: 'Structured Programs', desc: 'From beginner to elite competition preparation.' },
+]
+
+const PROGRAMS = [
+  { title: 'Beginner Program', duration: '8 weeks',
+    desc: 'Build foundational strength, learn basic ninja techniques, and develop proper form.',
+    includes: ['3 sessions per week', 'Basic obstacle training', 'Strength fundamentals', 'Flexibility work'] },
+  { title: 'Competition Prep', duration: '12 weeks',
+    desc: 'Intensive training designed specifically for competition readiness and peak performance.',
+    includes: ['5 sessions per week', 'Advanced obstacles', 'Competition simulation', 'Mental preparation'] },
+  { title: 'Youth Development', duration: 'Ongoing',
+    desc: 'Age-appropriate training for young athletes (13-17) focusing on skill development and character.',
+    includes: ['2-3 sessions per week', 'Age-appropriate obstacles', 'Supervised training', 'Character building'] },
+  { title: 'Elite Athlete', duration: 'Custom',
+    desc: 'Personalized programming for advanced competitors seeking championship-level performance.',
+    includes: ['Custom schedule', 'One-on-one coaching', 'Video analysis', 'Nutrition planning'] },
+]
+
+const FIRST_VISIT = [
+  'Facility tour and safety orientation',
+  'Fitness assessment and goal setting',
+  'Introduction to basic obstacles',
+  'Personalized training plan development',
+]
+
+const WHAT_TO_BRING = [
+  'Comfortable athletic wear',
+  'Proper training shoes (no sandals)',
+  'Water bottle and towel',
+  'Positive attitude and determination',
+]
 
 export default function TrainingPage() {
   return (
-    <main className="min-h-screen bg-white overflow-x-hidden pt-32">
+    <>
 
-      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12 mt-14">
-
-        {/* Header */}
-        <div className="mb-12">
-          <Link href="/" className="flex items-center gap-2 text-naija-green-600 hover:text-naija-green-700 mb-4 w-fit">
-            <ArrowLeft size={18} />
-            <span className="text-sm font-medium">Back to Home</span>
-          </Link>
-          <div className="flex items-center gap-4 mb-3">
-            <Dumbbell size={40} className="text-naija-green-600" />
-            <h1 className="text-4xl md:text-5xl font-bold text-gray-900">Training Centers</h1>
+      {/* Header */}
+      <header className={subStyles.subhero} style={{ paddingTop: 132 }}>
+        <span className={styles['ghost-num']} style={{ fontSize: '24vw', top: '-6vw', right: '-6vw' }}>NNW</span>
+        <div className={styles.wrap}>
+          <div className={subStyles['subhero-badge']}>
+            <span className={styles.dot} />
+            <span className={styles.mono} style={{ fontSize: 11, letterSpacing: '0.2em', textTransform: 'uppercase', color: 'var(--gold)' }}>Certified Facilities</span>
           </div>
-          <p className="text-xl text-gray-600">Official NNW Certified Facilities Across Nigeria</p>
+          <h1 className={styles.display}>Training<br />Centers.</h1>
+          <p>Official NNW certified facilities across Nigeria.</p>
         </div>
+      </header>
 
-        {/* Intro banner */}
-        <div className="bg-naija-green-600 text-white rounded-xl p-8 md:p-12 mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">Train Like a Warrior</h2>
-          <p className="text-lg text-green-50 leading-relaxed mb-8">
-            NNW is building a nationwide network of certified training centers - purpose-built for ninja-style competition prep, strength development, and athletic excellence. Each facility will feature competition-grade obstacles, professional coaching, and structured programs for all levels.
-          </p>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="bg-white/10 rounded-lg p-4">
-              <Users className="mb-2" size={28} />
-              <p className="font-bold mb-1">Expert Coaches</p>
-              <p className="text-green-100 text-sm">Certified trainers with competition experience</p>
-            </div>
-            <div className="bg-white/10 rounded-lg p-4">
-              <Dumbbell className="mb-2" size={28} />
-              <p className="font-bold mb-1">Full Equipment</p>
-              <p className="text-green-100 text-sm">Competition-grade obstacles and training gear</p>
-            </div>
-            <div className="bg-white/10 rounded-lg p-4">
-              <Award className="mb-2" size={28} />
-              <p className="font-bold mb-1">Structured Programs</p>
-              <p className="text-green-100 text-sm">From beginner to elite competition preparation</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Centers - coming soon */}
-        <div className="mb-16">
-          <h2 className="text-3xl font-bold text-gray-900 mb-8">Find a Center Near You</h2>
-          <div className="bg-gray-50 border border-gray-200 rounded-2xl p-12 text-center">
-            <div className="w-14 h-14 bg-naija-green-100 rounded-2xl flex items-center justify-center mx-auto mb-5">
-              <Dumbbell size={28} className="text-naija-green-600" />
-            </div>
-            <h3 className="text-xl font-bold text-gray-900 mb-2">Locations Being Confirmed</h3>
-            <p className="text-gray-500 mx-auto mb-8 leading-relaxed">
-              Official NNW training centers are currently being certified across all six geopolitical zones. Locations will be published as they are confirmed.
+      {/* Train Like a Warrior */}
+      <section className={aStyles['a-section']} style={{ background: 'var(--bone)', paddingBottom: 0 }}>
+        <div className={styles.wrap}>
+          <div className={aStyles.statement}>
+            <h2>Train Like a Warrior</h2>
+            <p>
+              NNW is building a nationwide network of certified training centers - purpose-built for
+              ninja-style competition prep, strength development, and athletic excellence. Each facility
+              will feature competition-grade obstacles, professional coaching, and structured programs for
+              all levels.
             </p>
-            <a
-              href="mailto:training@naijaninja.net"
-              className="inline-flex items-center gap-2 px-10 py-3.5 bg-naija-green-600 hover:bg-naija-green-700 text-white font-bold rounded-full transition"
-            >
-              <Mail size={16} />
-              Get Notified When Available
+          </div>
+        </div>
+      </section>
+
+      {/* Feature strip */}
+      <section className={aStyles['a-section']} style={{ background: 'var(--bone)' }}>
+        <div className={styles.wrap}>
+          <div className={aStyles['a-grid-3']}>
+            {FEATURES.map((f) => (
+              <div key={f.title} className={aStyles['a-card']}>
+                <div className={`${aStyles['a-card-icon']} ${aStyles[f.color]}`}>{f.icon}</div>
+                <h3>{f.title}</h3>
+                <p>{f.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Find a Center - coming soon */}
+      <section className={aStyles['a-section']} style={{ background: 'var(--bone)', paddingTop: 0 }}>
+        <div className={styles.wrap}>
+          <h2 className={`${styles.display} ${aStyles['a-section-title']}`}>Find a Center Near You</h2>
+          <div style={{ background: 'rgba(11,92,46,0.03)', border: '1px solid var(--line)', borderRadius: 3, padding: '56px 32px', textAlign: 'center' }}>
+            <div style={{ width: 56, height: 56, borderRadius: 10, background: 'rgba(11,92,46,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px' }}>
+              <Dumbbell size={26} color="var(--green)" />
+            </div>
+            <h3 style={{ fontSize: 20, marginBottom: 8 }}>Locations Being Confirmed</h3>
+            <p style={{ maxWidth: 480, margin: '0 auto 28px' }}>
+              Official NNW training centers are currently being certified across all six geopolitical zones.
+              Locations will be published as they are confirmed.
+            </p>
+            <a href="mailto:training@naijaninja.net" className={`${styles.btn} ${styles['btn-gold']}`}>
+              <Mail size={16} /> Get Notified When Available
             </a>
           </div>
         </div>
+      </section>
 
-        {/* Training Programs */}
-        <div className="mb-16">
-          <h2 className="text-3xl font-bold text-gray-900 mb-8">Training Programs</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {[
-              {
-                title: 'Beginner Program',
-                duration: '8 weeks',
-                desc: 'Build foundational strength, learn basic ninja techniques, and develop proper form.',
-                includes: ['3 sessions per week', 'Basic obstacle training', 'Strength fundamentals', 'Flexibility work'],
-              },
-              {
-                title: 'Competition Prep',
-                duration: '12 weeks',
-                desc: 'Intensive training designed specifically for competition readiness and peak performance.',
-                includes: ['5 sessions per week', 'Advanced obstacles', 'Competition simulation', 'Mental preparation'],
-              },
-              {
-                title: 'Youth Development',
-                duration: 'Ongoing',
-                desc: 'Age-appropriate training for young athletes (13–17) focusing on skill development and character.',
-                includes: ['2–3 sessions per week', 'Age-appropriate obstacles', 'Supervised training', 'Character building'],
-              },
-              {
-                title: 'Elite Athlete',
-                duration: 'Custom',
-                desc: 'Personalized programming for advanced competitors seeking championship-level performance.',
-                includes: ['Custom schedule', 'One-on-one coaching', 'Video analysis', 'Nutrition planning'],
-              },
-            ].map((program, i) => (
-              <div key={i} className="bg-gray-50 rounded-xl p-6 border border-gray-200">
-                <div className="flex items-start justify-between mb-4">
-                  <h3 className="font-bold text-gray-900 text-xl">{program.title}</h3>
-                  <span className="text-sm bg-naija-green-100 text-naija-green-700 px-3 py-1 rounded-full font-medium">
-                    {program.duration}
-                  </span>
+      {/* Training Programs */}
+      <section className={aStyles['a-section']} style={{ background: 'var(--navy)', paddingTop: 0 }}>
+        <div className={styles.wrap}>
+          <h2 className={`${styles.display} ${aStyles['a-section-title']}`} style={{ color: 'var(--bone)' }}>Training Programs</h2>
+          <div className={aStyles['a-grid-2']}>
+            {PROGRAMS.map((p) => (
+              <div key={p.title} className={aStyles['a-card']}>
+                <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 12, gap: 12 }}>
+                  <h3 style={{ marginBottom: 0 }}>{p.title}</h3>
+                  <span className={styles.mono} style={{ fontSize: 10.5, textTransform: 'uppercase', color: 'var(--green)', background: 'rgba(11,92,46,0.1)', padding: '4px 11px', borderRadius: 20, flexShrink: 0 }}>{p.duration}</span>
                 </div>
-                <p className="text-gray-600 mb-4 leading-relaxed">{program.desc}</p>
-                <div className="pt-4 border-t border-gray-200">
-                  <p className="text-xs font-semibold text-gray-500 mb-2 uppercase tracking-wide">Includes</p>
-                  <ul className="space-y-1">
-                    {program.includes.map((item, j) => (
-                      <li key={j} className="flex gap-2 items-center text-sm text-gray-700">
-                        <span className="w-1.5 h-1.5 bg-naija-green-600 rounded-full flex-shrink-0" />
+                <p style={{ marginBottom: 16 }}>{p.desc}</p>
+                <div style={{ borderTop: '1px solid var(--line)', paddingTop: 14 }}>
+                  <p className={styles.mono} style={{ fontSize: 10, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(var(--navy-rgb),0.4)', marginBottom: 10 }}>Includes</p>
+                  <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 7 }}>
+                    {p.includes.map((item) => (
+                      <li key={item} style={{ display: 'flex', alignItems: 'center', gap: 9, fontSize: 13, color: 'rgba(var(--navy-rgb),0.65)' }}>
+                        <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--green)', flexShrink: 0 }} />
                         {item}
                       </li>
                     ))}
@@ -121,69 +137,58 @@ export default function TrainingPage() {
             ))}
           </div>
         </div>
+      </section>
 
-        {/* What to Expect */}
-        <div className="mb-16">
-          <h2 className="text-3xl font-bold text-gray-900 mb-8">What to Expect</h2>
-          <div className="bg-blue-50 rounded-xl p-8 border border-blue-100">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <div>
-                <h3 className="font-bold text-gray-900 mb-4 text-lg">Your First Visit</h3>
-                <ul className="space-y-3">
-                  {[
-                    'Facility tour and safety orientation',
-                    'Fitness assessment and goal setting',
-                    'Introduction to basic obstacles',
-                    'Personalized training plan development',
-                  ].map((item, i) => (
-                    <li key={i} className="flex gap-3 items-start">
-                      <span className="text-naija-green-600 font-bold">{i + 1}.</span>
-                      <span className="text-gray-700">{item}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-              <div>
-                <h3 className="font-bold text-gray-900 mb-4 text-lg">What to Bring</h3>
-                <ul className="space-y-3">
-                  {[
-                    'Comfortable athletic wear',
-                    'Proper training shoes (no sandals)',
-                    'Water bottle and towel',
-                    'Positive attitude and determination',
-                  ].map((item, i) => (
-                    <li key={i} className="flex gap-3 items-start">
-                      <span className="text-naija-green-600">✓</span>
-                      <span className="text-gray-700">{item}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
+      {/* What to Expect */}
+      <section className={aStyles['a-section']} style={{ background: 'var(--bone)' }}>
+        <div className={styles.wrap}>
+          <h2 className={`${styles.display} ${aStyles['a-section-title']}`}>What to Expect</h2>
+          <div className={aStyles['a-grid-2']}>
+            <div className={aStyles['a-card']}>
+              <h3>Your First Visit</h3>
+              <ul style={{ listStyle: 'none', padding: 0, margin: '14px 0 0', display: 'flex', flexDirection: 'column', gap: 12 }}>
+                {FIRST_VISIT.map((item, i) => (
+                  <li key={item} style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+                    <span className={styles.mono} style={{ color: 'var(--green)', fontWeight: 700, fontSize: 13, flexShrink: 0 }}>{i + 1}.</span>
+                    <span style={{ fontSize: 14, color: 'rgba(var(--navy-rgb),0.65)' }}>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div className={aStyles['a-card']}>
+              <h3>What to Bring</h3>
+              <ul style={{ listStyle: 'none', padding: 0, margin: '14px 0 0', display: 'flex', flexDirection: 'column', gap: 12 }}>
+                {WHAT_TO_BRING.map((item) => (
+                  <li key={item} style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+                    <CheckCircle size={15} color="var(--green)" style={{ flexShrink: 0, marginTop: 2 }} />
+                    <span style={{ fontSize: 14, color: 'rgba(var(--navy-rgb),0.65)' }}>{item}</span>
+                  </li>
+                ))}
+              </ul>
             </div>
           </div>
         </div>
+      </section>
 
-        {/* CTA */}
-        <div className="bg-naija-green-600 text-white rounded-xl p-8 md:p-12">
-          <div className="max-w-3xl mx-auto text-center">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">Start Your Journey</h2>
-            <p className="text-lg text-green-50 mb-8">
-              Register for the competition while we finalise training center locations. Our team will keep you updated as facilities come online near you.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href="/register"
-                className="inline-block px-8 py-3 bg-white text-naija-green-700 font-bold rounded-full hover:bg-green-50 transition">
-                Register for Competition
-              </Link>
-              <Link href="/contact"
-                className="inline-block px-8 py-3 bg-naija-green-500 hover:bg-naija-green-400 text-white font-bold rounded-full border-2 border-white transition">
-                Contact Us
-              </Link>
+      {/* CTA */}
+      <section className={styles.section} style={{ background: 'var(--bone)' }}>
+        <div className={styles.wrap}>
+          <div className={styles['cta-card']}>
+            <span className={styles['ghost-num']} style={{ fontSize: '18vw', bottom: '-8vw', right: '-2vw' }}>NNW</span>
+            <div style={{ position: 'relative', zIndex: 2 }}>
+              <div className={styles['cta-title']}>Start Your Journey</div>
+              <p className={styles['cta-sub']}>
+                Register for the competition while we finalise training center locations. Our team will
+                keep you updated as facilities come online near you.
+              </p>
+            </div>
+            <div className={styles['cta-btns']}>
+              <Link href="/register" className={`${styles.btn} ${styles['btn-gold']}`}>Register for Competition <ArrowUpRight size={16} /></Link>
+              <Link href="/contact" className={`${styles.btn} ${styles['btn-ghost']}`}>Contact Us</Link>
             </div>
           </div>
         </div>
-
-      </div>
-    </main>
+      </section>
+    </>
   )
 }

@@ -10,19 +10,23 @@ import { isApplicationOpen } from '@/components/sections/nnw/data'
 import Hero from '@/components/sections/nnw/Hero'
 import FormatSection from '@/components/sections/nnw/FormatSection'
 
-// Below-the-fold sections load on demand, same pattern the rest of the app uses.
-const ScheduleSection  = dynamic(() => import('@/components/sections/nnw/ScheduleSection'))
-const GallerySection   = dynamic(() => import('@/components/sections/nnw/GallerySection'))
-const GauntletSection  = dynamic(() => import('@/components/sections/nnw/GauntletSection'))
-const StreamSection    = dynamic(() => import('@/components/sections/nnw/StreamSection'))
-const RosterSection    = dynamic(() => import('@/components/sections/nnw/RosterSection'))
-const StandingsSection = dynamic(() => import('@/components/sections/nnw/StandingsSection'))
-const RewardsSection   = dynamic(() => import('@/components/sections/nnw/RewardsSection'))
-const WaitlistSection    = dynamic(() => import('@/components/sections/nnw/WaitlistSection'))
-const SponsorsSection    = dynamic(() => import('@/components/sections/SponsorsSection'))
-const InquirySection     = dynamic(() => import('@/components/sections/nnw/InquirySection'))
-const SocialMediaSection = dynamic(() => import('@/components/sections/nnw/SocialMediaSection'))
-const CTASection        = dynamic(() => import('@/components/sections/nnw/CTASection'))
+
+const skeleton = (background: string, minHeight = 600) => () => (
+  <div style={{ background, minHeight, width: '100%' }} />
+)
+
+const ScheduleSection  = dynamic(() => import('@/components/sections/nnw/ScheduleSection'),  { loading: skeleton('var(--navy)', 700) })
+const GallerySection   = dynamic(() => import('@/components/sections/nnw/GallerySection'),   { loading: skeleton('var(--bone)', 500) })
+const GauntletSection  = dynamic(() => import('@/components/sections/nnw/GauntletSection'),  { loading: skeleton('var(--navy)', 800) })
+const StreamSection    = dynamic(() => import('@/components/sections/nnw/StreamSection'),    { loading: skeleton('var(--navy)', 700) })
+const RosterSection    = dynamic(() => import('@/components/sections/nnw/RosterSection'),    { loading: skeleton('var(--bone)', 600) })
+const StandingsSection = dynamic(() => import('@/components/sections/nnw/StandingsSection'), { loading: skeleton('var(--green)', 600) })
+const RewardsSection   = dynamic(() => import('@/components/sections/nnw/RewardsSection'),   { loading: skeleton('var(--bone)', 500) })
+const WaitlistSection    = dynamic(() => import('@/components/sections/nnw/WaitlistSection'),    { loading: skeleton('var(--navy)', 500) })
+const SponsorsSection    = dynamic(() => import('@/components/sections/SponsorsSection'),        { loading: skeleton('var(--bone)', 300) })
+const InquirySection     = dynamic(() => import('@/components/sections/nnw/InquirySection'),     { loading: skeleton('var(--bone)', 600) })
+const SocialMediaSection = dynamic(() => import('@/components/sections/nnw/SocialMediaSection'), { loading: skeleton('var(--navy)', 400) })
+const CTASection        = dynamic(() => import('@/components/sections/nnw/CTASection'),        { loading: skeleton('var(--bone)', 400) })
 
 function HomeClientContent() {
   const [champion, setChampion]         = useState<Champion | null>(null)

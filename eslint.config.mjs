@@ -13,6 +13,19 @@ const eslintConfig = defineConfig([
     "build/**",
     "next-env.d.ts",
   ]),
+  // Carried over from the removed .eslintrc.json - ESLint 9 flat config
+  // doesn't read that file, so without this the exceptions were silently lost.
+  {
+    rules: {
+      "@typescript-eslint/no-unused-vars": [
+        "warn",
+        {
+          argsIgnorePattern: "^_",
+          varsIgnorePattern: "^_|^toast",
+        },
+      ],
+    },
+  },
 ]);
 
 export default eslintConfig;

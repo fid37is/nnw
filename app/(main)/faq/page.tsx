@@ -1,5 +1,7 @@
 'use client'
 
+// File: app/(main)/faq/page.tsx
+
 import { useState } from 'react'
 import Link from 'next/link'
 import { ArrowLeft, HelpCircle, ChevronDown, ChevronUp } from 'lucide-react'
@@ -41,7 +43,6 @@ export default function FAQPage() {
       question: 'What is the selection process?',
       answer: 'It runs in stages: online registration → screening, where we check your submitted materials and information against our standard requirements → qualifying, where you compete for your spot in your regional semi-final → zone allocation for contestants who qualify. Each zone’s semi-final has a minimum of 10 and up to 50 contestants, depending on registration volume.'
     },
-
     // The Zone System
     {
       category: 'Zones',
@@ -58,7 +59,6 @@ export default function FAQPage() {
       question: 'How do zone champions reach the Grand Finale?',
       answer: 'Each zone week crowns one zone champion - the fastest or highest-scoring contestant from that week. All six zone champions advance directly to the Grand Finale.'
     },
-
     // Competition Format
     {
       category: 'Competition',
@@ -80,7 +80,6 @@ export default function FAQPage() {
       question: 'Can I compete in a zone other than my own?',
       answer: 'No - you compete in the zone matching your state of origin or current residence, as declared at registration. This keeps zone representation fair across the whole country.'
     },
-
     // Health & Safety
     {
       category: 'Health & Safety',
@@ -92,7 +91,6 @@ export default function FAQPage() {
       question: 'Is medical staff available on competition day?',
       answer: 'Yes. A Medical Officer must be physically present before any competitor enters the course, with authority to prevent a competitor from running on medical grounds. A dedicated Safety & Security Officer also has authority to halt any run for safety reasons.'
     },
-
     // Prizes
     {
       category: 'Prizes',
@@ -109,7 +107,6 @@ export default function FAQPage() {
       question: 'How and when are prizes paid out?',
       answer: 'Winners provide tax identification and banking information, and prize distribution follows within a defined window after the competition. Prizes may be subject to applicable taxes, which are the winner’s responsibility.'
     },
-
     // Media & Broadcasting
     {
       category: 'Media',
@@ -126,7 +123,6 @@ export default function FAQPage() {
       question: 'Will I be interviewed on camera?',
       answer: 'Selected competitors may be interviewed for broadcast segments. It’s voluntary but encouraged, and all participants grant media rights as outlined in our Terms and Conditions.'
     },
-
     // Logistics
     {
       category: 'Logistics',
@@ -143,7 +139,6 @@ export default function FAQPage() {
       question: 'Can spectators attend?',
       answer: 'Zone weeks currently center on Zone Squad attendance rather than general ticketed admission. Broader public ticketing is being considered for future seasons depending on demand - updates will be posted on our website ahead of each competition.'
     },
-
     // General
     {
       category: 'General',
@@ -183,22 +178,20 @@ export default function FAQPage() {
   }
 
   return (
-    <main className="min-h-screen bg-white overflow-x-hidden pt-32">
-
-      <div className="w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12 mt-14">
-        {/* Header */}
-        <div className="mb-12">
-          <Link href="/" className="flex items-center gap-2 text-naija-green-600 hover:text-naija-green-700 mb-4 w-fit">
-            <ArrowLeft size={18} />
-            <span className="text-sm font-medium">Back to Home</span>
-          </Link>
-          <div className="flex items-center gap-4 mb-3">
-            <HelpCircle size={40} className="text-naija-green-600" />
-            <h1 className="text-4xl md:text-5xl font-bold text-gray-900">Frequently Asked Questions</h1>
+    <>
+      <header className="relative overflow-hidden bg-gradient-to-br from-nnw-navy via-nnw-navy to-nnw-green pt-32 pb-16">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center gap-2 mb-4">
           </div>
-          <p className="text-xl text-gray-600">Find answers to common questions about Nigeria Next Warrior</p>
+          <div className="flex items-center gap-4 mb-3">
+            <HelpCircle size={36} className="text-nnw-gold" />
+            <h1 className="font-display uppercase text-4xl md:text-6xl text-nnw-bone leading-none">FAQ.</h1>
+          </div>
+          <p className="text-nnw-ash text-lg max-w-xl">Find answers to common questions about Nigeria Next Warrior.</p>
         </div>
+      </header>
 
+      <div className="w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         {/* Category Filter */}
         <div className="mb-8">
           <div className="flex flex-wrap gap-3">
@@ -206,10 +199,10 @@ export default function FAQPage() {
               <button
                 key={category}
                 onClick={() => setSelectedCategory(category)}
-                className={`px-4 py-2 rounded-lg font-medium transition ${
+                className={`px-4 py-2 rounded-full font-mono text-xs tracking-wider uppercase transition ${
                   selectedCategory === category
-                    ? 'bg-naija-green-600 text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    ? 'bg-nnw-navy text-nnw-bone'
+                    : 'bg-nnw-navy/5 text-nnw-navy/60 hover:bg-nnw-navy/10'
                 }`}
               >
                 {category}
@@ -223,31 +216,31 @@ export default function FAQPage() {
           {filteredFaqs.map((faq, index) => (
             <div
               key={index}
-              className="bg-white rounded-xl border-2 border-gray-200 overflow-hidden hover:border-naija-green-300 transition"
+              className="bg-white rounded-lg border-2 border-nnw-navy/10 overflow-hidden hover:border-nnw-green/40 transition"
             >
               <button
                 onClick={() => toggleFAQ(index)}
-                className="w-full px-6 py-4 flex items-center justify-between text-left hover:bg-gray-50 transition"
+                className="w-full px-6 py-4 flex items-center justify-between text-left hover:bg-nnw-navy/[0.02] transition"
               >
                 <div className="flex-grow pr-4">
-                  <span className="text-xs font-semibold text-naija-green-600 mb-1 block">
+                  <span className="text-xs font-mono tracking-wider uppercase text-nnw-green mb-1 block">
                     {faq.category}
                   </span>
-                  <h3 className="font-semibold text-gray-900 text-lg">
+                  <h3 className="font-display uppercase text-nnw-navy text-lg">
                     {faq.question}
                   </h3>
                 </div>
                 <div className="flex-shrink-0">
                   {openIndex === index ? (
-                    <ChevronUp className="text-naija-green-600" size={24} />
+                    <ChevronUp className="text-nnw-green" size={22} />
                   ) : (
-                    <ChevronDown className="text-gray-400" size={24} />
+                    <ChevronDown className="text-nnw-navy/30" size={22} />
                   )}
                 </div>
               </button>
               {openIndex === index && (
-                <div className="px-6 pb-4 pt-2 bg-gray-50 border-t border-gray-200">
-                  <p className="text-gray-700 leading-relaxed">{faq.answer}</p>
+                <div className="px-6 pb-5 pt-1 bg-nnw-navy/[0.02] border-t border-nnw-navy/10">
+                  <p className="text-nnw-navy/65 leading-relaxed">{faq.answer}</p>
                 </div>
               )}
             </div>
@@ -255,23 +248,23 @@ export default function FAQPage() {
         </div>
 
         {/* Still Have Questions */}
-        <div className="bg-gradient-to-br from-naija-green-600 to-naija-green-700 text-white rounded-xl p-8 md:p-12">
+        <div className="bg-gradient-to-br from-nnw-navy to-nnw-green text-nnw-bone rounded-lg p-8 md:p-12">
           <div className="max-w-3xl mx-auto text-center">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">Still Have Questions?</h2>
-            <p className="text-lg text-green-50 mb-8">
-              Can't find what you're looking for? Our team is here to help. Contact us directly and we'll get back to you as soon as possible.
+            <h2 className="font-display uppercase text-3xl md:text-4xl mb-4">Still Have Questions?</h2>
+            <p className="text-lg text-nnw-ash mb-8">
+              Can&apos;t find what you&apos;re looking for? Our team is here to help. Contact us directly and we&apos;ll get back to you as soon as possible.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href="/contact" className="inline-block px-8 py-3 bg-white text-naija-green-600 font-bold rounded-full hover:bg-green-50 transition">
+              <Link href="/contact" className="inline-block px-8 py-3 bg-nnw-gold text-nnw-navy font-mono text-sm tracking-wider uppercase font-bold rounded hover:bg-nnw-gold-soft transition">
                 Contact Us
               </Link>
-              <a href="mailto:phyd3lis@gmail.com" className="inline-block px-8 py-3 bg-naija-green-500 text-white font-bold rounded-full hover:bg-naija-green-400 border-2 border-white transition">
+              <a href="mailto:phyd3lis@gmail.com" className="inline-block px-8 py-3 border-2 border-nnw-bone/40 text-nnw-bone font-mono text-sm tracking-wider uppercase font-bold rounded hover:bg-nnw-bone/10 transition">
                 Email Support
               </a>
             </div>
           </div>
         </div>
       </div>
-    </main>
+    </>
   )
 }

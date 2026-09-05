@@ -1,5 +1,7 @@
 'use client'
 
+// File: app/(main)/hall-of-fame/page.tsx
+
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -88,7 +90,7 @@ export default function HallOfFamePage() {
 
       seasons.forEach(season => {
         const seasonChamps = championsData?.filter(c => c.season_id === season.id) || []
-        
+
         const champion = seasonChamps.find(c => c.position === 1)
         const secondPlace = seasonChamps.find(c => c.position === 2)
         const thirdPlace = seasonChamps.find(c => c.position === 3)
@@ -132,52 +134,52 @@ export default function HallOfFamePage() {
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-yellow-50 via-white to-gray-50 pt-32">
+    <>
+      <header className="relative overflow-hidden bg-gradient-to-br from-nnw-navy via-nnw-navy to-nnw-green pt-32 pb-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <Link href="/" className="inline-flex items-center gap-2 text-nnw-ash hover:text-nnw-bone transition mb-6 text-xs font-mono tracking-widest uppercase">
+            <ArrowLeft size={14} /> Back to Home
+          </Link>
+          <div className="flex items-center gap-2 mb-4">
+            <span className="w-2 h-2 rounded-full bg-nnw-gold" />
+            <span className="text-xs font-mono tracking-[0.2em] uppercase text-nnw-gold">All Seasons</span>
+          </div>
+          <div className="flex items-center gap-4 mb-3">
+            <Trophy size={36} className="text-nnw-gold" />
+            <h1 className="font-display uppercase text-4xl md:text-6xl text-nnw-bone leading-none">Hall of Fame.</h1>
+          </div>
+          <p className="text-nnw-ash text-lg max-w-xl">Celebrating our champions across all seasons.</p>
+        </div>
+      </header>
 
       {loading ? (
-        <div className="flex items-center justify-center min-h-[calc(100vh-80px)]">
-          <div className="animate-spin w-12 h-12 border-4 border-yellow-200 border-t-yellow-600 rounded-full"></div>
+        <div className="flex items-center justify-center py-32">
+          <div className="animate-spin w-10 h-10 border-4 border-nnw-gold/20 border-t-nnw-gold rounded-full" />
         </div>
       ) : (
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12 mt-14">
-          {/* Header */}
-          <div className="mb-12">
-            <Link href="/" className="inline-flex items-center gap-2 text-yellow-700 hover:text-yellow-800 mb-6 font-medium transition group">
-              <ArrowLeft size={18} className="group-hover:-translate-x-1 transition-transform" />
-              <span className="text-sm">Back to Home</span>
-            </Link>
-            <div className="text-center">
-              <div className="flex items-center justify-center gap-4 mb-4">
-                <Trophy size={48} className="text-yellow-600" />
-                <h1 className="text-5xl md:text-6xl font-black text-gray-900">Hall of Fame</h1>
-                <Trophy size={48} className="text-yellow-600" />
-              </div>
-              <p className="text-xl text-gray-600 font-medium">Celebrating Our Champions Across All Seasons</p>
-            </div>
-          </div>
-
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
           {champions.length === 0 ? (
-            <div className="bg-white rounded-2xl shadow-md p-16 text-center border border-gray-200">
-              <Trophy size={80} className="mx-auto mb-6 text-gray-300" />
-              <p className="text-2xl text-gray-600 font-semibold mb-2">No Champions Yet</p>
-              <p className="text-gray-500">Champions will appear here once seasons are completed!</p>
+            <div className="bg-white rounded-lg shadow-sm p-16 text-center border border-nnw-navy/10">
+              <Trophy size={64} className="mx-auto mb-6 text-nnw-navy/20" />
+              <p className="text-xl font-display uppercase text-nnw-navy mb-2">No Champions Yet</p>
+              <p className="text-nnw-navy/50">Champions will appear here once seasons are completed!</p>
             </div>
           ) : (
             <div className="space-y-12">
               {champions.map((champion) => (
                 <div
                   key={champion.season_id}
-                  className="bg-white rounded-3xl shadow-xl overflow-hidden border-2 border-yellow-300"
+                  className="bg-white rounded-lg shadow-xl overflow-hidden border-2 border-nnw-gold/30"
                 >
                   {/* Season Header */}
-                  <div className="bg-gradient-to-r from-yellow-400 via-yellow-500 to-amber-500 px-8 py-6">
+                  <div className="bg-gradient-to-r from-nnw-navy to-nnw-green px-8 py-6">
                     <div className="flex items-center justify-between">
                       <div>
-                        <h2 className="text-3xl font-black text-white mb-1">
+                        <h2 className="font-display uppercase text-3xl text-nnw-bone mb-1">
                           {champion.season_name} {champion.season_year}
                         </h2>
                         {champion.completion_date && (
-                          <p className="text-yellow-100 text-sm">
+                          <p className="text-nnw-ash text-sm">
                             Completed: {new Date(champion.completion_date).toLocaleDateString('en-US', {
                               year: 'numeric',
                               month: 'long',
@@ -186,7 +188,7 @@ export default function HallOfFamePage() {
                           </p>
                         )}
                       </div>
-                      <Award size={48} className="text-white/80" />
+                      <Award size={44} className="text-nnw-gold" />
                     </div>
                   </div>
 
@@ -196,9 +198,8 @@ export default function HallOfFamePage() {
                       {/* Champion - Center/First */}
                       <div className={`${champion.second_runner_up_name || champion.third_runner_up_name ? 'md:col-start-2' : 'md:col-span-3 max-w-md mx-auto'}`}>
                         <div className="relative">
-                          {/* Champion Card */}
-                          <div className="group relative overflow-hidden rounded-2xl shadow-2xl ring-4 ring-yellow-400 ring-offset-4 hover:scale-105 transition-all duration-300">
-                            <div className="relative aspect-[3/4] overflow-hidden bg-gradient-to-br from-yellow-300 to-amber-400">
+                          <div className="group relative overflow-hidden rounded-lg shadow-2xl ring-4 ring-nnw-gold ring-offset-4 hover:scale-105 transition-all duration-300">
+                            <div className="relative aspect-[3/4] overflow-hidden bg-gradient-to-br from-nnw-navy to-nnw-green">
                               {champion.champion_photo ? (
                                 <Image
                                   src={champion.champion_photo}
@@ -208,32 +209,32 @@ export default function HallOfFamePage() {
                                 />
                               ) : (
                                 <div className="w-full h-full flex items-center justify-center">
-                                  <User size={80} className="text-yellow-600/50" />
+                                  <User size={80} className="text-nnw-bone/40" />
                                 </div>
                               )}
 
                               {/* Crown Badge */}
-                              <div className="absolute -top-6 left-1/2 -translate-x-1/2 bg-gradient-to-br from-yellow-300 via-yellow-400 to-yellow-500 rounded-full p-4 shadow-2xl border-4 border-white animate-pulse">
-                                <Crown size={40} className="text-white" />
+                              <div className="absolute -top-6 left-1/2 -translate-x-1/2 bg-nnw-gold rounded-full p-4 shadow-2xl border-4 border-white">
+                                <Crown size={40} className="text-nnw-navy" />
                               </div>
 
                               {/* Champion Label */}
-                              <div className="absolute top-12 left-1/2 -translate-x-1/2 bg-yellow-500 text-white px-4 py-1.5 rounded-full text-sm font-black shadow-lg whitespace-nowrap">
-                                🏆 CHAMPION 🏆
+                              <div className="absolute top-12 left-1/2 -translate-x-1/2 bg-nnw-gold text-nnw-navy px-4 py-1.5 rounded-full text-sm font-display uppercase shadow-lg whitespace-nowrap">
+                                🏆 Champion 🏆
                               </div>
 
                               {/* Gradient Overlay */}
-                              <div className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-black via-black/70 to-transparent"></div>
+                              <div className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-nnw-navy via-nnw-navy/70 to-transparent" />
 
                               {/* Name and Stats */}
                               <div className="absolute bottom-0 left-0 right-0 p-6 text-center">
-                                <p className="text-white font-black text-2xl mb-3 leading-tight">
+                                <p className="text-nnw-bone font-display uppercase text-2xl mb-3 leading-tight">
                                   {getDisplayName(champion.champion_name, champion.champion_preferred_name)}
                                 </p>
-                                <div className="flex justify-center gap-4 text-white/90">
+                                <div className="flex justify-center gap-4 text-nnw-bone/90">
                                   <div className="text-center">
-                                    <p className="text-2xl font-bold">{champion.champion_points}</p>
-                                    <p className="text-xs">Points</p>
+                                    <p className="text-2xl font-display">{champion.champion_points}</p>
+                                    <p className="text-xs font-mono uppercase tracking-wider">Points</p>
                                   </div>
                                 </div>
                               </div>
@@ -245,8 +246,8 @@ export default function HallOfFamePage() {
                       {/* Second Runner-Up - Left */}
                       {champion.second_runner_up_name && (
                         <div className="md:order-first">
-                          <div className="group relative overflow-hidden rounded-2xl shadow-lg ring-2 ring-gray-300 hover:scale-105 transition-all duration-300">
-                            <div className="relative aspect-[3/4] overflow-hidden bg-gradient-to-br from-gray-200 to-gray-300">
+                          <div className="group relative overflow-hidden rounded-lg shadow-lg ring-2 ring-nnw-ash hover:scale-105 transition-all duration-300">
+                            <div className="relative aspect-[3/4] overflow-hidden bg-gradient-to-br from-nnw-navy to-nnw-ash">
                               {champion.second_runner_up_photo ? (
                                 <Image
                                   src={champion.second_runner_up_photo}
@@ -256,23 +257,23 @@ export default function HallOfFamePage() {
                                 />
                               ) : (
                                 <div className="w-full h-full flex items-center justify-center">
-                                  <User size={60} className="text-gray-400" />
+                                  <User size={60} className="text-nnw-bone/40" />
                                 </div>
                               )}
 
                               {/* Silver Medal */}
-                              <div className="absolute top-3 left-3 bg-gradient-to-br from-gray-300 to-gray-400 rounded-full p-2 shadow-lg border-2 border-white">
-                                <Medal size={24} className="text-white" />
+                              <div className="absolute top-3 left-3 bg-nnw-ash rounded-full p-2 shadow-lg border-2 border-white">
+                                <Medal size={24} className="text-nnw-navy" />
                               </div>
 
                               <div className="absolute top-3 right-3 bg-white/90 px-3 py-1 rounded-full">
-                                <p className="text-sm font-bold text-gray-700">2nd</p>
+                                <p className="text-sm font-display uppercase text-nnw-navy">2nd</p>
                               </div>
 
-                              <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-black via-black/50 to-transparent"></div>
+                              <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-nnw-navy via-nnw-navy/50 to-transparent" />
 
                               <div className="absolute bottom-0 left-0 right-0 p-4 text-center">
-                                <p className="text-white font-bold text-lg leading-tight">
+                                <p className="text-nnw-bone font-display uppercase text-lg leading-tight">
                                   {getDisplayName(champion.second_runner_up_name, champion.second_runner_up_preferred_name || null)}
                                 </p>
                               </div>
@@ -284,8 +285,8 @@ export default function HallOfFamePage() {
                       {/* Third Runner-Up - Right */}
                       {champion.third_runner_up_name && (
                         <div>
-                          <div className="group relative overflow-hidden rounded-2xl shadow-lg ring-2 ring-orange-300 hover:scale-105 transition-all duration-300">
-                            <div className="relative aspect-[3/4] overflow-hidden bg-gradient-to-br from-orange-200 to-orange-300">
+                          <div className="group relative overflow-hidden rounded-lg shadow-lg ring-2 ring-nnw-amber hover:scale-105 transition-all duration-300">
+                            <div className="relative aspect-[3/4] overflow-hidden bg-gradient-to-br from-nnw-navy to-nnw-amber">
                               {champion.third_runner_up_photo ? (
                                 <Image
                                   src={champion.third_runner_up_photo}
@@ -295,23 +296,23 @@ export default function HallOfFamePage() {
                                 />
                               ) : (
                                 <div className="w-full h-full flex items-center justify-center">
-                                  <User size={60} className="text-orange-400" />
+                                  <User size={60} className="text-nnw-bone/40" />
                                 </div>
                               )}
 
                               {/* Bronze Medal */}
-                              <div className="absolute top-3 left-3 bg-gradient-to-br from-orange-400 to-orange-500 rounded-full p-2 shadow-lg border-2 border-white">
-                                <Medal size={24} className="text-white" />
+                              <div className="absolute top-3 left-3 bg-nnw-amber rounded-full p-2 shadow-lg border-2 border-white">
+                                <Medal size={24} className="text-nnw-bone" />
                               </div>
 
                               <div className="absolute top-3 right-3 bg-white/90 px-3 py-1 rounded-full">
-                                <p className="text-sm font-bold text-orange-700">3rd</p>
+                                <p className="text-sm font-display uppercase text-nnw-amber">3rd</p>
                               </div>
 
-                              <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-black via-black/50 to-transparent"></div>
+                              <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-nnw-navy via-nnw-navy/50 to-transparent" />
 
                               <div className="absolute bottom-0 left-0 right-0 p-4 text-center">
-                                <p className="text-white font-bold text-lg leading-tight">
+                                <p className="text-nnw-bone font-display uppercase text-lg leading-tight">
                                   {getDisplayName(champion.third_runner_up_name, champion.third_runner_up_preferred_name || null)}
                                 </p>
                               </div>
@@ -327,6 +328,6 @@ export default function HallOfFamePage() {
           )}
         </div>
       )}
-    </main>
+    </>
   )
 }
