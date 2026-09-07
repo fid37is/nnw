@@ -2,7 +2,6 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import dynamic from 'next/dynamic'
 import { supabase } from '@/lib/supabase/client'
 import { Champion, Runner, Season, YouTubeVideo, Sponsor } from '@/components/sections/nnw/types'
 import { isApplicationOpen } from '@/components/sections/nnw/data'
@@ -10,23 +9,30 @@ import { isApplicationOpen } from '@/components/sections/nnw/data'
 import Hero from '@/components/sections/nnw/Hero'
 import FormatSection from '@/components/sections/nnw/FormatSection'
 
-
-const skeleton = (background: string, minHeight = 600) => () => (
-  <div style={{ background, minHeight, width: '100%' }} />
-)
-
-const ScheduleSection  = dynamic(() => import('@/components/sections/nnw/ScheduleSection'),  { loading: skeleton('var(--navy)', 700) })
-const GallerySection   = dynamic(() => import('@/components/sections/nnw/GallerySection'),   { loading: skeleton('var(--bone)', 500) })
-const GauntletSection  = dynamic(() => import('@/components/sections/nnw/GauntletSection'),  { loading: skeleton('var(--navy)', 800) })
-const StreamSection    = dynamic(() => import('@/components/sections/nnw/StreamSection'),    { loading: skeleton('var(--navy)', 700) })
-const RosterSection    = dynamic(() => import('@/components/sections/nnw/RosterSection'),    { loading: skeleton('var(--bone)', 600) })
-const StandingsSection = dynamic(() => import('@/components/sections/nnw/StandingsSection'), { loading: skeleton('var(--green)', 600) })
-const RewardsSection   = dynamic(() => import('@/components/sections/nnw/RewardsSection'),   { loading: skeleton('var(--bone)', 500) })
-const WaitlistSection    = dynamic(() => import('@/components/sections/nnw/WaitlistSection'),    { loading: skeleton('var(--navy)', 500) })
-const SponsorsSection    = dynamic(() => import('@/components/sections/SponsorsSection'),        { loading: skeleton('var(--bone)', 300) })
-const InquirySection     = dynamic(() => import('@/components/sections/nnw/InquirySection'),     { loading: skeleton('var(--bone)', 600) })
-const SocialMediaSection = dynamic(() => import('@/components/sections/nnw/SocialMediaSection'), { loading: skeleton('var(--navy)', 400) })
-const CTASection        = dynamic(() => import('@/components/sections/nnw/CTASection'),        { loading: skeleton('var(--bone)', 400) })
+// These were previously code-split with next/dynamic(), each with an
+// estimated-height loading placeholder. That estimate never matched the
+// section's real rendered height, so when the actual content swapped in,
+// the page height changed right as the section scrolled into view - a
+// visible jump/jank on every section except Hero (which was never
+// code-split, so it never had anything to swap in).
+//
+// These are small, ordinary marketing sections, not heavy dashboards or
+// chart libraries - the bundle-size savings from splitting them were
+// trivial, but the layout-shift cost was real and visible on every scroll.
+// Static imports remove the swap entirely: the real content is present
+// from first paint, so there's nothing to estimate and nothing to jump.
+import ScheduleSection from '@/components/sections/nnw/ScheduleSection'
+import GallerySection from '@/components/sections/nnw/GallerySection'
+import GauntletSection from '@/components/sections/nnw/GauntletSection'
+import StreamSection from '@/components/sections/nnw/StreamSection'
+import RosterSection from '@/components/sections/nnw/RosterSection'
+import StandingsSection from '@/components/sections/nnw/StandingsSection'
+import RewardsSection from '@/components/sections/nnw/RewardsSection'
+import WaitlistSection from '@/components/sections/nnw/WaitlistSection'
+import SponsorsSection from '@/components/sections/SponsorsSection'
+import InquirySection from '@/components/sections/nnw/InquirySection'
+import SocialMediaSection from '@/components/sections/nnw/SocialMediaSection'
+import CTASection from '@/components/sections/nnw/CTASection'
 
 function HomeClientContent() {
   const [champion, setChampion]         = useState<Champion | null>(null)
