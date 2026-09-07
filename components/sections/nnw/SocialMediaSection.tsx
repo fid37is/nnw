@@ -15,8 +15,14 @@ export default function SocialMediaSection() {
         <Reveal delay={60}>
           <h2 className={styles.display} style={{ fontSize: 'clamp(34px,6vw,58px)', color: 'var(--bone)', lineHeight: 0.95, maxWidth: 620 }}>Follow the<br />Movement.</h2>
         </Reveal>
+        <Reveal delay={100}>
+          <p style={{ marginTop: 20, maxWidth: 480, color: 'var(--ash)', lineHeight: 1.6 }}>
+            Zone announcements, contestant reveals, and behind-the-scenes build footage post first
+            across these channels - before anywhere else.
+          </p>
+        </Reveal>
 
-        <div className={styles['social-grid']}>
+        <div className={styles['social-grid']} style={{ marginTop: 48 }}>
           {SOCIAL.map((s, i) => (
             <Reveal key={s.name} delay={i * 60}>
               <a href={s.url} target="_blank" rel="noopener noreferrer" className={styles['social-card']}>
